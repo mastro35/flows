@@ -1,0 +1,308 @@
+###################
+# flows recipe file
+# -----------------
+#
+# Copyright 2016 Davide Mastromatteo
+####################################
+
+# Special Keyword:
+# ----------------
+# {date}				: current date
+# {time}				: current time
+# {event_type}			: only for filesystem event this is the type of the filesystem event monitored
+# {file_source}			: only for filesystem event this is the source of the file 
+# {file_destination}	: only for filesystem event this is the destination of the file 
+# {is_directory}		: only for filesystem event print "False" if the source is a file 
+#                         or "True" if it's a directory
+
+
+[my_watchdog_action_name]
+# Watchdog Action Configuration
+# -----------------------------
+# Monitors filesystem for changes
+#
+# monitor = one of the following: create, move, delete, modify, any
+# option = recursive or nonrecursive
+#
+type = watchdog
+input = /directory_to/be/monitored/
+monitor = create
+option = recursive
+patterns = *.*
+# ignore_patterns = *.pdf *.ePS
+# case_sensitive
+# ignore_directory
+
+
+[my_tail_action_name]
+# Tail Action Configuration
+# -------------------------
+# Monitor a file for new lines and output each new line
+# If used with the option "regex_new_buffer", it doesn't output 
+# each file but work like an auto growing buffer that flushes when 
+# a specific regex is met. Useful to get exception from a log file. 
+#
+type = tail
+input = filename
+# regex_new_buffer = ^(ERROR|INFO|WARN|DEBUG)
+
+
+[my_read_file_action_name]
+# ReadFile Action Configuration
+# -------------------------
+# Reads a filename and returns each line read
+# 
+type = readfile
+input = filename
+
+
+[my_timer_action_name]
+# Timer Action Configuration
+# --------------------------
+# Send a message after a custom delay
+# 
+# delay = N		-> send a message every N seconds
+#
+type = timer
+delay = N
+
+
+[my_alarm_action_name]
+# Alarm Action Configuration
+# --------------------------
+# Send a message on a specific moment
+# 
+# date = %d/%m/%Y %H:%M
+#
+type = alarm
+date = 01/11/1976 18:25:06
+
+
+[my_cron_action_name]
+# Cron Action Configuration
+# --------------------------
+# Schedule a message with a cron-like style
+# 
+#					 .---------------- [m]inute: (0 - 59) 
+#					 |  .------------- [h]our: (0 - 23)
+#					 |  |  .---------- [d]ay of month: (1 - 31)
+#					 |  |  |  .------- [mon]th: (1 - 12) or jan,feb,mar,apr... 
+#					 |  |  |  |  .---- [w]eek day: (0 - 6) or sun,mon,tue,wed,thu,fri,sat
+#					 |  |  |  |  |
+# crontab_schedule = *  *  *  *  *
+#
+type = cron
+crontab_schedule = 06 06 06 06 *
+
+
+[my_log_action_name]
+# Log Action Configuration
+# ------------------------
+# Prints a log string to the stdout or a file and returns it as well
+# 
+# option = filename or null	-> optional parameter, if filename write the log to the filename specified, if null don't print anything. If omitted, print to stdout
+# text = string to log. -> optional parameter, support special keyword.
+# rolling = use rolling log
+# maxBytes = if rolling, maxBytes is the max number of bytes written before rolling
+# backupCount = if rolling, backupCount is the max number of rolled copy allowed
+# 
+type = log
+input = any_other_action
+text = {date} - {time} : {event_type} {file_source}
+option = [/filename] [null] 
+# rolling
+# maxBytes = 20000000
+# backupCount = 5
+
+
+[my_command_action_name]
+# Command Action Configuration
+# ------------------------
+# Execute a command and output the stdout of the command
+# 
+# command = command_to_be_executed.sh -> support special keyword.
+# 
+type = command
+input = any_other_action
+command = cp {file_source} /home/mastro35/myDestination
+
+
+[my_count_action_name]
+# Count Action Configuration
+# ------------------------
+# Count how many times the action is currently hit and returns the counter after each hit.
+# 
+type = count
+input = any_other_action
+# timeout = 3
+# partial
+
+
+[my_get_url_action_name]
+# Get-Url Action Configuration
+# ----------------------------
+# Visit and get the content of an URL.
+# Returns a string like 
+# HTTP_CODE;HTTP_STATUS_DESCRIPTION;HTML
+#
+type = get_url
+input = any_other_action
+url = url_to_get
+
+
+[my_hash_action_name]
+# Hash Action Configuration
+# -------------------------
+# Return the md5 hash of the input string received
+#
+type = hash
+input = any_other_action
+
+
+[my_substring_action_name]
+# Substring Action Configuration
+# ------------------------------
+# Return a substring from the input string
+#
+# subtype = cut or split -> if cut returns a substring using the indices specified
+#                           if split, returns a the Nth item of the separator-splitted string
+#
+type = substring
+input = any_other_action
+subtype = split
+separator = ;
+item = 1
+# from = 1
+# to = 10
+
+
+
+[my_mail_action_name]
+# Mail Action Configuration
+# ------------------------------
+# Send a mail and returns the input received
+#
+type = mail
+input = any_other_action
+from = from_mail_address
+to = destination_mail_address
+subject = subject of the mail to be sent
+body = body of the mail to be sent
+smtp_server = address_of_the_smtp_server
+smtp_port = 25
+
+
+[my_webserver_action_name]
+# Webserver Action Configuration
+# ------------------------------
+# Create a webserver to return a JSON of all the input events collected
+#
+type = webserver
+input = any_other_action
+hostname = localhost
+hostport = 3535
+
+
+[my_check_if_action_name]
+# Check-If Action Configuration
+# -----------------------------
+# Check if a condition is met
+# 
+# operation = any of <, <=, >, >=, ==, !=, %% (true if remainder is 0)
+# limit = N -> second operand of the check-if action. If omitted the comparsion in made between the two operands 
+#              received in input when the input is column separated (like 10;20)
+#
+type = check-if
+input = any_other_action
+operation = <
+limit = 100
+
+
+[my_append_variable_by_time_action_name]
+# Append Variable By Name Action Configuration
+# ------------------------------
+# Append to the input a column and another value, depending on the time of the day
+# 
+type = append_variable_by_time
+input = any_other_action
+00:00 = 0
+08:00 = 10
+12:00 = 20
+18:00 = 80
+
+
+[my_buffer_action_name]
+# Buffer Action Configuration
+# ------------------------------
+# Auto-growing buffer that flushes when a regex is met
+# 
+type = buffer
+input = any_other_action
+regex_new_buffer = ^(ERROR|INFO|WARN|DEBUG)
+
+
+[my_filter_action_name]
+# Filter Action Configuration
+# ------------------------------
+# return the input received only if it match a given regex
+#
+# regex = xxx -> regex to be matched
+# regex_file = filename -> if present, allow to match the input with at least one of the 
+#              regex contained in the regex_file
+# subtype = invert -> if present, invert the match and returns only if NO regex match
+#
+type = filter
+# subtype = invert
+input = any_other_action
+regex = /^ERROR
+# regex_file = filename_containing_regexs
+
+
+[my_pass_on_interval_action_name]
+# Pass on interval Action Configuration
+# ------------------------------
+# return the input received only if we are in the middle of a configured interval
+# weekdays = 0 1 2 3  where 0 is monday
+#
+type = pass_on_interval
+input = any_other_action
+
+start_date = 01/11/1976
+end_date = 28/12/1978
+start_time = 08:00
+end_time = 20:00
+# weekdays = 0 2 3 4 5 6
+# day = 1
+# month = 1
+
+
+
+[my_sqlserver_query_action]
+# Execute a sqlserver query 
+# ------------------------------
+# return the query results
+#
+type = sqlserver
+input = any_other_action
+server = my_server_name
+user = my_user_name
+password = very_secret_password
+dbname = NewagePerformanceMonitor
+query = select avg(duration) as tempo, count(*) as numeroCalcoli from entry where entry.IdProcesso in ('1101','1102','1103','1104','1105','1106','1107','1108','1109','1110','1111','1112','1113','1114','1115','1116','1117','1118','1119','1120') and data > dateadd(MINUTE,-10,getdate())
+separator = ;
+
+
+[my_check_url_for_200_action]
+# Get-Url Action Configuration
+# ----------------------------
+# Visit and get the content of an URL
+# Returns the status code only if 200
+# Using the "invert" keywork, returns the
+# status code only if it's not 200 (useful 
+# to check service status) 
+#
+type = check_url_for_200
+input = any_other_action
+url = url_to_get
+invert
+
