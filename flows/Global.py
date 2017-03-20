@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Global.py - singleton and utility for Flows"""
 
 VERSION = '0.9.20'
