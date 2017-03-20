@@ -17,23 +17,23 @@ import random
 from flows import Global
 
 
-def _get_configuration_file_path(app_name):
-    """ get the path of the config file """
-    environment_variable_path = str.format("{0}_CONF", app_name.upper)
-    possible_paths = [os.curdir, os.path.expanduser("~"), "/etc/",
-                      os.environ.get(environment_variable_path)]
+# def _get_configuration_file_path(app_name):
+#     """ get the path of the config file """
+#     environment_variable_path = str.format("{0}_CONF", app_name.upper)
+#     possible_paths = [os.curdir, os.path.expanduser("~"), "/etc/",
+#                       os.environ.get(environment_variable_path)]
 
-    for loc in possible_paths:
-        try:
-            if loc is not None:
-                config_file_name = os.path.join(loc, app_name + ".conf")
-                if os.path.exists(config_file_name):
-                    return config_file_name
+#     for loc in possible_paths:
+#         try:
+#             if loc is not None:
+#                 config_file_name = os.path.join(loc, app_name + ".conf")
+#                 if os.path.exists(config_file_name):
+#                     return config_file_name
 
-        except IOError:
-            return ""
+#         except IOError:
+#             return ""
 
-    return ""
+#     return ""
 
 
 class ConfigManager:
@@ -47,13 +47,15 @@ class ConfigManager:
     _instance = None
     subscriber_socket_address = ""
     publisher_socket_address = ""
-    sleep_interval = 0.5
-    message_fetcher_sleep_interval = 0.5
+    sleep_interval = 0.5  # -i parameter
+    message_fetcher_sleep_interval = 0.5    # no parameter: auto throttle
     queue_length_for_system_check = 100
     messages_dispatched_for_system_check = 5000
     seconds_between_queue_check = 60
-    log_level = logging.INFO
-    recipes = []
+    log_level = logging.INFO  # -v parameter
+    recipes = []  # parameters from command line 
+    show_stats = False  # -s <> 0 parameter
+    stats_timeout = 60  # -s parameter
 
     @staticmethod
     def default_instance():
@@ -114,18 +116,6 @@ class ConfigManager:
                                                    internal_0mq_address,
                                                    internal_0mq_port_publisher)
 
-    def read_configuration(self):
-        """ read the configuration file """
-        self.config_file = _get_configuration_file_path('flows')
-        Global.LOGGER.debug("Config File = " + self.config_file)
-
-        config = configparser.ConfigParser(allow_no_value=True,
-                                           delimiters="=")
-        config.read(self.config_file)
-
-        for section in config.sections():
-            self.sections[section] = config[section]
-
     def get_section(self, section_name):
         """ get the value of a single section of the configuration file """
         try:
@@ -142,3 +132,15 @@ class ConfigManager:
                 config_value = self.sections["configuration"][key]
 
         return config_value
+
+    # def read_configuration(self):
+    #     """ read the configuration file """
+    #     self.config_file = _get_configuration_file_path('flows')
+    #     Global.LOGGER.debug("Config File = " + self.config_file)
+
+    #     config = configparser.ConfigParser(allow_no_value=True,
+    #                                        delimiters="=")
+    #     config.read(self.config_file)
+
+    #     for section in config.sections():
+    #         self.sections[section] = config[section]

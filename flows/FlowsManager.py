@@ -44,10 +44,12 @@ class FlowsManager:
         self.last_queue_check_count = 0
         self.last_queue_check_date = datetime.datetime.now()
 
+        self.last_stats_check_date = datetime.datetime.now()
+
         Global.LOGGER_INSTANCE = FlowsLogger.FlowsLogger.default_instance()
         Global.LOGGER = FlowsLogger.FlowsLogger.default_instance().get_logger()
         Global.CONFIG_MANAGER = ConfigManager.ConfigManager.default_instance()
-        Global.CONFIG_MANAGER.read_configuration()
+        # Global.CONFIG_MANAGER.read_configuration()
 
         args = self._parse_input_parameters()
         self._set_command_line_arguments(args)
@@ -68,15 +70,20 @@ class FlowsManager:
             Global.CONFIG_MANAGER.log_level = logging.DEBUG
             Global.LOGGER_INSTANCE.reconfigure_log_level()
 
+        if args.STATS > 0:
+            Global.CONFIG_MANAGER.show_stats = True
+            Global.CONFIG_MANAGER.stats_timeout = args.STATS
+
+        if args.INTERVAL > 0:
+            Global.CONFIG_MANAGER.sleep_interval = float(args.INTERVAL)/1000
+
     def start(self):
         """ Start all the processes """
         self._start_actions()
         self._start_message_fetcher()
-        # Global.MESSAGE_FETCHER.start()
 
     def stop(self):
         """ Stop all the processes """
-        # Global.MESSAGE_FETCHER.stop()
         self._stop_actions()
         self.isrunning = False
 
@@ -146,41 +153,30 @@ class FlowsManager:
         Global.LOGGER.info("actions stopped")
         time.sleep(1)
 
-    # def _process_system_message(self, msg):
-    #     # DAV - TO BE MOVED!!!
-    #     if self.dispatched % 1000 == 0:
-    #         Global.LOGGER.debug(str.format("zmq has dispatched {0} messages",
-    #                                         self.dispatched))
-    #         self.adapt_sleep_interval()
-
     def _perform_system_check(self):
         now = datetime.datetime.now()
         sent = Global.MESSAGE_DISPATCHER.dispatched
         received = self.fetched
         queue_length = sent - received
 
-        # if sent - self.last_queue_check_count > 100:
-        #     print ("sent "+ str(sent))
-        #     print ("received "+ str(received))
-        #     print ("queue "+ str(queue_length))
+        if Global.CONFIG_MANAGER.show_stats:
+            if (now - self.last_stats_check_date).total_seconds() > Global.CONFIG_MANAGER.stats_timeout:
+                self.last_stats_check_date = now
+                stats_string = f"--- [STATS] ---\nMessage Sent: {sent}\nMessage Received: {received}\nQueue length = {queue_length}\n--- [ END ] ---"
+                Global.LOGGER.info(stats_string)
 
         # if we are accumulating messages, or we have processed at least 5000 messages
         # since last check, we need to speed up the process
         if (sent - self.last_queue_check_count > Global.CONFIG_MANAGER.messages_dispatched_for_system_check) or (
             queue_length > Global.CONFIG_MANAGER.queue_length_for_system_check and (
                 now - self.last_queue_check_date).total_seconds() > Global.CONFIG_MANAGER.seconds_between_queue_check):
-            Global.LOGGER.info(
-                "calling the sleep interval adjust function. Queue length = " + str(queue_length))
+
             self._adapt_sleep_interval(sent, received, queue_length, now)
 
     def _deliver_message(self, msg):
         """
         Deliver the message to the subscripted actions
         """
-
-        # if msg.sender = "__SYSTEM__":
-        #     self._process_system_message(msg)
-        #     return
 
         my_subscribed_actions = self.subscriptions.get(msg.sender, [])
         for action in my_subscribed_actions:
@@ -229,7 +225,7 @@ class FlowsManager:
     def _adapt_sleep_interval(self, sent, received, queue, now):
         '''adapt sleep time based on the number of the messages in queue'''
 
-        Global.LOGGER.debug("Adjusting sleep interval")
+        Global.LOGGER.debug("... adjusting sleep interval")
 
         dispatched_since_last_check = sent - self.last_queue_check_count
         seconds_since_last_check = (
@@ -250,9 +246,12 @@ class FlowsManager:
         self.last_queue_check_count = sent
 
         Global.CONFIG_MANAGER.message_fetcher_sleep_interval = sleep_time
-        Global.LOGGER.info(str.format("New sleep_interval = {0} ",
-                                            sleep_time))
 
+        sleep_interval_log_string = f"New sleep_interval = {sleep_time}"
+        Global.LOGGER.debug(sleep_interval_log_string)
+
+        if Global.CONFIG_MANAGER.show_stats:
+            Global.LOGGER.info(sleep_interval_log_string)
 
     def _parse_input_parameters(self):
         """Set the configuration for the Logger"""
@@ -261,6 +260,12 @@ class FlowsManager:
             description='A workflow engine for Pythonistas', formatter_class=argparse.RawTextHelpFormatter)
         parser.add_argument('FILENAME', nargs='+',
                             help='name of the recipe file(s)')
+        parser.add_argument('-i', '--INTERVAL', type=int, default=500,
+                            metavar=('MS'),
+                            help='perform a cycle each [MS] milliseconds. (default = 500)')
+        parser.add_argument('-s', '--STATS', type=int, default=0,
+                            metavar=('SEC'),
+                            help='show stats each [SEC] seconds. (default = NO STATS)')
         parser.add_argument('-v', '--VERBOSE', action='store_true',
                             help='enable verbose output')
         parser.add_argument('-V', '--VERSION',
