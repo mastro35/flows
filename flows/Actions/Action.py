@@ -51,6 +51,8 @@ class Action(Thread):
     monitored_input = None
     my_action_input = None
 
+    python_files = None
+
     def __init__(self, name, configuration, managed_input):
         super().__init__()
 
@@ -146,16 +148,23 @@ class Action(Thread):
         """
         debug = "debug" in configuration
 
-        python_files = glob.glob("./**/Actions/*Action.py", recursive=True)
+        if not Action.python_files:
+            Global.LOGGER.debug("Searching for installed actions... it can takes a while")
+            Action.python_files = glob.glob("/**/Actions/*Action.py", recursive=True)
+            Global.LOGGER.debug("Actions found: " + str(Action.python_files))
+
         if debug:
-            print("Actions found: " + str(python_files))
+            print("Actions found: " + str(Action.python_files))
 
         # import Actions
-        for path in python_files:
+        for path in Action.python_files:
             filename = os.path.basename(os.path.normpath(path))[:-3]
             module_name = "flows.Actions." + filename
             Global.LOGGER.debug("...importing " + module_name)
-            importlib.import_module(module_name, package="flows.Actions")
+            try:
+                importlib.import_module(module_name, package="flows.Actions")
+            except ModuleNotFoundError as ex:
+                Global.LOGGER.warn(f"An error occured while importing {module_name}. The module will be skipped.")
 
         action = None
 
