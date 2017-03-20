@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 FlowsLogger.py
@@ -17,18 +17,18 @@ from flows import Global
 
 class FlowsLogger:
     """
-    FlowsLogger class
-    Logger Factory
+    FlowsLogger class - Logger Factory
     """
-
     _instance = None
     _instance_lock = threading.Lock()
     _logger_instance = None
 
     @classmethod
     def default_instance(cls):
-        """For use like a singleton, return the existing instance of the object
-        or a new instance"""
+        """
+        For use like a singleton, return the existing instance of the object
+        or a new instance
+        """
         if cls._instance is None:
             with cls._instance_lock:
                 if cls._instance is None:
@@ -37,7 +37,9 @@ class FlowsLogger:
         return cls._instance
 
     def get_logger(self):
-        """Returns the standard logger"""
+        """
+        Returns the standard logger
+        """
         if self._logger_instance is not None:
             return self._logger_instance
 
@@ -57,8 +59,11 @@ class FlowsLogger:
         return self._logger_instance
 
     def reconfigure_log_level(self):
-        """Returns a new standard logger instance"""
-        stream_handlers = filter(lambda x: type(x) is logging.StreamHandler, self._logger_instance.handlers)
+        """
+        Returns a new standard logger instance
+        """
+        stream_handlers = filter(lambda x: type(x) is logging.StreamHandler,
+                                 self._logger_instance.handlers)
 
         for x in stream_handlers:
             x.level = Global.CONFIG_MANAGER.log_level

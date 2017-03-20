@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 '''
 FlowsManager.py
 ---------
@@ -6,18 +8,18 @@ Copyright 2016-2017 Davide Mastromatteo
 License: Apache-2.0
 '''
 
+import argparse
+import asyncio
+import datetime
 import logging
 import pickle
 import time
-import datetime
-import asyncio
-import argparse
 
 import zmq
 
-from flows import Global
 from flows import ConfigManager
 from flows import FlowsLogger
+from flows import Global
 from flows import MessageDispatcher
 
 from flows.Actions.Action import Action
@@ -64,6 +66,10 @@ class FlowsManager:
         self.socket.setsockopt(zmq.SUBSCRIBE, bytes('*', 'utf-8'))
 
     def _set_command_line_arguments(self, args):
+        """
+        Set internal configuration variables according to 
+        the input parameters
+        """
         Global.CONFIG_MANAGER.recipes = (args.FILENAME)
 
         if args.VERBOSE:
@@ -78,23 +84,32 @@ class FlowsManager:
             Global.CONFIG_MANAGER.sleep_interval = float(args.INTERVAL)/1000
 
     def start(self):
-        """ Start all the processes """
+        """
+        Start all the processes
+        """
         self._start_actions()
         self._start_message_fetcher()
 
     def stop(self):
-        """ Stop all the processes """
+        """
+        Stop all the processes
+        """
         self._stop_actions()
         self.isrunning = False
 
     def restart(self):
-        """ Restart all the processes """
+        """
+        Restart all the processes
+        """
         Global.LOGGER.info("restarting flows")
         self._stop_actions()    # stop the old actions
         self.actions = []       # clear the action list
         self._start_actions()   # start the configured actions
 
     def _start_actions(self):
+        """
+        Start all the actions for the recipes
+        """
         Global.LOGGER.info("starting actions")
 
         for recipe in Global.CONFIG_MANAGER.recipes:
@@ -104,6 +119,9 @@ class FlowsManager:
             section), Global.CONFIG_MANAGER.sections))
 
     def _start_action_for_section(self, section):
+        """
+        Start all the actions for a particular section
+        """
         if section == "configuration":
             return
 
@@ -145,15 +163,20 @@ class FlowsManager:
                 "Unable to find the configuration for section " + section)
 
     def _stop_actions(self):
-        """ Stop all the actions """
+        """
+        Stop all the actions
+        """
         Global.LOGGER.info("stopping actions")
 
         list(map(lambda x: x.stop(), self.actions))
 
         Global.LOGGER.info("actions stopped")
-        time.sleep(1)
 
     def _perform_system_check(self):
+        """
+        Perform a system check to define if we need to throttle to handle 
+        all the incoming messages 
+        """
         now = datetime.datetime.now()
         sent = Global.MESSAGE_DISPATCHER.dispatched
         received = self.fetched
@@ -177,7 +200,6 @@ class FlowsManager:
         """
         Deliver the message to the subscripted actions
         """
-
         my_subscribed_actions = self.subscriptions.get(msg.sender, [])
         for action in my_subscribed_actions:
             action.on_input_received(msg)
@@ -201,6 +223,9 @@ class FlowsManager:
                 raise new_exception
 
     async def message_fetcher_coroutine(self, loop):
+        """
+        Register callback for message fetcher coroutines
+        """
         Global.LOGGER.debug(
             'registering callbacks for message fetcher coroutine')
         self.isrunning = True
@@ -212,6 +237,9 @@ class FlowsManager:
         Global.LOGGER.debug('message fetcher stopped')
 
     def _start_message_fetcher(self):
+        """
+        Start the message fetcher (called from coroutine)
+        """        
         event_loop = asyncio.get_event_loop()
         try:
             Global.LOGGER.debug(
@@ -223,7 +251,9 @@ class FlowsManager:
             event_loop.close()
 
     def _adapt_sleep_interval(self, sent, received, queue, now):
-        '''adapt sleep time based on the number of the messages in queue'''
+        """
+        Adapt sleep time based on the number of the messages in queue
+        """
 
         Global.LOGGER.debug("... adjusting sleep interval")
 
@@ -254,7 +284,9 @@ class FlowsManager:
             Global.LOGGER.info(sleep_interval_log_string)
 
     def _parse_input_parameters(self):
-        """Set the configuration for the Logger"""
+        """
+        Set the configuration for the Logger
+        """
 
         parser = argparse.ArgumentParser(
             description='A workflow engine for Pythonistas', formatter_class=argparse.RawTextHelpFormatter)
