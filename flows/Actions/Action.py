@@ -13,6 +13,7 @@ import glob
 import importlib
 import importlib.util
 import os
+import site
 import time
 from threading import Thread
 
@@ -51,7 +52,7 @@ class Action(Thread):
     monitored_input = None
     my_action_input = None
 
-    python_files = None
+    python_files = []
 
     def __init__(self, name, configuration, managed_input):
         super().__init__()
@@ -146,15 +147,22 @@ class Action(Thread):
         """
         Factory method to create an instance of an Action from an input code
         """
-        debug = "debug" in configuration
 
-        if not Action.python_files:
+        if len(Action.python_files) == 0:
             Global.LOGGER.debug("Searching for installed actions... it can takes a while")
-            Action.python_files = glob.glob("/**/Actions/*Action.py", recursive=True)
-            Global.LOGGER.debug("Actions found: " + str(Action.python_files))
+            site_packages = site.getsitepackages()
+            
+            tmp_python_files = []
+            for my_site in site_packages:
+                tmp_python_files = glob.glob(f"{my_site}/**/Actions/*Action.py", recursive=True) 
+                if tmp_python_files:
+                    Global.LOGGER.debug(f"{len(tmp_python_files)} actions found on {my_site}")
+                    Action.python_files = Action.python_files + tmp_python_files
+                else:
+                    Global.LOGGER.debug(f"No actions found on {my_site}")
 
-        if debug:
-            print("Actions found: " + str(Action.python_files))
+            Action.python_files = list(set(Action.python_files))
+            Global.LOGGER.debug("Actions found: " + str(Action.python_files))
 
         # import Actions
         for path in Action.python_files:
@@ -169,8 +177,6 @@ class Action(Thread):
         action = None
 
         for subclass in Action.__subclasses__():
-            if debug:
-                print("checking if the action is " + str(subclass.type))
             if subclass.type == action_code:
                 action_class = subclass
                 action = action_class(name, configuration, managed_input)
