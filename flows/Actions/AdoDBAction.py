@@ -27,14 +27,6 @@ class AdoDBAction(Action):
         super().on_init()
 
         connstring = self.configuration['connstring']
-        # server = self.configuration['server']
-        # user = self.configuration['user']
-        # password = self.configuration['password']
-        # dbname = self.configuration['dbname']
-
-        # self.conn = pymssql.connect(
-        #     server, user, password, dbname)
-
         self.conn = adodbapi.connect(connstring)
 
         self.query = self.configuration['query']
