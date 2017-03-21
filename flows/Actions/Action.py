@@ -172,7 +172,8 @@ class Action(Thread):
             try:
                 importlib.import_module(module_name, package="flows.Actions")
             except ModuleNotFoundError as ex:
-                Global.LOGGER.warn(f"An error occured while importing {module_name}. The module will be skipped.")
+                Global.LOGGER.warn(f"An error occured while importing {module_name}, so the module will be skipped.")
+                Global.LOGGER.debug(f"Error occured : {ex}")
 
         action = None
 

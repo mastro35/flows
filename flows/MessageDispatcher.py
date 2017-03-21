@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 MessageDispatcher.py
@@ -25,15 +25,16 @@ class MessageDispatcher:
     MessageDispatcher class
     Messages broadcaster
     """
-
     # singleton variables
     _instance = None
     _instance_lock = threading.Lock()
 
     @classmethod
     def default_instance(cls):
-        """For use like a singleton, return the existing instance of the object
-        or a new instance"""
+        """
+        For use like a singleton, return the existing instance of the object
+        or a new instance
+        """
         if cls._instance is None:
             with cls._instance_lock:
                 if cls._instance is None:
@@ -70,14 +71,13 @@ class MessageDispatcher:
                     sys.exit(8)
 
                 Global.LOGGER.warning(str.format(
-                    "An error occured trying to connect to {0} ", Global.CONFIG_MANAGER.publisher_socket_address))
+                    "An error occured trying to connect to {0} ",
+                    Global.CONFIG_MANAGER.publisher_socket_address))
+
                 Global.LOGGER.warning(str.format(
                     "retrying... ({0}/{1})", attempt + 1, 5))
 
                 time.sleep(1)
-
-        # DAV
-        # time.sleep(0.2)
 
         Global.LOGGER.debug("Message dispatcher initialized successfully")
 
@@ -85,7 +85,6 @@ class MessageDispatcher:
         """
         Dispatch a message using 0mq
         """
-
         with self._instance_lock:
             if message is None:
                 Global.LOGGER.error("can't deliver a null messages")

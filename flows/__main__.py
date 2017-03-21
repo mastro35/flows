@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flows.FlowsManager import FlowsManager
 from flows import Global
 

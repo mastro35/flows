@@ -1,24 +1,47 @@
 # FLOWS
 
 
+*Flows* is a workflow engine for Python(istas). 
+With *flows* you will be able to create complex workflows based on the built-in actions and other custom actions that you will be able to create.
 
-*Flows* allows you to execute chains of simple actions and conditional statements. It's somehow similar to the IFTTT web service but it's based on a local computer and on local events.
-
+With *flows*, creating a custom action is as easy as subclassing a standard Python class and the building of a workflow is even simpler.
 
 
 # Installation
-To install *flows* just install all the requirements listed in requirements.txt by typing
+
+*flows* can be build from sources or can be obtained from binary distribution.
+
+## For Windows user
+
+If you want to install flows on a Windows machine, please start installing the pypiwin32 package using:
+
+```sh
+c:\pip install pypiwin32
+```
+
+This is necessary due of a [problem on the pypiwin32 that the maintainer is not going to fix](https://sourceforge.net/p/pywin32/bugs/522/) (basically pypiwin32 doesn't support source builds on Python3 and doesn't have binary builds for Python 3.6. yet)
+
+## Get *flows* from pypi
+
+The raccomended method to get *flows* is by using pip and the [pypi repository](https://pypi.python.org/pypi).
+
+$ pip install flows
+
+Yes, it's so simple.
+
+## Build *flows* from sources
+
+To build *flows* from sources, just install all the requirements listed in requirements.txt by typing
 
 ```sh
 $ pip install -r requirements.txt
 ```
 
-Once the requirements have been installed, simply install *flows* typing
+Once the requirements have been installed, you can simply install *flows* by typing
 
 ```sh
 $ python setup.py install
 ```
-
 
 
 # Usage
@@ -26,26 +49,45 @@ $ python setup.py install
 To start a flow simply start a terminal and type
 
 ```sh
-$ flows.py flowToBeStarted [anotherFlowToBeStarted] [anotherOne]
+$ flows [-h] [-i MS] [-s SEC] [-v] [-V] FILENAME [FILENAME ...]
 ```
+
 Note that you can start more flows with a single command and every single action contained in every flow will be able to communicate with each others.
 
+Just using flows -h gives you the help of the command line interface.
+
+>
+>A workflow engine for Pythonistas  
+>  
+>positional arguments:  
+>  FILENAME              name of the recipe file(s)  
+>  
+>optional arguments:  
+>  -h, --help            show this help message and exit  
+>  -i MS, --INTERVAL MS  perform a cycle each [MS] milliseconds. (default = 500)  
+>  -s SEC, --STATS SEC   show stats each [SEC] seconds. (default = NO STATS)  
+>  -v, --VERBOSE         enable verbose output  
+>  -V, --VERSION         show program's version number and exit  
+
+As you can see, if you need to have some statistics on how your workflow is running you can specify the -s option, and each [SEC] seconds you will get an onscreen message with some statistics informations. 
+
+Beside, you can add verbosity to the output of the command just specifying the -v option.
+
+Don't be afraid from the -i option, we will discuss it later. However, the standard usage of *flows* is just by specifing the name of the recipes files to start.
 
 
 # "Actions": The flows' building blocks
 
-To create your first flow you just need to know what kind of *actions* you can use, because a flow is just a set of actions that are chained together and that works together to get something. This is why you should look at an action as a sort of a "building block" that you can mix and match with other building block to create a flow.
+To create your first flow you just need to know what kind of *actions* you can use, because a workflow is just a set of actions that are chained together and that works together to get something. This is why you should consider actions like "building blocks" that you can mix and match with other building blocks to create a workflow.
 
 There are a lot of actions that are ready to use out of the box and here we will explain how they work. 
 
 To make it more clear to the reader, we will talk about two different kind of actions: **input actions** and **work actions**. The former is a type of action that is executed when an event occurs, the latter is a type of action that is called by another action to do something specific.
 
 
-
 ## Input actions
 
 Input actions don't usually need to listen to other actions, they are usually at the beginning of a flow and are the starters of the whole process.
-
 
 
 ### Alarm
@@ -61,7 +103,6 @@ date = 01/11/2035 18:25:06
 ```
 
 In this example, the alarm will send a message at 6:25.06 pm on November the 1st, 2035.
-
 
 
 ### Cron
@@ -90,7 +131,6 @@ crontab_schedule = 06 06 06 06 *
 In this example, the action will send a message yearly at 06:06 am on June the 6th, regardless of the weekday.
 
 
-
 ### Readfile
 
 The readfile action reads a text file one line at a time and sends a message that contains the read line to the listeners.
@@ -102,7 +142,6 @@ To use this action, put this code in your flow file
 type = readfile
 input = /home/user/path/to/filename
 ```
-
 
 
 ### Tail
@@ -121,7 +160,6 @@ input = /home/user/path/of/the/file/to/be/tailed
 ```
 
 
-
 ### Timer
 
 The timer action sends a message every N seconds. The number of the seconds can be set in the configuration of this action.
@@ -135,7 +173,6 @@ delay = 300
 ```
 
 In this example, the timer will send a message every 5 minutes.
-
 
 
 ### Watchdog
@@ -161,11 +198,9 @@ patterns = *.*
 In this example where are monitoring just the creation of new files under /directory_to/be/monitored/ and recursively under all its subdirectories regardless of the name of the file (\*.\*) .
 
 
-
 ## Work actions
 
 Work actions are the actions that actually do the real work. They are usually set to listen input actions or other work actions because they can't start without input.
-
 
 
 ### Log
@@ -231,7 +266,6 @@ smtp_port = 25
 Note that in "subject" and "body" configuration you can use variables like in the "log" action.
 
 
-
 ### Pass_on_interval
 
 The "pass_on_interval" action simply sends the input message received from the listened action to the listeners when it's running on a specific time of the day.
@@ -255,7 +289,6 @@ weekdays = 0
 In this example, the action sends the input message to the listeners only if the current date is between 1976 November the 1st and 2035 December the 28th, it's a monday and the time is between 8am and 8pm.
 
 
-
 ### Restart
 
 The restart action stops all the current actions and restart the flow. It is useful just if you need to create a flow that restarts itself when the flow file is changed, so it is usually set to listen to a watchdog action that monitors the "." directory for changes.
@@ -267,7 +300,6 @@ To use this action, put this code in your flow file
 type = restart
 input = any_other_action
 ```
-
 
 
 ### Substring
@@ -287,7 +319,6 @@ item = 1
 ```
 
 
-
 ### Webserver
 
 The webserver action starts a webserver that provides a Json dictionary of all latest values received from the listened actions. 
@@ -303,7 +334,6 @@ hostport = 3535
 ```
 
 In this example to access the webserver you would need to visit http://localhost:3535
-
 
 
 ### Append_variable_by_time
@@ -326,7 +356,6 @@ separator = ";"
 In this example, from 12:00 am to 08:00 am, to the input message will be appended the value ";0"
 
 
-
 ### Buffer
 
 The buffer action is very useful when you are working with the tail action and you need to consider a multiline entry like a single entry. Since the tail action sends every single line as a different message you may consider to use a buffer action to collect all the lines and flush the buffer only when a specific regular expression matches.
@@ -341,7 +370,6 @@ regex_new_buffer = ^(ERROR|INFO|WARN|DEBUG)
 ```
 
 In this example, the buffer is flushed only when you receive a line that starts with "ERROR", "INFO", "WARN" or "DEBUG". This is useful to parse a log file that handles multiline exception.
-
 
 
 ### Check_if
@@ -366,7 +394,6 @@ limit = 100
 In this example, if the integer value of the input  is less then 100 the condition is met and the message is sent to listeners.
 
 
-
 ### Command
 
 The command action executes a shell command and sends the results of the standard output to the listeners.
@@ -383,7 +410,6 @@ command = cp {file_source} /home/mastro35/myDestination
 Note that in the "command" configuration you can use the variables of the log action.
 
 
-
 ### Count
 
 The count action is just a counter that counts how many times the action is executed. In the default configuration the counter value is sent to the listeners after each hit, but if you specify a timeout you can notify listeners every N seconds on the status of the counter. The "partial" keyword, if specified, resets the counter when the message of the counter value is sent to listeners (so it's useful only if used with a timeout).
@@ -397,7 +423,6 @@ input = any_other_action
 # timeout = 3
 # partial
 ```
-
 
 
 ### Filter
@@ -419,7 +444,6 @@ regex = /^ERROR
 If you need to match just one regular expression you can put it on the configuration like in this example, but if you need to match more regular expressions you can use a regex_file (that is a normal plain text file containing all the regexes to be matched)
 
 
-
 ### Get_url
 
 The get_url action visits a web address and returns a string like HTTP_CODE;HTTP_STATUS_DESCRIPTION;HTML
@@ -432,7 +456,6 @@ type = get_url
 input = any_other_action
 url = url_to_get
 ```
-
 
 
 ### Check url for 200
@@ -448,7 +471,6 @@ invert
 ```
 
 
-
 ### Hash
 
 This action creates a md5 hash of the input received and sends it to listeners.
@@ -462,28 +484,22 @@ input = any_other_action
 ```
 
 
+### AdoDBAction
 
-### Sqlserver
-
-This action use the pymssql module to execute sqlserver query.
+This action use the adodbapi module to execute query against a database.
 
 To use this action, put this code in your flow file
 
 ```sh
 [my_sqlserver_query_action]
-type = sqlserver
+type = adodb
 input = any_other_action
-server = my_server_name
-user = my_user_name
-password = very_secret_password
-dbname = NewagePerformanceMonitor
+connstring = Provider=SQLNCLI11;Server=srv-mydbInstance;Database=myDB;Uid=Marilyn;Pwd=superstar;
 separator = ;
 query = SELECT avg(duration) as duration, count(*) as number from entry where data < getdate() 
 ```
 
 The results are sent one at a time to the listeners.
-
-
 
 
 # Some example
@@ -564,7 +580,6 @@ text =  {date} - {time} : Too much files created in the last 5 minutes ({input})
 ```
 
 
-
 # How to create custom actions
 
 Creating custom actions is really easy. All you have to do is to subclass the Action class and put the file you are creating under the "\Actions" subdirectory.
@@ -622,12 +637,17 @@ As you can see from the example above, all you have to do is to subclass the Act
 
 The methods that need to be overridden are: 
 
-* on_init(self) - called when the action is instanciated when you start the flow. It's basically the constructor method of the action.
-* on_stop(self) - called when the action is going to be destroyed, at the end of the execution
-* on_cycle(self) - called on each cycle of the program. This is very important because this **IS** the life cycle of your action. **DO NOT** create your own cycle in the on_init(self) method or do anything stupid, keep it simple! Do you need a cycle inside your action? There's a method for that! (cit) :)
-* on_input_received(self) - called when your action receive a message from another listened action. If you need to elaborate an input that comes from another action, this is the right place.
+* on\_init(self) - called when the action is instanciated when you start the flow. It's basically the constructor method of the action.
+* on\_stop(self) - called when the action is going to be destroyed, at the end of the execution
+* on\_cycle(self) - called on each cycle of the program. This is very important because this **IS** the life cycle of your action. **DO NOT** create your own cycle in the on_init(self) method or do anything stupid, keep it simple! Do you need a cycle inside your action? There's a method for that! (cit) :)
+Note that by default this method is called every 500 milliseconds. If you want to make the cycle sleep shorter or longer, you can specify the -i parameter on the command line.
+* on\_input\_received(self) - called when your action receive a message from another listened action. If you need to elaborate an input that comes from another action, this is the right place.
+It's important to note that you can't estimate when the on\_input\_received will be called because it depends on when the message from the action you have subscribed will arrive. Beside, if the messages are queueing up, the engine will throttle to handle the queue as fast as possible, so bear in mind it.
 
-Feel free to choose the name of the class you create, but I encourage you to call it "SomethingAction" if it's a work action or "InputSomethingAction" if it's an input action.
+A very important thing is the naming convention: *flows* will load all the actions it will find in *Action.py python modules under the *\flows\Action directory you will find after the installation on your current python site_packages directory. 
+So, I encourage you to call your custom actions like:
+* "[Something]Action.py" if it's a work action
+* "Input[Something]Action.py" if it's an input action.
 
 Note that the input message can be accessed using the action_input.message and that to send messages to listeners you need to use 
 
@@ -635,12 +655,14 @@ Note that the input message can be accessed using the action_input.message and t
 self.send_message("message to be sent to listeners")
 ```
 
-Note that you can add all the configuration needed by your action within the action configuration in the flow file and your action will be able to access these values using the dictionary pointed by the self.configuration variable.
+You can add all the configuration needed by your action within the action configuration in the flow recipe file and your action will be able to access these values using the dictionary pointed by the self.configuration variable. So, for example, if you need a parameter named "myparameter" in your SomethingAction, you can add it to your recipe and in your action you will be able to access it by using
 
+```python
+self.configuration["myparameter"]
+```
 
-
-#How to contribute 
+# How to contribute 
 
 This software is free, so your contribution is very precious.
 
-You can contribute in several ways: helping me in the development of the software, spotting and fixing bugs or simply talking about it on social networks using the tag #flowsiscool , but if you really like it, please consider to offer me a Starbucks' "tall pike" using paypal at http://paypal.me/mastro35  ; because I code better when I'm high on Starbucks' drinks :)
+You can contribute in several ways: helping me in the development of the software, spotting and fixing bugs or simply talking about it on social networks using the tag #flowsiscool :) ... but if you really like it, please consider to offer me a Starbucks' "tall pike" by using paypal at http://paypal.me/mastro35  ; because I code better when I'm high on Starbucks' drinks :)
