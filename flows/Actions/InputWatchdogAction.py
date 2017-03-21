@@ -9,7 +9,6 @@ Copyright 2016 Davide Mastromatteo
 
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
-from watchdog.observers.polling import PollingObserver
 from flows.Actions.Action import Action
 from flows.Actions.Action import ActionInput
 import flows.Global
@@ -102,9 +101,6 @@ class WatchdogAction(Action):
                                                        self.case_sensitive)
         my_event_handler.delegates.append(self)
 
-        # if "polling" in self.configuration:
-        # self.observer = PollingObserver(1)
-        # else:
         if "timeout" in self.configuration:
             self.timeout = int(self.configuration["timeout"])
 

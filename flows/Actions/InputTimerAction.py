@@ -39,6 +39,5 @@ class TimerAction(Action):
     def on_init(self):
         super().on_init()
         self.timeout = int(self.configuration["delay"])
-        # self.start_time = datetime.datetime.now()
 
         self.start_timer()

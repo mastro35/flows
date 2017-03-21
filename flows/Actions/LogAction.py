@@ -55,11 +55,6 @@ class LogAction(Action):
 
                     self.file_logger.addHandler(handler)
 
-                # Remove the file if already exists...
-                # try:
-                #    os.remove(self.output_file)
-                # except OSError:
-                #    pass
 
     def on_input_received(self, action_input=None):
         super().on_input_received(action_input)

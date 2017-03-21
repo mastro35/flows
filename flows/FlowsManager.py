@@ -31,7 +31,7 @@ __license__ = "Apache-2.0"
 __version__ = Global.VERSION
 __maintainer__ = "Davide Mastromatteo"
 __email__ = "dave35@me.com"
-__status__ = "Beta"
+__status__ = "Production/Stable"
 
 
 class FlowsManager:
@@ -45,13 +45,11 @@ class FlowsManager:
 
         self.last_queue_check_count = 0
         self.last_queue_check_date = datetime.datetime.now()
-
         self.last_stats_check_date = datetime.datetime.now()
 
         Global.LOGGER_INSTANCE = FlowsLogger.FlowsLogger.default_instance()
         Global.LOGGER = FlowsLogger.FlowsLogger.default_instance().get_logger()
         Global.CONFIG_MANAGER = ConfigManager.ConfigManager.default_instance()
-        # Global.CONFIG_MANAGER.read_configuration()
 
         args = self._parse_input_parameters()
         self._set_command_line_arguments(args)
