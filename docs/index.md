@@ -116,12 +116,21 @@ To use this action, put this code in your flow file
 ```sh
 [my_cron_action_name]
 # 
+<<<<<<< HEAD
 #                    .---------------- [m]inute: (0 - 59) 
 #                    |  .------------- [h]our: (0 - 23)
 #                    |  |  .---------- [d]ay of month: (1 - 31)
 #                    |  |  |  .------- [mon]th: (1 - 12) or jan,feb,mar,apr... 
 #                    |  |  |  |  .---- [w]eek day: (0 - 6) or sun,mon,tue,wed,thu,fri,sat
 #                    |  |  |  |  |
+=======
+#					 .---------------- [m]inute: (0 - 59) 
+#					 |  .------------- [h]our: (0 - 23)
+#					 |  |  .---------- [d]ay of month: (1 - 31)
+#					 |  |  |  .------- [mon]th: (1 - 12) or jan,feb,mar,apr... 
+#					 |  |  |  |  .---- [w]eek day: (0 - 6) or sun,mon,tue,wed,thu,fri,sat
+#					 |  |  |  |  |
+>>>>>>> 5d22c34468a09d9b6baa96cb49e9f08182ecf267
 # crontab_schedule = *  *  *  *  *
 #
 type = cron
