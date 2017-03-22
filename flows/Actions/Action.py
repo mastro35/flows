@@ -151,10 +151,16 @@ class Action(Thread):
         if len(Action.python_files) == 0:
             Global.LOGGER.debug("Searching for installed actions... it can takes a while")
             site_packages = site.getsitepackages()
-            
-            tmp_python_files = []
+
+            tmp_python_files_in_current_action_subdirectory = glob.glob(f"./**/Actions/*Action.py", recursive=True) 
+            tmp_python_files_in_current_directory = glob.glob(f"./**/*Action.py", recursive=True) 
+
             for my_site in site_packages:
-                tmp_python_files = glob.glob(f"{my_site}/**/Actions/*Action.py", recursive=True) 
+                tmp_python_files_in_site_directory = glob.glob(f"{my_site}/**/Actions/*Action.py", recursive=True) 
+                tmp_python_files = tmp_python_files_in_current_directory + \
+                                   tmp_python_files_in_current_action_subdirectory + \
+                                   tmp_python_files_in_site_directory
+
                 if tmp_python_files:
                     Global.LOGGER.debug(f"{len(tmp_python_files)} actions found on {my_site}")
                     Action.python_files = Action.python_files + tmp_python_files
