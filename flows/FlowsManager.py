@@ -84,6 +84,13 @@ class FlowsManager:
             Global.LOGGER.debug(f"setting sleep interval to {args.INTERVAL} milliseconds")            
             Global.CONFIG_MANAGER.sleep_interval = float(args.INTERVAL)/1000
 
+        if args.TRACE:
+            Global.LOGGER.debug("tracing mode active")
+            Global.CONFIG_MANAGER.tracing_mode = True
+            Global.CONFIG_MANAGER.log_level = logging.DEBUG
+            Global.LOGGER_INSTANCE.reconfigure_log_level()
+
+
         Global.LOGGER.debug(f"recipes to be parsed: {args.FILENAME}")
         Global.CONFIG_MANAGER.recipes = (args.FILENAME)
 
@@ -168,7 +175,7 @@ class FlowsManager:
 
         self.actions.append(my_action)
 
-        Global.LOGGER.warn("updating the subscriptions table")
+        Global.LOGGER.debug("updating the subscriptions table")
         for my_input in my_action.monitored_input:
             self.subscriptions.setdefault(
                 my_input, []).append(my_action)
@@ -188,6 +195,9 @@ class FlowsManager:
         Perform a system check to define if we need to throttle to handle 
         all the incoming messages 
         """
+        if Global.CONFIG_MANAGER.tracing_mode:
+            Global.LOGGER.debug("performing a system check")
+
         now = datetime.datetime.now()
         sent = Global.MESSAGE_DISPATCHER.dispatched
         received = self.fetched
@@ -201,10 +211,13 @@ class FlowsManager:
 
         # if we are accumulating messages, or we have processed at least 5000 messages
         # since last check, we need to speed up the process
-        if (sent - self.last_queue_check_count > Global.CONFIG_MANAGER.messages_dispatched_for_system_check) or (
-            queue_length > Global.CONFIG_MANAGER.queue_length_for_system_check and (
-                now - self.last_queue_check_date).total_seconds() > Global.CONFIG_MANAGER.seconds_between_queue_check):
+        messages_limit_reached = sent - self.last_queue_check_count > Global.CONFIG_MANAGER.messages_dispatched_for_system_check
+        queue_limit_reached = queue_length > Global.CONFIG_MANAGER.queue_length_for_system_check
+        time_limit_since_last_check_is_over = (now - self.last_queue_check_date).total_seconds() > Global.CONFIG_MANAGER.seconds_between_queue_check
 
+        if (messages_limit_reached) or (queue_limit_reached and time_limit_since_last_check_is_over):
+            cause = "messages limit reached" if messages_limit_reached else "queue limit reached"
+            Global.LOGGER.debug(f"triggering the throttle function due to {cause}")
             self._adapt_sleep_interval(sent, received, queue_length, now)
 
     def _deliver_message(self, msg):
@@ -213,6 +226,8 @@ class FlowsManager:
         """
         my_subscribed_actions = self.subscriptions.get(msg.sender, [])
         for action in my_subscribed_actions:
+            if Global.CONFIG_MANAGER.tracing_mode:
+                Global.LOGGER.debug(f"delivering message to {action.name}")
             action.on_input_received(msg)
 
     def _fetch_messages(self):
@@ -220,25 +235,25 @@ class FlowsManager:
         Get an input message from the socket
         """
         try:
-            [_, msg] = self.socket.recv_multipart(
-                flags=zmq.NOBLOCK)
+            [_, msg] = self.socket.recv_multipart(flags=zmq.NOBLOCK)
+            if Global.CONFIG_MANAGER.tracing_mode:
+                Global.LOGGER.debug("fetched a new message")
+
             self.fetched = self.fetched + 1
             obj = pickle.loads(msg)
             self._deliver_message(obj)
             return obj
-
+        except zmq.error.Again:
+            return None
         except Exception as new_exception:
-            if new_exception.errno == zmq.EAGAIN:
-                return None
-            else:
-                raise new_exception
-
+            Global.LOGGER.error(new_exception)
+            raise new_exception
+              
     async def message_fetcher_coroutine(self, loop):
         """
         Register callback for message fetcher coroutines
         """
-        Global.LOGGER.debug(
-            'registering callbacks for message fetcher coroutine')
+        Global.LOGGER.debug('registering callbacks for message fetcher coroutine')
         self.isrunning = True
         while self.isrunning:
             loop.call_soon(self._fetch_messages)
@@ -251,12 +266,11 @@ class FlowsManager:
         """
         Start the message fetcher (called from coroutine)
         """        
+        Global.LOGGER.debug('starting the message fetcher')
         event_loop = asyncio.get_event_loop()
         try:
-            Global.LOGGER.debug(
-                'entering event loop for message fetcher coroutine')
-            event_loop.run_until_complete(
-                self.message_fetcher_coroutine(event_loop))
+            Global.LOGGER.debug('entering event loop for message fetcher coroutine')
+            event_loop.run_until_complete(self.message_fetcher_coroutine(event_loop))
         finally:
             Global.LOGGER.debug('closing the event loop')
             event_loop.close()
@@ -265,8 +279,7 @@ class FlowsManager:
         """
         Adapt sleep time based on the number of the messages in queue
         """
-
-        Global.LOGGER.debug("... adjusting sleep interval")
+        Global.LOGGER.debug("adjusting sleep interval")
 
         dispatched_since_last_check = sent - self.last_queue_check_count
         seconds_since_last_check = (
@@ -288,7 +301,7 @@ class FlowsManager:
 
         Global.CONFIG_MANAGER.message_fetcher_sleep_interval = sleep_time
 
-        sleep_interval_log_string = f"New sleep_interval = {sleep_time}"
+        sleep_interval_log_string = f"new sleep_interval = {sleep_time}"
         Global.LOGGER.debug(sleep_interval_log_string)
 
         if Global.CONFIG_MANAGER.show_stats:
@@ -298,19 +311,18 @@ class FlowsManager:
         """
         Set the configuration for the Logger
         """
-
+        Global.LOGGER.debug("define and parsing command line arguments")
         parser = argparse.ArgumentParser(
             description='A workflow engine for Pythonistas', formatter_class=argparse.RawTextHelpFormatter)
-        parser.add_argument('FILENAME', nargs='+',
-                            help='name of the recipe file(s)')
+        parser.add_argument('FILENAME', nargs='+',help='name of the recipe file(s)')
         parser.add_argument('-i', '--INTERVAL', type=int, default=500,
                             metavar=('MS'),
                             help='perform a cycle each [MS] milliseconds. (default = 500)')
         parser.add_argument('-s', '--STATS', type=int, default=0,
                             metavar=('SEC'),
                             help='show stats each [SEC] seconds. (default = NO STATS)')
-        parser.add_argument('-v', '--VERBOSE', action='store_true',
-                            help='enable verbose output')
+        parser.add_argument('-t', '--TRACE', action='store_true',help='enable super verbose output, only useful for tracing')                            
+        parser.add_argument('-v', '--VERBOSE', action='store_true',help='enable verbose output')
         parser.add_argument('-V', '--VERSION',
                             action="version", version=__version__)
 

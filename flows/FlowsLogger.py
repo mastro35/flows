@@ -40,13 +40,15 @@ class FlowsLogger:
         """
         Returns the standard logger
         """
+        if Global.LOGGER:
+            Global.LOGGER.debug('configuring a logger')
         if self._logger_instance is not None:
             return self._logger_instance
 
         self._logger_instance = logging.getLogger("flowsLogger")
         self._logger_instance.setLevel(logging.DEBUG)
 
-        log_format = '%(asctime)s - [%(levelname)s] %(message)s'
+        log_format = '%(asctime)s - [%(levelname)s]\t%(message)s'
         log_date_format = '%Y-%m-%d %H:%M:%S'
         formatter = logging.Formatter(log_format, log_date_format)
 
@@ -62,6 +64,8 @@ class FlowsLogger:
         """
         Returns a new standard logger instance
         """
+        if Global.LOGGER:
+            Global.LOGGER.debug('reconfiguring logger level')
         stream_handlers = filter(lambda x: type(x) is logging.StreamHandler,
                                  self._logger_instance.handlers)
 
