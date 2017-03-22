@@ -91,16 +91,16 @@ class MessageDispatcher:
                 return
 
             if message.sender is None:
-                Global.LOGGER.error("can't deliver anonymous messages")
+                Global.LOGGER.error(f"can't deliver anonymous messages with body {message.body}")
                 return
 
             if message.receiver is None:
                 Global.LOGGER.error(
-                    "can't deliver message: recipient not specified")
+                    f"can't deliver message from {message.sender}: recipient not specified")
                 return
 
             if message.message is None:
-                Global.LOGGER.error("can't deliver message with no body")
+                Global.LOGGER.error(f"can't deliver message with no body from {message.sender}")
                 return
 
             sender = "*" + message.sender + "*"
