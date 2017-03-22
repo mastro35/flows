@@ -49,7 +49,7 @@ $ python setup.py install
 To start a flow simply start a terminal and type
 
 ```sh
-$ flows [-h] [-i MS] [-s SEC] [-v] [-V] FILENAME [FILENAME ...]
+$ flows [-h] [-i MS] [-s SEC] [-t] [-v] [-V] FILENAME [FILENAME ...]
 ```
 
 Note that you can start more flows with a single command and every single action contained in every flow will be able to communicate with each others.
@@ -66,12 +66,13 @@ Just using flows -h gives you the help of the command line interface.
 >  -h, --help            show this help message and exit  
 >  -i MS, --INTERVAL MS  perform a cycle each [MS] milliseconds. (default = 500)  
 >  -s SEC, --STATS SEC   show stats each [SEC] seconds. (default = NO STATS)  
+>  -t, --TRACE           enable super verbose output, only useful for tracing
 >  -v, --VERBOSE         enable verbose output  
 >  -V, --VERSION         show program's version number and exit  
 
 As you can see, if you need to have some statistics on how your workflow is running you can specify the -s option, and each [SEC] seconds you will get an onscreen message with some statistics informations. 
 
-Beside, you can add verbosity to the output of the command just specifying the -v option.
+Beside, you can add verbosity to the output of the command just specifying the -v option or super extra verbosity adding the -t option.
 
 Don't be afraid from the -i option, we will discuss it later. However, the standard usage of *flows* is just by specifing the name of the recipes files to start.
 
