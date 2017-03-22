@@ -118,7 +118,7 @@ class Action(Thread):
 
     def stop(self):
         ''' Stop the current action '''
-        Global.LOGGER.debug("..." + self.name + " stopped")
+        Global.LOGGER.debug(f"action {self.name} stopped")
         self.is_running = False
         self.on_stop()
 
@@ -126,12 +126,11 @@ class Action(Thread):
         """
         Start the action
         """
-
-        Global.LOGGER.debug("RUNNING - " + self.name + " " + str(len(self.monitored_input)))
+        Global.LOGGER.debug(f"action {self.name} is running")
 
         for tmp_monitored_input in self.monitored_input:
             sender = "*" + tmp_monitored_input + "*"
-            Global.LOGGER.debug(self.name + " is monitoring " + sender)
+            Global.LOGGER.debug(f"action {self.name} is monitoring {sender}")
 
         while self.is_running:
             try:
@@ -139,41 +138,79 @@ class Action(Thread):
                 self.on_cycle()
 
             except Exception as exc:
-                Global.LOGGER.error(
-                    "Error while running the action " + self.name + " \n " + str(exc))
+                Global.LOGGER.error(f"error while running the action {self.name}: {str(exc)}")
+
+    @staticmethod
+    def load_actions():
+        Global.LOGGER.debug("loading actions in memory")
+        # if we load the actions yet, return them
+        if len(Action.python_files) > 0:
+            return Action.python_files
+
+        # elsewere, load all the custom actions you find
+        Global.LOGGER.debug("searching for installed actions... it can takes a while")
+        site_packages = site.getsitepackages()
+
+        # get custom actions in current path 
+        Global.LOGGER.debug("looking inside the current directory")
+        tmp_python_files_in_current_directory = glob.glob(f"./**/*Action.py", recursive=False)
+        tmp_python_files_dict = dict(zip(list(map(os.path.basename, tmp_python_files_in_current_directory)), tmp_python_files_in_current_directory))
+
+        # get custom actions in current /Action subdir
+        Global.LOGGER.debug("looking inside the current ./Actions subdirectory")        
+        tmp_python_files_in_current_action_subdirectory = glob.glob(f"./**/Actions/*Action.py", recursive=True)
+        for action_file in tmp_python_files_in_current_action_subdirectory:
+            action_filename = os.path.basename(action_file)
+            if action_filename not in tmp_python_files_dict:
+                tmp_python_files_dict[action_filename] = action_file
+
+        # get custom actions in site_packages directory
+        Global.LOGGER.debug("looking inside the Python environment")
+        for my_site in site_packages:
+            tmp_python_files_in_site_directory = glob.glob(f"{my_site}/**/Actions/*Action.py", recursive=True) 
+            for action_file in tmp_python_files_in_site_directory:
+                action_filename = os.path.basename(action_file)                
+                if action_filename not in tmp_python_files_dict:
+                    tmp_python_files_dict[action_filename] = action_file
+
+        # Action.python_files = list(set(tmp_python_files))
+        Action.python_files = tmp_python_files_dict.values()
+
+        if len(Action.python_files) > 0:
+            Global.LOGGER.debug(f"{len(Action.python_files)} actions found")
+
+            if Global.CONFIG_MANAGER.tracing_mode:
+                actions_found = "\n".join(Action.python_files)
+                Global.LOGGER.debug(f"actions found: \n{actions_found}")
+                # time.sleep(2)
+        else:
+            Global.LOGGER.debug(f"no actions found on {my_site}")
+        
 
     @staticmethod
     def create_action_for_code(action_code, name, configuration, managed_input):
         """
         Factory method to create an instance of an Action from an input code
         """
+        Global.LOGGER.debug(f"creating action {name} for code {action_code}")
+        Global.LOGGER.debug(f"configuration length: {len(configuration)}")
+        Global.LOGGER.debug(f"input: {managed_input}")
 
-        if len(Action.python_files) == 0:
-            Global.LOGGER.debug("Searching for installed actions... it can takes a while")
-            site_packages = site.getsitepackages()
-            
-            tmp_python_files = []
-            for my_site in site_packages:
-                tmp_python_files = glob.glob(f"{my_site}/**/Actions/*Action.py", recursive=True) 
-                if tmp_python_files:
-                    Global.LOGGER.debug(f"{len(tmp_python_files)} actions found on {my_site}")
-                    Action.python_files = Action.python_files + tmp_python_files
-                else:
-                    Global.LOGGER.debug(f"No actions found on {my_site}")
-
-            Action.python_files = list(set(Action.python_files))
-            Global.LOGGER.debug("Actions found: " + str(Action.python_files))
-
+        Action.load_actions()
+        
         # import Actions
         for path in Action.python_files:
             filename = os.path.basename(os.path.normpath(path))[:-3]
             module_name = "flows.Actions." + filename
-            Global.LOGGER.debug("...importing " + module_name)
+
+            if Global.CONFIG_MANAGER.tracing_mode:
+                Global.LOGGER.debug("importing " + module_name)
+
             try:
                 importlib.import_module(module_name, package="flows.Actions")
             except ModuleNotFoundError as ex:
-                Global.LOGGER.warn(f"An error occured while importing {module_name}, so the module will be skipped.")
-                Global.LOGGER.debug(f"Error occured : {ex}")
+                Global.LOGGER.warn(f"an error occured while importing {module_name}, so the module will be skipped.")
+                Global.LOGGER.debug(f"error occured : {ex}")
 
         action = None
 
@@ -181,7 +218,7 @@ class Action(Thread):
             if subclass.type == action_code:
                 action_class = subclass
                 action = action_class(name, configuration, managed_input)
-                Global.LOGGER.debug("...created action " + str(action))
+                Global.LOGGER.debug("created action " + str(action))
                 return action
 
         return action
