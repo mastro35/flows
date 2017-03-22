@@ -45,7 +45,7 @@ class MessageDispatcher:
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        Global.LOGGER.debug("Initializing the message dispatcher")
+        Global.LOGGER.debug("initializing the message dispatcher")
 
         self.dispatched = 0
         self.last_stat = datetime.datetime.now()
@@ -56,7 +56,7 @@ class MessageDispatcher:
         self.socket = self.context.socket(zmq.PUB)
 
         Global.LOGGER.debug(
-            "Configuring the socket address for messaging subsystem")
+            "configuring the socket address for messaging subsystem")
         for attempt in range(0, 6):
             try:
                 Global.CONFIG_MANAGER.set_socket_address()
@@ -71,7 +71,7 @@ class MessageDispatcher:
                     sys.exit(8)
 
                 Global.LOGGER.warning(str.format(
-                    "An error occured trying to connect to {0} ",
+                    "error occured trying to connect to {0} ",
                     Global.CONFIG_MANAGER.publisher_socket_address))
 
                 Global.LOGGER.warning(str.format(
@@ -79,7 +79,7 @@ class MessageDispatcher:
 
                 time.sleep(1)
 
-        Global.LOGGER.debug("Message dispatcher initialized successfully")
+        Global.LOGGER.debug("message dispatcher initialized successfully")
 
     def send_message(self, message):
         """
@@ -107,11 +107,12 @@ class MessageDispatcher:
             self.socket.send_multipart(
                 [bytes(sender, 'utf-8'), pickle.dumps(message)])
 
-            Global.LOGGER.debug("Dispatched : "
-                                + message.sender
-                                + "-"
-                                + message.message
-                                + "-"
-                                + message.receiver)
+            if Global.CONFIG_MANAGER.tracing_mode:
+                Global.LOGGER.debug("dispatched : "
+                                    + message.sender
+                                    + "-"
+                                    + message.message
+                                    + "-"
+                                    + message.receiver)
 
             self.dispatched = self.dispatched + 1
