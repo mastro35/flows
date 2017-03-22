@@ -2,7 +2,7 @@
 
 """Global.py - singleton and utility for Flows"""
 
-VERSION = '1.0'
+VERSION = '1.1'
 CONFIG_MANAGER = None
 LOGGER_INSTANCE = None
 LOGGER = None
