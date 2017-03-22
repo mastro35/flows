@@ -285,8 +285,8 @@ class FlowsManager:
         seconds_since_last_check = (
             now - self.last_queue_check_date).total_seconds()
 
-        Global.LOGGER.info(
-            str(dispatched_since_last_check) + " in " + str(seconds_since_last_check))
+        Global.LOGGER.debug(
+            str(dispatched_since_last_check) + " dispatched in the last " + str(seconds_since_last_check))
         sleep_time = (seconds_since_last_check /
                       (dispatched_since_last_check + queue + 1)) * 0.75
 
