@@ -147,6 +147,9 @@ class Action(Thread):
         """
         Factory method to create an instance of an Action from an input code
         """
+        Global.LOGGER.debug(f"creating action {name} for code {action_code}")
+        Global.LOGGER.debug(f"configuration length: {len(configuration)}")
+        Global.LOGGER.debug(f"input: {managed_input}")
 
         if len(Action.python_files) == 0:
             Global.LOGGER.debug("Searching for installed actions... it can takes a while")

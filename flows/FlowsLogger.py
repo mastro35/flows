@@ -46,7 +46,7 @@ class FlowsLogger:
         self._logger_instance = logging.getLogger("flowsLogger")
         self._logger_instance.setLevel(logging.DEBUG)
 
-        log_format = '%(asctime)s - %(message)s'
+        log_format = '%(asctime)s - [%(levelname)s] %(message)s'
         log_date_format = '%Y-%m-%d %H:%M:%S'
         formatter = logging.Formatter(log_format, log_date_format)
 

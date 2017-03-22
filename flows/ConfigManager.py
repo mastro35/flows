@@ -75,6 +75,7 @@ class ConfigManager:
         """
         Read a recipe file from disk
         """
+        Global.LOGGER.debug(f"reading recipe {filename}")
         if not os.path.isfile(filename):
             Global.LOGGER.error(filename + " recipe not found, skipping")
             return

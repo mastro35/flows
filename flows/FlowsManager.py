@@ -68,41 +68,53 @@ class FlowsManager:
         Set internal configuration variables according to 
         the input parameters
         """
-        Global.CONFIG_MANAGER.recipes = (args.FILENAME)
+        Global.LOGGER.debug("setting command line arguments")
 
         if args.VERBOSE:
+            Global.LOGGER.debug("verbose mode active")
             Global.CONFIG_MANAGER.log_level = logging.DEBUG
             Global.LOGGER_INSTANCE.reconfigure_log_level()
 
         if args.STATS > 0:
+            Global.LOGGER.debug(f"stats requested every {args.STATS} seconds")
             Global.CONFIG_MANAGER.show_stats = True
             Global.CONFIG_MANAGER.stats_timeout = args.STATS
 
         if args.INTERVAL > 0:
+            Global.LOGGER.debug(f"setting sleep interval to {args.INTERVAL} milliseconds")            
             Global.CONFIG_MANAGER.sleep_interval = float(args.INTERVAL)/1000
+
+        Global.LOGGER.debug(f"recipes to be parsed: {args.FILENAME}")
+        Global.CONFIG_MANAGER.recipes = (args.FILENAME)
+
 
     def start(self):
         """
         Start all the processes
         """
+        Global.LOGGER.info("starting the flow manager")
         self._start_actions()
         self._start_message_fetcher()
+        Global.LOGGER.debug("flow manager started")
 
     def stop(self):
         """
         Stop all the processes
         """
+        Global.LOGGER.info("stopping the flow manager")
         self._stop_actions()
         self.isrunning = False
+        Global.LOGGER.debug("flow manager stopped")
 
     def restart(self):
         """
         Restart all the processes
         """
-        Global.LOGGER.info("restarting flows")
+        Global.LOGGER.info("restarting the flow manager")
         self._stop_actions()    # stop the old actions
         self.actions = []       # clear the action list
         self._start_actions()   # start the configured actions
+        Global.LOGGER.debug("flow manager restarted")
 
     def _start_actions(self):
         """
@@ -129,36 +141,37 @@ class FlowsManager:
         action_configuration = Global.CONFIG_MANAGER.sections[
             section]
 
-        if len(action_configuration) > 0:
-            action_type = None
+        if len(action_configuration) == 0:
+            Global.LOGGER.warn(f"section {section} has no configuration, skipping")
+            return
 
-            if "type" in action_configuration:
-                action_type = action_configuration["type"]
+        action_type = None
+        # action_input = None
+        new_managed_input = []
 
-            new_managed_input = []
-            action_input = None
+        if "type" in action_configuration:
+            action_type = action_configuration["type"]
 
-            if "input" in action_configuration:
-                action_input = action_configuration["input"]
-                new_managed_input = (item.strip()
-                                     for item in action_input.split(","))
+        if "input" in action_configuration:
+            action_input = action_configuration["input"]
+            new_managed_input = (item.strip()
+                                    for item in action_input.split(","))
 
-            my_action = Action.create_action_for_code(action_type,
-                                                      section,
-                                                      action_configuration,
-                                                      list(new_managed_input))
+        my_action = Action.create_action_for_code(action_type,
+                                                    section,
+                                                    action_configuration,
+                                                    list(new_managed_input))
 
-            if my_action is not None:
-                self.actions.append(my_action)
-                for my_input in my_action.monitored_input:
-                    self.subscriptions.setdefault(
-                        my_input, []).append(my_action)
-            else:
-                Global.LOGGER.warn(
-                    "Can't find a type for action " + section)
-        else:
-            Global.LOGGER.warn(
-                "Unable to find the configuration for section " + section)
+        if not my_action:
+            Global.LOGGER.warn(f"can't find a type for action {section}, the action will be skipped")
+            return
+
+        self.actions.append(my_action)
+
+        Global.LOGGER.warn("updating the subscriptions table")
+        for my_input in my_action.monitored_input:
+            self.subscriptions.setdefault(
+                my_input, []).append(my_action)
 
     def _stop_actions(self):
         """
@@ -183,7 +196,7 @@ class FlowsManager:
         if Global.CONFIG_MANAGER.show_stats:
             if (now - self.last_stats_check_date).total_seconds() > Global.CONFIG_MANAGER.stats_timeout:
                 self.last_stats_check_date = now
-                stats_string = f"--- [STATS] ---\nMessage Sent: {sent}\nMessage Received: {received}\nQueue length = {queue_length}\n--- [ END ] ---"
+                stats_string = f"showing stats\n--- [STATS] ---\nMessage Sent: {sent}\nMessage Received: {received}\nQueue length = {queue_length}\n--- [ END ] ---"
                 Global.LOGGER.info(stats_string)
 
         # if we are accumulating messages, or we have processed at least 5000 messages
