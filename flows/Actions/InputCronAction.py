@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 CronAction.py
@@ -18,10 +18,10 @@ The parameter crontab_schedule has to be in the crontab format:
 Copyright 2016 Davide Mastromatteo
 '''
 
-import datetime
-import croniter
-import threading
 from flows.Actions.Action import Action
+import datetime
+from croniter import croniter
+import threading
 
 
 class CronAction(Action):
@@ -71,7 +71,7 @@ class CronAction(Action):
         now = datetime.datetime.now()
         now = now.replace(microsecond=0)
 
-        self.cron = croniter.croniter(self.crontab_schedule, now)
+        self.cron = croniter(self.crontab_schedule, now)
         self.next = self.cron.get_next(datetime.datetime)
         self.start_timer()
 
