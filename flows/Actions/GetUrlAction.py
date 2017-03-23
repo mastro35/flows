@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 GetUrlAction.py
@@ -8,8 +8,7 @@ Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
 '''
 
-import urllib.request
-import urllib.parse
+import urllib
 from flows.Actions.Action import Action
 
 

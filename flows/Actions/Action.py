@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 Action.py
@@ -9,12 +9,15 @@ Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
 '''
 
+import gc
 import glob
 import importlib
 import importlib.util
 import os
 import site
+import sys
 import time
+import threading
 from threading import Thread
 
 from flows import Global
@@ -45,6 +48,7 @@ class Action(Thread):
 
     type = ""
     name = ""
+    _instance_lock = threading.Lock()
     configuration = None
     context = None
     socket = None
@@ -140,9 +144,19 @@ class Action(Thread):
             except Exception as exc:
                 Global.LOGGER.error(f"error while running the action {self.name}: {str(exc)}")
 
-    @staticmethod
-    def load_actions():
-        Global.LOGGER.debug("loading actions in memory")
+    @classmethod
+    def load_module(cls, module_name, module_filename):
+        try:
+            spec = importlib.util.spec_from_file_location(module_name, module_filename)
+            foo = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(foo)
+        except Exception as ex:
+            Global.LOGGER.warn(f"{ex}")
+            Global.LOGGER.warn(f"an error occured while importing {module_name}, so the module will be skipped.")
+
+
+    @classmethod
+    def search_actions(cls):
         # if we load the actions yet, return them
         if len(Action.python_files) > 0:
             return Action.python_files
@@ -151,14 +165,18 @@ class Action(Thread):
         Global.LOGGER.debug("searching for installed actions... it can takes a while")
         site_packages = site.getsitepackages()
 
+        Global.LOGGER.debug(f"current path: {os.getcwd()}")
         # get custom actions in current path 
         Global.LOGGER.debug("looking inside the current directory")
-        tmp_python_files_in_current_directory = glob.glob(f"./**/*Action.py", recursive=False)
-        tmp_python_files_dict = dict(zip(list(map(os.path.basename, tmp_python_files_in_current_directory)), tmp_python_files_in_current_directory))
+        tmp_python_files_in_current_directory = glob.glob(f"{os.getcwd()}/*Action.py", recursive=False)
+        Global.LOGGER.debug(f"found {len(tmp_python_files_in_current_directory)} actions in current directory")
+        basenames = list(map(os.path.basename, tmp_python_files_in_current_directory))
+        tmp_python_files_dict = dict(zip(basenames, tmp_python_files_in_current_directory))
 
         # get custom actions in current /Action subdir
-        Global.LOGGER.debug("looking inside the current ./Actions subdirectory")        
-        tmp_python_files_in_current_action_subdirectory = glob.glob(f"./**/Actions/*Action.py", recursive=True)
+        Global.LOGGER.debug("looking inside any ./Actions subdirectory")        
+        tmp_python_files_in_current_action_subdirectory = glob.glob(f"{os.getcwd()}/**/Actions/*Action.py", recursive=True)
+        Global.LOGGER.debug(f"found {len(tmp_python_files_in_current_action_subdirectory)} actions in a ./Actions subdirectory")        
         for action_file in tmp_python_files_in_current_action_subdirectory:
             action_filename = os.path.basename(action_file)
             if action_filename not in tmp_python_files_dict:
@@ -168,27 +186,32 @@ class Action(Thread):
         Global.LOGGER.debug("looking inside the Python environment")
         for my_site in site_packages:
             tmp_python_files_in_site_directory = glob.glob(f"{my_site}/**/Actions/*Action.py", recursive=True) 
+            Global.LOGGER.debug(f"found {len(tmp_python_files_in_site_directory)} actions in {my_site}")
+
             for action_file in tmp_python_files_in_site_directory:
-                action_filename = os.path.basename(action_file)                
+                action_filename = os.path.basename(action_file)
                 if action_filename not in tmp_python_files_dict:
                     tmp_python_files_dict[action_filename] = action_file
 
         # Action.python_files = list(set(tmp_python_files))
-        Action.python_files = tmp_python_files_dict.values()
+        action_files = tmp_python_files_dict.values()
 
-        if len(Action.python_files) > 0:
-            Global.LOGGER.debug(f"{len(Action.python_files)} actions found")
+        if len(action_files) > 0:
+            Global.LOGGER.debug(f"{len(action_files)} actions found")
 
             if Global.CONFIG_MANAGER.tracing_mode:
-                actions_found = "\n".join(Action.python_files)
+                actions_found = "\n".join(action_files)
                 Global.LOGGER.debug(f"actions found: \n{actions_found}")
-                # time.sleep(2)
         else:
             Global.LOGGER.debug(f"no actions found on {my_site}")
         
+        Action.python_files = action_files
 
-    @staticmethod
-    def create_action_for_code(action_code, name, configuration, managed_input):
+        return action_files
+
+
+    @classmethod
+    def create_action_for_code(cls, action_code, name, configuration, managed_input):
         """
         Factory method to create an instance of an Action from an input code
         """
@@ -196,29 +219,20 @@ class Action(Thread):
         Global.LOGGER.debug(f"configuration length: {len(configuration)}")
         Global.LOGGER.debug(f"input: {managed_input}")
 
-        Action.load_actions()
-        
-        # import Actions
-        for path in Action.python_files:
-            filename = os.path.basename(os.path.normpath(path))[:-3]
-            module_name = "flows.Actions." + filename
+        # get the actions catalog
+        my_actions_file = Action.search_actions()
 
-            if Global.CONFIG_MANAGER.tracing_mode:
-                Global.LOGGER.debug("importing " + module_name)
+        # load custom actions to find the right one
+        for filename in my_actions_file:
+            module_name = os.path.basename(os.path.normpath(filename))[:-3]
 
-            try:
-                importlib.import_module(module_name, package="flows.Actions")
-            except ModuleNotFoundError as ex:
-                Global.LOGGER.warn(f"an error occured while importing {module_name}, so the module will be skipped.")
-                Global.LOGGER.debug(f"error occured : {ex}")
-
-        action = None
-
-        for subclass in Action.__subclasses__():
-            if subclass.type == action_code:
-                action_class = subclass
-                action = action_class(name, configuration, managed_input)
-                Global.LOGGER.debug("created action " + str(action))
-                return action
-
-        return action
+            # garbage collect all the modules you load if they are not necessary
+            context = {}
+            Action.load_module(module_name, filename)
+            for subclass in Action.__subclasses__():
+                if subclass.type == action_code:
+                    action_class = subclass
+                    action = action_class(name, configuration, managed_input)
+                    return action
+            subclass = None
+            gc.collect()

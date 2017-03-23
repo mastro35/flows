@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 CheckUrlFor200Action.py
@@ -8,9 +8,9 @@ Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
 '''
 
-import urllib.request
-import urllib.parse
 from flows.Actions.Action import Action
+import datetime
+import urllib
 
 
 class CheckUrlFor200(Action):

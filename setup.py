@@ -15,7 +15,7 @@ License: Apache 2.0
 from setuptools import setup
 from flows.Global import VERSION
 
-setup_requires = ['adodbapi>=2.6.0.6',
+setup_requires = ['adodbapi>=2.6.0.7',
                   'watchdog>=0.8.3',
                   'zmq>=0.0.0',
                   'croniter>=0.3.12',
