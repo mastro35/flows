@@ -90,7 +90,7 @@ class FlowsManager:
             Global.CONFIG_MANAGER.log_level = logging.DEBUG
             Global.LOGGER_INSTANCE.reconfigure_log_level()
 
-        if args.MESSAGEINTERVAL > 0:
+        if  args.MESSAGEINTERVAL is not None and args.MESSAGEINTERVAL > 0:
             Global.LOGGER.debug(f"setting message fetcher sleep interval to {args.MESSAGEINTERVAL/10} milliseconds")
             Global.CONFIG_MANAGER.message_fetcher_sleep_interval =  float(args.MESSAGEINTERVAL)/10000
             Global.CONFIG_MANAGER.fixed_message_fetcher_interval = True
