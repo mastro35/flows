@@ -38,6 +38,7 @@ class ConfigManager:
     show_stats = False  # -s <> 0 parameter
     tracing_mode = False # -t parameter
     stats_timeout = 60  # -s parameter
+    fixed_message_fetcher_interval = False # -m parameter
 
     @staticmethod
     def default_instance():

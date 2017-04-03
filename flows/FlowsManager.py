@@ -81,7 +81,7 @@ class FlowsManager:
             Global.CONFIG_MANAGER.stats_timeout = args.STATS
 
         if args.INTERVAL > 0:
-            Global.LOGGER.debug(f"setting sleep interval to {args.INTERVAL} milliseconds")            
+            Global.LOGGER.debug(f"setting sleep interval to {args.INTERVAL} milliseconds")
             Global.CONFIG_MANAGER.sleep_interval = float(args.INTERVAL)/1000
 
         if args.TRACE:
@@ -90,6 +90,10 @@ class FlowsManager:
             Global.CONFIG_MANAGER.log_level = logging.DEBUG
             Global.LOGGER_INSTANCE.reconfigure_log_level()
 
+        if args.MESSAGEINTERVAL > 0:
+            Global.LOGGER.debug(f"setting message fetcher sleep interval to {args.MESSAGEINTERVAL/10} milliseconds")
+            Global.CONFIG_MANAGER.message_fetcher_sleep_interval =  float(args.MESSAGEINTERVAL)/10000
+            Global.CONFIG_MANAGER.fixed_message_fetcher_interval = True
 
         Global.LOGGER.debug(f"recipes to be parsed: {args.FILENAME}")
         Global.CONFIG_MANAGER.recipes = (args.FILENAME)
@@ -202,11 +206,12 @@ class FlowsManager:
         sent = Global.MESSAGE_DISPATCHER.dispatched
         received = self.fetched
         queue_length = sent - received
+        message_sleep_interval = Global.CONFIG_MANAGER.message_fetcher_sleep_interval
 
         if Global.CONFIG_MANAGER.show_stats:
             if (now - self.last_stats_check_date).total_seconds() > Global.CONFIG_MANAGER.stats_timeout:
                 self.last_stats_check_date = now
-                stats_string = f"showing stats\n--- [STATS] ---\nMessage Sent: {sent}\nMessage Received: {received}\nQueue length = {queue_length}\n--- [ END ] ---"
+                stats_string = f"showing stats\n--- [STATS] ---\nMessage Sent: {sent}\nMessage Received: {received}\nMessage Sleep Interval = {message_sleep_interval}\nQueue length = {queue_length}\n--- [ END ] ---"
                 Global.LOGGER.info(stats_string)
 
         # if we are accumulating messages, or we have processed at least 5000 messages
@@ -215,10 +220,11 @@ class FlowsManager:
         queue_limit_reached = queue_length > Global.CONFIG_MANAGER.queue_length_for_system_check
         time_limit_since_last_check_is_over = (now - self.last_queue_check_date).total_seconds() > Global.CONFIG_MANAGER.seconds_between_queue_check
 
-        if (messages_limit_reached) or (queue_limit_reached and time_limit_since_last_check_is_over):
-            cause = "messages limit reached" if messages_limit_reached else "queue limit reached"
-            Global.LOGGER.debug(f"triggering the throttle function due to {cause}")
-            self._adapt_sleep_interval(sent, received, queue_length, now)
+        if not Global.CONFIG_MANAGER.fixed_message_fetcher_interval:
+            if (messages_limit_reached) or (queue_limit_reached and time_limit_since_last_check_is_over):
+                cause = "messages limit reached" if messages_limit_reached else "queue limit reached"
+                Global.LOGGER.debug(f"triggering the throttle function due to {cause}")
+                self._adapt_sleep_interval(sent, received, queue_length, now)
 
     def _deliver_message(self, msg):
         """
@@ -318,6 +324,10 @@ class FlowsManager:
         parser.add_argument('-i', '--INTERVAL', type=int, default=500,
                             metavar=('MS'),
                             help='perform a cycle each [MS] milliseconds. (default = 500)')
+
+        parser.add_argument('-m', '--MESSAGEINTERVAL', type=int, 
+                            metavar=('X'),
+                            help='dequeue a message each [X] tenth of milliseconds. (default = auto)')
         parser.add_argument('-s', '--STATS', type=int, default=0,
                             metavar=('SEC'),
                             help='show stats each [SEC] seconds. (default = NO STATS)')
