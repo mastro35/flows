@@ -65,6 +65,7 @@ Just using flows -h gives you the help of the command line interface.
 >optional arguments:  
 >  -h, --help            show this help message and exit  
 >  -i MS, --INTERVAL MS  perform a cycle each [MS] milliseconds. (default = 500)  
+>  -m X, --MESSAGEINTERVAL X  dequeue a message each [X] tenth of milliseconds. (default = auto)
 >  -s SEC, --STATS SEC   show stats each [SEC] seconds. (default = NO STATS)  
 >  -t, --TRACE           enable super verbose output, only useful for tracing
 >  -v, --VERBOSE         enable verbose output  
