@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 
-from flows.FlowsManager import FlowsManager
+"""
+flows.py
+entry point of the program
+----------------------------------
+
+Copyright 2016 Davide Mastromatteo
+License: Apache-2.0
+"""
+
 from flows import Global
+from flows.FlowsManager import FlowsManager
 
 
 def main():

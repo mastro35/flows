@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-'''
+"""
 FlowsLogger.py
 Logging facility module for flows
 ----------------------------------
 
 Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
-'''
+"""
 
 import logging
 import threading
@@ -66,7 +66,7 @@ class FlowsLogger:
         """
         if Global.LOGGER:
             Global.LOGGER.debug('reconfiguring logger level')
-        stream_handlers = filter(lambda x: type(x) is logging.StreamHandler,
+        stream_handlers = filter(lambda k: type(k) is logging.StreamHandler,
                                  self._logger_instance.handlers)
 
         for x in stream_handlers:

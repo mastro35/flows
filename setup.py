@@ -13,6 +13,7 @@ License: Apache 2.0
 # import platform
 
 from setuptools import setup
+
 from flows.Global import VERSION
 
 setup_requires = ['adodbapi>=2.6.0.7',
@@ -45,5 +46,5 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3.6'
     ],
-    entry_points={'console_scripts': ['flows = flows.__main__:main']}
+    entry_points={'console_scripts': ['flows = flows.flows:main']}
 )

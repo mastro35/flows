@@ -9,9 +9,9 @@ Copyright 2016 Davide Mastromatteo
 
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
+
 from flows.Actions.Action import Action
 from flows.Actions.Action import ActionInput
-import flows.Global
 
 
 class DannyFileSystemEventHandler(PatternMatchingEventHandler):
@@ -120,32 +120,41 @@ class WatchdogAction(Action):
         if self.trigger != "create":
             return
         action_input = ActionInput(event, "", self.name)
-        flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
+        self.send_message(action_input)
+
+    #        flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
 
     def on_modified(self, event):
         '''Fired when something's been modified'''
         if self.trigger != "modify":
             return
         action_input = ActionInput(event, "", self.name)
-        flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
+        self.send_message(action_input)
+
+    #        flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
 
     def on_deleted(self, event):
         '''Fired when something's been deleted'''
         if self.trigger != "delete":
             return
         action_input = ActionInput(event, "", self.name)
-        flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
+        self.send_message(action_input)
+
+    #        flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
 
     def on_moved(self, event):
         '''Fired when something's been moved'''
         if self.trigger != "move":
             return
         action_input = ActionInput(event, "", self.name)
-        flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
+        self.send_message(action_input)
+
+    #        flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
 
     def on_any_event(self, event):
         '''Fired on any filesystem event'''
         if self.trigger != "any":
             return
         action_input = ActionInput(event, "", self.name)
-        flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
+        self.send_message(action_input)
+#        flows.Global.MESSAGE_DISPATCHER.send_message(action_input)

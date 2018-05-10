@@ -15,9 +15,8 @@ import importlib
 import importlib.util
 import os
 import site
-import sys
-import time
 import threading
+import time
 from threading import Thread
 
 from flows import Global
@@ -58,7 +57,7 @@ class Action(Thread):
 
     python_files = []
 
-    def __init__(self, name, configuration, managed_input):
+    def __init__(self, name, configuration, worker, managed_input):
         super().__init__()
 
         # Set the action as a daemon
@@ -67,6 +66,7 @@ class Action(Thread):
         # Init the action instance variables
         self.monitored_input = managed_input
         self.configuration = configuration
+        self.worker = worker
         self.name = name
 
         # Launch custom configuration method
@@ -102,7 +102,7 @@ class Action(Thread):
         """
         Send an output to the socket
         """
-        Global.MESSAGE_DISPATCHER.send_message(output)
+        pass
 
     def send_message(self, output):
         """
@@ -118,7 +118,8 @@ class Action(Thread):
                                     self.name,
                                     "*")
 
-        Global.MESSAGE_DISPATCHER.send_message(output_action)
+        #        Global.MESSAGE_DISPATCHER.send_message(output_action)
+        self.worker.MESSAGE_DISPATCHER.send_message(output_action)
 
     def stop(self):
         ''' Stop the current action '''
@@ -211,7 +212,7 @@ class Action(Thread):
 
 
     @classmethod
-    def create_action_for_code(cls, action_code, name, configuration, managed_input):
+    def create_action_for_code(cls, action_code, name, configuration, worker, managed_input):
         """
         Factory method to create an instance of an Action from an input code
         """
@@ -232,7 +233,7 @@ class Action(Thread):
             for subclass in Action.__subclasses__():
                 if subclass.type == action_code:
                     action_class = subclass
-                    action = action_class(name, configuration, managed_input)
+                    action = action_class(name, configuration, worker, managed_input)
                     return action
             subclass = None
             gc.collect()

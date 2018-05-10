@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-'''
+"""
 ConfigManager.py
 Handle the configuration for flows
 ----------------------------------
 
 Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
-'''
+"""
 
 import configparser
 import logging
@@ -16,6 +16,7 @@ import random
 import threading
 
 from flows import Global
+
 
 class ConfigManager:
     """
@@ -29,16 +30,16 @@ class ConfigManager:
     subscriber_socket_address = ""
     publisher_socket_address = ""
     sleep_interval = 0.5  # -i parameter
-    message_fetcher_sleep_interval = 0.5    # no parameter: auto throttle
+    message_fetcher_sleep_interval = 0.1  # no parameter: auto throttle
     queue_length_for_system_check = 100
     messages_dispatched_for_system_check = 5000
     seconds_between_queue_check = 60
     log_level = logging.INFO  # -v parameter
     recipes = []  # parameters from command line
     show_stats = False  # -s <> 0 parameter
-    tracing_mode = False # -t parameter
+    tracing_mode = False  # -t parameter
     stats_timeout = 60  # -s parameter
-    fixed_message_fetcher_interval = False # -m parameter
+    fixed_message_fetcher_interval = False  # -m parameter
 
     @staticmethod
     def default_instance():
@@ -101,4 +102,3 @@ class ConfigManager:
             return section_content
         except IndexError:
             return []
-
