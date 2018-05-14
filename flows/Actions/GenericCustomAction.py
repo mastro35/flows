@@ -35,7 +35,7 @@ class GenericCustomAction(Action):
 
         # if needed, execute code to handle input received HERE, doing something clever ...
         # - like reverting the input string?
-        to_return = action_input.message[::-1]
+        to_return = action_input["message"][::-1]
 
         # and - if needed - message other actions with the result of your
         # operation

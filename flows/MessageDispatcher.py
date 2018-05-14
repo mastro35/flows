@@ -90,22 +90,22 @@ class MessageDispatcher:
                 Global.LOGGER.error("can't deliver a null messages")
                 return
 
-            if message.sender is None:
-                Global.LOGGER.error(f"can't deliver anonymous messages with body {message.body}")
+            if message["sender"] is None:
+                Global.LOGGER.error(f"can't deliver anonymous messages")
                 return
 
-            if message.receiver is None:
+            if message["target"] is None:
                 Global.LOGGER.error(
-                    f"can't deliver message from {message.sender}: recipient not specified")
+                    f"can't deliver message: recipient not specified")
                 return
 
-            if message.message is None:
-                Global.LOGGER.error(f"can't deliver message with no body from {message.sender}")
+            if message["message"] is None:
+                Global.LOGGER.error(f"can't deliver message with no body")
                 return
 
             self.socket.send(pickle.dumps(message))
 
             if Global.CONFIG_MANAGER.tracing_mode:
-                Global.LOGGER.debug(f"dispatched from {message.sender} - {message.message}")
+                Global.LOGGER.debug(f"dispatched")
 
             self.dispatched = self.dispatched + 1

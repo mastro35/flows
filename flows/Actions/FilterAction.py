@@ -8,8 +8,9 @@ Copyright 2016 Davide Mastromatteo
 '''
 
 
-import re
 import os
+import re
+
 from flows.Actions.Action import Action
 
 
@@ -55,7 +56,7 @@ class FilterAction(Action):
         super().on_input_received(action_input)
 
         # Action
-        return_value = action_input.message
+        return_value = action_input["message"]
 
         flags = 0
         if self.ignorecase:
@@ -66,7 +67,7 @@ class FilterAction(Action):
             for regex in self.regexes:
                 regex = regex.strip()
                 if regex != "":
-                    match = re.search(regex, action_input.message, flags)
+                    match = re.search(regex, action_input["message"], flags)
                     if match is not None:
                         self.send_message(return_value)
 
@@ -75,7 +76,7 @@ class FilterAction(Action):
         else:
             for regex in self.regexes:
                 regex = regex.strip()
-                match = re.search(regex, action_input.message, flags)
+                match = re.search(regex, action_input["message"], flags)
                 if match is not None:
                     return None
 

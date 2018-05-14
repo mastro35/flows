@@ -37,13 +37,13 @@ class FlowsWorker(Thread):
 
         # Set the worker as a daemon
         self.daemon = True
-        self.isrunning = False
+        self.is_running = False
 
         # self.MESSAGE_DISPATCHER = MessageDispatcher.MessageDispatcher.default_instance()
         self.MESSAGE_DISPATCHER = MessageDispatcher.MessageDispatcher.default_instance()
 
-        self.actions = []
-        self.subscriptions = {}
+        self.actions: [Action] = []
+        self.subscriptions: {} = {}
         self.fetched = 0
 
         self._start_actions()
@@ -66,7 +66,7 @@ class FlowsWorker(Thread):
 
     def stop(self):
         self._stop_actions()
-        self.isrunning = False
+        self.is_running = False
 
     def _start_message_fetcher(self):
         """
@@ -87,8 +87,8 @@ class FlowsWorker(Thread):
         Register callback for message fetcher coroutines
         """
         Global.LOGGER.debug('WORK: registering callbacks for message fetcher coroutine')
-        self.isrunning = True
-        while self.isrunning:
+        self.is_running = True
+        while self.is_running:
             loop.call_soon(self._fetch_messages)
             #            loop.call_soon(self._perform_system_check)
             await asyncio.sleep(Global.CONFIG_MANAGER.message_fetcher_sleep_interval)
@@ -103,7 +103,6 @@ class FlowsWorker(Thread):
             if Global.CONFIG_MANAGER.tracing_mode:
                 Global.LOGGER.debug("WORK: trying fetching messages")
 
-            # [_, msg] = self.socket.recv_multipart(flags=zmq.NOBLOCK)
             msg = self.receivesocket.recv(flags=zmq.NOBLOCK)
             if Global.CONFIG_MANAGER.tracing_mode:
                 Global.LOGGER.debug("WORK: this worker has fetched a new message")
@@ -122,7 +121,7 @@ class FlowsWorker(Thread):
         """
         Deliver the message to the subscripted actions
         """
-        my_subscribed_actions = self.subscriptions.get(msg.sender, [])
+        my_subscribed_actions = self.subscriptions.get(msg["sender"], [])
         for action in my_subscribed_actions:
             if Global.CONFIG_MANAGER.tracing_mode:
                 Global.LOGGER.debug(f"WORK: delivering message to {action.name}")

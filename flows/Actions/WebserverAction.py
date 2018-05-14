@@ -7,12 +7,13 @@ WebserverAction.py
 Copyright 2016 Davide Mastromatteo
 '''
 
-import threading
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import time
 import json
-from flows.Actions.Action import Action
+import threading
+import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
 import flows.Global
+from flows.Actions.Action import Action
 
 
 class WebserverAction(Action):
@@ -53,8 +54,8 @@ class WebserverAction(Action):
         # Action
 
         MyServerRequestHandler.message[
-            action_input.sender] = action_input.message
-        self.send_message(action_input.message)
+            action_input.sender] = action_input["message"]
+        self.send_message(action_input["message"])
 
     def on_stop(self):
         super().on_stop()

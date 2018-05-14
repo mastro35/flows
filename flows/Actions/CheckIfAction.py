@@ -40,14 +40,14 @@ class CheckIf(Action):
 
         # If the input has a separator, the syntax expected is
         # value[separator]limit
-        if self.separator in action_input.message:
-            input_message = action_input.message
+        if self.separator in action_input["message"]:
+            input_message = action_input["message"]
             value = int(input_message.split(self.separator)[0])
             limit = int(input_message.split(self.separator)[1])
         else:
             # if not, the value is the message and the limit is read fromn the
             # config
-            value = int(action_input.message)
+            value = int(action_input["message"])
             limit = int(self.configuration["limit"])
 
         if operation == "<":

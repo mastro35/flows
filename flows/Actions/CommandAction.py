@@ -8,8 +8,9 @@ Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
 '''
 
-import time
 import subprocess
+import time
+
 from flows.Actions.Action import Action
 
 
@@ -35,7 +36,7 @@ class CommandAction(Action):
         super().on_input_received(action_input)
 
         # Action
-        input_message = action_input.message
+        input_message = action_input["message"]
 
         cmd = self.command
         cmd = cmd.replace("{input}", input_message)

@@ -54,7 +54,7 @@ class MailAction(Action):
         super().on_input_received(action_input)
 
         # Action
-        input_message = str(action_input.message)
+        input_message = str(action_input["message"])
 
         body = self.configuration["body"]
         body = body.replace("{input}", input_message)

@@ -8,9 +8,10 @@ Copyright 2016 Davide Mastromatteo
 '''
 
 
-import time
 import logging
+import time
 from logging.handlers import RotatingFileHandler
+
 from flows.Actions.Action import Action
 
 
@@ -65,7 +66,7 @@ class LogAction(Action):
         if "text" in self.configuration:
             string_to_log = self.configuration["text"]
 
-        input_message = action_input.message
+        input_message = action_input["message"]
 
         string_to_log = string_to_log.replace("\\n", '\n')
         string_to_log = string_to_log.replace("\\t", '\t')
@@ -75,16 +76,16 @@ class LogAction(Action):
         string_to_log = string_to_log.replace(
             "{time}", time.strftime("%H:%M:%S"))
 
-        if action_input.file_system_event is not None:
+        if "message_dictionary" in action_input:
             string_to_log = string_to_log.replace("{event_type}",
-                                                  action_input.file_system_event.event_type)
+                                                  action_input["message_dictionary"].event_type)
             string_to_log = string_to_log.replace("{file_source}",
-                                                  action_input.file_system_event.src_path)
+                                                  action_input["message_dictionary"].src_path)
             string_to_log = string_to_log.replace("{is_directory}",
-                                                  str(action_input.file_system_event.is_directory))
-            if hasattr(action_input.file_system_event, "dest_path"):
+                                                  str(action_input["message_dictionary"].is_directory))
+            if hasattr(action_input["message_dictionary"], "dest_path"):
                 string_to_log = string_to_log.replace("{file_destination}",
-                                                      action_input.file_system_event.src_path)
+                                                      action_input["message_dictionary"].src_path)
 
         if string_to_log == "":
             string_to_log = input_message

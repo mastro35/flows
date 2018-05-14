@@ -10,6 +10,7 @@ Copyright 2016 Davide Mastromatteo
 '''
 
 import datetime
+
 from flows.Actions.Action import Action
 
 
@@ -91,5 +92,5 @@ class PassOnInterval(Action):
             # then
             return (None, "*")
 
-        return_value = action_input.message
+        return_value = action_input["message"]
         self.send_message(return_value)

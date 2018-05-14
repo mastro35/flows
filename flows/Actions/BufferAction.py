@@ -34,17 +34,17 @@ class BufferAction(Action):
     def on_input_received(self, action_input=None):
         super().on_input_received(action_input)
         # Action
-        match = re.search(self.regex, action_input.message)
+        match = re.search(self.regex, action_input["message"])
 
         # if no match, bufferize & return
         if match is None:
-            self.buffer.append(action_input.message)
+            self.buffer.append(action_input["message"])
             return (None, "*")
 
         if len(self.buffer) > 0:
             return_value = ''.join(self.buffer)
             self.buffer.clear()
-            self.buffer.append(action_input.message)
+            self.buffer.append(action_input["message"])
             self.send_message(return_value)
         else:
-            self.buffer.append(action_input.message)
+            self.buffer.append(action_input["message"])

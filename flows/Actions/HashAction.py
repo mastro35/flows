@@ -8,6 +8,7 @@ Copyright 2016 Davide Mastromatteo
 '''
 
 import hashlib
+
 from flows.Actions.Action import Action
 
 
@@ -24,7 +25,7 @@ class HashAction(Action):
         # Action
         return_value = ""
 
-        input_message = action_input.message
+        input_message = action_input["message"]
 
         md5_object = hashlib.md5()
         md5_object.update(input_message.encode('utf-8'))

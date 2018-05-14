@@ -8,8 +8,9 @@ Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
 '''
 
-import datetime
 import collections
+import datetime
+
 from flows.Actions.Action import Action
 
 
@@ -44,7 +45,7 @@ class AppendVariableByTime(Action):
                 if now >= limit:
                     variable = self.configuration[config]
 
-        msg = str.format("{0}{1}{2}", action_input.message,
+        msg = str.format("{0}{1}{2}", action_input["message"],
                          self.separator, variable)
 
         # returns the output

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-'''
+"""
 Action.py
 Action superclasses
 -------------------
 
 Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
-'''
+"""
 
 import gc
 import glob
@@ -22,21 +22,22 @@ from threading import Thread
 from flows import Global
 
 
-class ActionInput:
-    """
-    Standard input for every action in flows
-    """
-    sender = ""
-    receiver = ""
-    message = ""
-    file_system_event = None
-
-    def __init__(self, event, message, sender, receiver="*"):
-        super().__init__()
-        self.message = message
-        self.file_system_event = event
-        self.sender = sender
-        self.receiver = receiver
+#
+# class ActionInput:
+#     """
+#     Standard input for every action in flows
+#     """
+#     sender = ""
+#     receiver = ""
+#     message = ""
+#     file_system_event = None
+#
+#     def __init__(self, event, message, sender, receiver="*"):
+#         super().__init__()
+#         self.message = message
+#         self.file_system_event = event
+#         self.sender = sender
+#         self.receiver = receiver
 
 
 class Action(Thread):
@@ -53,7 +54,7 @@ class Action(Thread):
     socket = None
     is_running = True
     monitored_input = None
-    my_action_input = None
+    #    my_action_input = None
 
     python_files = []
 
@@ -104,21 +105,28 @@ class Action(Thread):
         """
         pass
 
-    def send_message(self, output):
+    def send_custom_dictionary(self, output) -> None:
+        """
+        Send a message to the socket by using a custom dictionary
+        """
+        output_action = {"message": "dictionary",
+                         "message_dictionary": output,
+                         "sender": self.name,
+                         "target": "*"}
+
+        # Global.MESSAGE_DISPATCHER.send_message(output_action)
+        self.worker.MESSAGE_DISPATCHER.send_message(output_action)
+
+    def send_message(self, output) -> None:
         """
         Send a message to the socket
         """
 
-        file_system_event = None
-        if self.my_action_input:
-            file_system_event = self.my_action_input.file_system_event or None
+        output_action = {"message": output,
+                         "sender": self.name,
+                         "target": "*"}
 
-        output_action = ActionInput(file_system_event,
-                                    output,
-                                    self.name,
-                                    "*")
-
-        #        Global.MESSAGE_DISPATCHER.send_message(output_action)
+        # Global.MESSAGE_DISPATCHER.send_message(output_action)
         self.worker.MESSAGE_DISPATCHER.send_message(output_action)
 
     def stop(self):

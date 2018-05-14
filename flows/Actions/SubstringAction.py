@@ -51,7 +51,7 @@ class SubstringAction(Action):
         return_value = ""
 
         # do stuff...
-        input_string = action_input.message
+        input_string = action_input["message"]
 
         if self.substring_type == "cut":
             return_value = input_string[self.from_index:self.to_index]
