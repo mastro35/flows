@@ -46,5 +46,5 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3.6'
     ],
-    entry_points={'console_scripts': ['flows = flows.flows:main']}
+    entry_points={'console_scripts': ['flows = flows.__main__:main']}
 )

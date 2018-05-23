@@ -9,6 +9,7 @@
 # '''
 
 import adodbapi
+
 from flows.Actions.Action import Action
 
 
@@ -26,8 +27,8 @@ class AdoDBAction(Action):
     def on_init(self):
         super().on_init()
 
-        connstring = self.configuration['connstring']
-        self.conn = adodbapi.connect(connstring)
+        conn_string = self.configuration['connstring']
+        self.conn = adodbapi.connect(conn_string)
 
         self.query = self.configuration['query']
         if 'separator' in self.configuration:

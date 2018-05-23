@@ -15,29 +15,10 @@ import importlib
 import importlib.util
 import os
 import site
-import threading
 import time
-from threading import Thread
+from threading import Thread, Lock
 
 from flows import Global
-
-
-#
-# class ActionInput:
-#     """
-#     Standard input for every action in flows
-#     """
-#     sender = ""
-#     receiver = ""
-#     message = ""
-#     file_system_event = None
-#
-#     def __init__(self, event, message, sender, receiver="*"):
-#         super().__init__()
-#         self.message = message
-#         self.file_system_event = event
-#         self.sender = sender
-#         self.receiver = receiver
 
 
 class Action(Thread):
@@ -48,7 +29,7 @@ class Action(Thread):
 
     type = ""
     name = ""
-    _instance_lock = threading.Lock()
+    _instance_lock: Lock = Lock()
     configuration = None
     context = None
     socket = None
@@ -130,7 +111,7 @@ class Action(Thread):
         self.worker.MESSAGE_DISPATCHER.send_message(output_action)
 
     def stop(self):
-        ''' Stop the current action '''
+        """ Stop the current action """
         Global.LOGGER.debug(f"action {self.name} stopped")
         self.is_running = False
         self.on_stop()
@@ -161,8 +142,8 @@ class Action(Thread):
             spec.loader.exec_module(foo)
         except Exception as ex:
             Global.LOGGER.warn(f"{ex}")
-            Global.LOGGER.warn(f"an error occured while importing {module_name}, so the module will be skipped.")
-
+            Global.LOGGER.warn(f"an error occurred while importing {module_name}"
+                               f", so the module will be skipped.")
 
     @classmethod
     def search_actions(cls):
@@ -172,7 +153,19 @@ class Action(Thread):
 
         # elsewere, load all the custom actions you find
         Global.LOGGER.debug("searching for installed actions... it can takes a while")
-        site_packages = site.getsitepackages()
+
+        site_packages = []
+
+        try:
+            site_packages = site.getsitepackages()
+        except AttributeError as ex:
+            Global.LOGGER.warn(f"{ex}")
+            Global.LOGGER.warn(f"Perhaps you're using a PyInstaller package?")
+
+            # This try/except block is needed for the use with PyInstaller, because
+            # in this case you don't have any site and the getsitepackages would raise
+            # an AttributeError Exception.
+            pass
 
         Global.LOGGER.debug(f"current path: {os.getcwd()}")
         # get custom actions in current path 
@@ -183,9 +176,13 @@ class Action(Thread):
         tmp_python_files_dict = dict(zip(basenames, tmp_python_files_in_current_directory))
 
         # get custom actions in current /Action subdir
-        Global.LOGGER.debug("looking inside any ./Actions subdirectory")        
-        tmp_python_files_in_current_action_subdirectory = glob.glob(f"{os.getcwd()}/**/Actions/*Action.py", recursive=True)
-        Global.LOGGER.debug(f"found {len(tmp_python_files_in_current_action_subdirectory)} actions in a ./Actions subdirectory")        
+        Global.LOGGER.debug("looking inside any ./Actions subdirectory")
+        tmp_python_files_in_current_action_subdirectory = glob.glob(f"{os.getcwd()}"
+                                                                    f"/**/Actions/*Action.py",
+                                                                    recursive=True)
+        Global.LOGGER.debug(f"found "
+                            f"{len(tmp_python_files_in_current_action_subdirectory)}"
+                            f" actions in a ./Actions subdirectory")
         for action_file in tmp_python_files_in_current_action_subdirectory:
             action_filename = os.path.basename(action_file)
             if action_filename not in tmp_python_files_dict:
@@ -194,8 +191,10 @@ class Action(Thread):
         # get custom actions in site_packages directory
         Global.LOGGER.debug("looking inside the Python environment")
         for my_site in site_packages:
-            tmp_python_files_in_site_directory = glob.glob(f"{my_site}/**/Actions/*Action.py", recursive=True) 
-            Global.LOGGER.debug(f"found {len(tmp_python_files_in_site_directory)} actions in {my_site}")
+            tmp_python_files_in_site_directory = glob.glob(f"{my_site}/**/Actions/*Action.py", recursive=True)
+            Global.LOGGER.debug(f"found "
+                                f"{len(tmp_python_files_in_site_directory)}"
+                                f" actions in {my_site}")
 
             for action_file in tmp_python_files_in_site_directory:
                 action_filename = os.path.basename(action_file)
@@ -218,7 +217,6 @@ class Action(Thread):
 
         return action_files
 
-
     @classmethod
     def create_action_for_code(cls, action_code, name, configuration, worker, managed_input):
         """
@@ -236,12 +234,12 @@ class Action(Thread):
             module_name = os.path.basename(os.path.normpath(filename))[:-3]
 
             # garbage collect all the modules you load if they are not necessary
-            context = {}
+            #            context = {}
             Action.load_module(module_name, filename)
             for subclass in Action.__subclasses__():
                 if subclass.type == action_code:
                     action_class = subclass
                     action = action_class(name, configuration, worker, managed_input)
                     return action
-            subclass = None
+            #            subclass = None
             gc.collect()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-flows.py
+__main__.py
 entry point of the program
 ----------------------------------
 
@@ -13,7 +13,24 @@ from flows import Global
 from flows.FlowsManager import FlowsManager
 
 
-def main():
+# ############################
+# FIX FOR PYINSTALLER
+# ############################
+# import smtplib
+# import croniter
+# import tyler
+# from watchdog import *
+# from smtplib import *
+# import adodbapi
+# import logging.handlers
+# import watchdog.events
+# import watchdog.observers
+# import email.mime
+# ############################
+# END FIX FOR PYINSTALLER
+# ############################
+
+def main(args=None):
     my_flows_manager = FlowsManager()
 
     try:
