@@ -18,8 +18,8 @@ The parameter crontab_schedule has to be in the crontab format:
 Copyright 2016 Davide Mastromatteo
 '''
 
+import asyncio
 import datetime
-import threading
 
 from croniter import croniter
 
@@ -37,7 +37,7 @@ class CronAction(Action):
     next = None
     cron = None
     timeout = 60
-    next_timer = None
+    loop = None
 
     def run_operation(self):
         """
@@ -52,18 +52,17 @@ class CronAction(Action):
 
         if self.is_running:
             self.start_timer()
+        else:
+            self.loop.close()
 
     def start_timer(self):
         """
-        Start the threading timer
+        Schedule the next run
         """
-        self.next_timer = threading.Timer(self.timeout, self.run_operation)
-        self.next_timer.start()
+        self.loop.call_later(self.timeout, self.run_operation)
 
     def on_stop(self):
-        if self.next_timer is not None:
-            self.next_timer.cancel()
-
+        self.is_running = False
         super().on_stop()
 
     def on_init(self):
@@ -73,6 +72,8 @@ class CronAction(Action):
             raise ValueError(str.format("The cron action {0} is not properly configured."
                                         "The crontab_schedule parameter is missing",
                                         self.name))
+
+        self.loop = asyncio.get_event_loop()
 
         self.crontab_schedule = self.configuration["crontab_schedule"]
 

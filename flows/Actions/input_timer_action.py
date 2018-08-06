@@ -28,6 +28,8 @@ class TimerAction(Action):
 
         if self.is_running:
             self.start_timer()
+        else:
+            self.loop.close()
 
     def start_timer(self):
         """

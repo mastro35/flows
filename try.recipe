@@ -1,3 +1,13 @@
+[my_cron]
+type = cron
+crontab_schedule = */1 * * * *
+
+[scrivi_mastro]
+type=log
+input = my_cron
+text={time} - MASTRO
+
+
 [my_timer]
 type=timer
 delay=1
