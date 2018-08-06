@@ -18,10 +18,12 @@ The parameter crontab_schedule has to be in the crontab format:
 Copyright 2016 Davide Mastromatteo
 '''
 
-from flows.Actions.action import Action
 import datetime
-from croniter import croniter
 import threading
+
+from croniter import croniter
+
+from flows.Actions.action import Action
 
 
 class CronAction(Action):
@@ -38,6 +40,9 @@ class CronAction(Action):
     next_timer = None
 
     def run_operation(self):
+        """
+        Execute the action when the cront time has reached
+        """
         now = datetime.datetime.now()
         now = now.replace(microsecond=0)
 
@@ -49,7 +54,10 @@ class CronAction(Action):
             self.start_timer()
 
     def start_timer(self):
-        self.next_timer = ing.Timer(self.timeout, self.run_operation)
+        """
+        Start the threading timer
+        """
+        self.next_timer = threading.Timer(self.timeout, self.run_operation)
         self.next_timer.start()
 
     def on_stop(self):
@@ -74,4 +82,3 @@ class CronAction(Action):
         self.cron = croniter(self.crontab_schedule, now)
         self.next = self.cron.get_next(datetime.datetime)
         self.start_timer()
-
