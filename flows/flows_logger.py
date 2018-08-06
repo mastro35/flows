@@ -69,7 +69,7 @@ class FlowsLogger:
 #        stream_handlers = filter(lambda k: type(k) is logging.StreamHandler,
 #                                 self._logger_instance.handlers)
 
-        stream_handlers = filter(lambda k: k.isinstance(logging.StreamHandler),
+        stream_handlers = filter(lambda k: isinstance(k, logging.StreamHandler),
                                  self._logger_instance.handlers)
 
         for stream_handler in stream_handlers:
