@@ -106,6 +106,6 @@ class MessageDispatcher:
             self.socket.send(pickle.dumps(message))
 
             if Global.CONFIG_MANAGER.tracing_mode:
-                Global.LOGGER.debug(f"dispatched")
+                Global.LOGGER.debug(f"{message} dispatched")
 
             self.dispatched = self.dispatched + 1
