@@ -97,7 +97,7 @@ class Action():
                          "target": "*"}
 
         # Global.MESSAGE_DISPATCHER.send_message(output_action)
-        self.worker.MESSAGE_DISPATCHER.send_message(output_action)
+        self.worker.message_dispatcher.send_message(output_action)
 
     def send_message(self, output) -> None:
         """
@@ -109,7 +109,7 @@ class Action():
                          "target": "*"}
 
         # Global.MESSAGE_DISPATCHER.send_message(output_action)
-        self.worker.MESSAGE_DISPATCHER.send_message(output_action)
+        self.worker.message_dispatcher.send_message(output_action)
 
     def stop(self):
         """ Stop the current action """
