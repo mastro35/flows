@@ -13,8 +13,8 @@ from datetime import datetime
 
 import zmq
 
-from flows import Global
-from flows.FlowsWorker import FlowsWorker
+from flows import global_module as Global
+from flows.flows_worker import FlowsWorker
 
 __author__ = "Davide Mastromatteo"
 __copyright__ = "Copyright 2016, Davide Mastromatteo"

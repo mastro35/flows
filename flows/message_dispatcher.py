@@ -15,7 +15,7 @@ import threading
 
 import zmq
 
-from flows import Global
+from flows import global_module as Global
 
 
 class MessageDispatcher:

@@ -15,9 +15,9 @@ from threading import Thread
 
 import zmq
 
-from flows import Global
-from flows import MessageDispatcher
-from flows.Actions.Action import Action
+from flows import global_module as Global
+from flows import message_dispatcher
+from flows.Actions.action import Action
 
 __author__ = "Davide Mastromatteo"
 __copyright__ = "Copyright 2016, Davide Mastromatteo"
@@ -41,7 +41,7 @@ class FlowsWorker(Thread):
         self.is_running = False
 
         # self.MESSAGE_DISPATCHER = MessageDispatcher.MessageDispatcher.default_instance()
-        self.message_dispatcher = MessageDispatcher.MessageDispatcher.default_instance()
+        self.message_dispatcher = message_dispatcher.MessageDispatcher.default_instance()
 
         self.actions: [Action] = []
         self.subscriptions: {} = {}
@@ -140,8 +140,8 @@ class FlowsWorker(Thread):
         for recipe in Global.CONFIG_MANAGER.recipes:
             Global.CONFIG_MANAGER.read_recipe(recipe)
 
-        list(map(lambda section: self._start_action_for_section(
-            section), Global.CONFIG_MANAGER.sections))
+        _ = [self._start_action_for_section(section) \
+            for section in Global.CONFIG_MANAGER.sections]
 
     def _start_action_for_section(self, section):
         """
@@ -196,6 +196,7 @@ class FlowsWorker(Thread):
         """
         Global.LOGGER.info("WORK: stopping actions")
 
-        list(map(lambda x: x.stop(), self.actions))
+        #list(map(lambda x: x.stop(), self.actions))
+        _ = [action.stop for action in self.actions]
 
         Global.LOGGER.info("WORK: actions stopped")

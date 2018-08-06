@@ -18,7 +18,7 @@ import site
 import time
 # from threading import Thread, Lock
 
-from flows import Global
+from flows import global_module as Global
 
 
 #class Action(Thread):
@@ -132,7 +132,7 @@ class Action():
                 time.sleep(Global.CONFIG_MANAGER.sleep_interval)
                 self.on_cycle()
 
-            except Exception as exc:
+            except Exception as exc: # pylint: disable=W0703
                 Global.LOGGER.error(f"error while running the action {self.name}: {str(exc)}")
 
     @classmethod
@@ -144,7 +144,7 @@ class Action():
             spec = importlib.util.spec_from_file_location(module_name, module_filename)
             my_module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(my_module)
-        except Exception as ex:
+        except Exception as ex: # pylint: disable=W0703
             Global.LOGGER.warn(f"{ex}")
             Global.LOGGER.warn(f"an error occurred while importing {module_name}"
                                f", so the module will be skipped.")

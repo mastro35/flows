@@ -9,8 +9,8 @@ Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
 """
 
-from flows import Global
-from flows.FlowsManager import FlowsManager
+from flows import global_module
+from flows.flows_manager import FlowsManager
 
 
 # ############################
@@ -39,7 +39,7 @@ def main():
     try:
         my_flows_manager.start()
     except KeyboardInterrupt:
-        Global.LOGGER.info("Quit command received")
+        global_module.LOGGER.info("Quit command received")
         my_flows_manager.stop()
 
 

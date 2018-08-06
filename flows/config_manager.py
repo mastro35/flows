@@ -15,7 +15,7 @@ import os
 import random
 import threading
 
-from flows import Global
+from flows import global_module as Global
 
 
 class ConfigManager:

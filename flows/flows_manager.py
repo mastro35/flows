@@ -13,11 +13,11 @@ import logging
 
 import zmq
 
-from flows import ConfigManager
-from flows import FlowsLogger
-from flows import FlowsVentilator
-from flows import FlowsWorker
-from flows import Global
+from flows import config_manager
+from flows import flows_logger
+from flows import flows_ventilator
+from flows import flows_worker
+from flows import global_module as Global
 
 __author__ = "Davide Mastromatteo"
 __copyright__ = "Copyright 2016, Davide Mastromatteo"
@@ -100,9 +100,9 @@ class FlowsManager:
         self.workers = []
         self.ventilator = None
 
-        Global.LOGGER_INSTANCE = FlowsLogger.FlowsLogger.default_instance()
-        Global.LOGGER = FlowsLogger.FlowsLogger.default_instance().get_logger()
-        Global.CONFIG_MANAGER = ConfigManager.ConfigManager.default_instance()
+        Global.LOGGER_INSTANCE = flows_logger.FlowsLogger.default_instance()
+        Global.LOGGER = flows_logger.FlowsLogger.default_instance().get_logger()
+        Global.CONFIG_MANAGER = config_manager.ConfigManager.default_instance()
 
         args = _parse_input_parameters()
         _set_command_line_arguments(args)
@@ -111,7 +111,7 @@ class FlowsManager:
 
     # region WORKERS MANAGEMENT
     def _start_workers(self):
-        my_worker = FlowsWorker.FlowsWorker()
+        my_worker = flows_worker.FlowsWorker()
         self.workers.append(my_worker)
 
     def _stop_workers(self):
@@ -123,7 +123,7 @@ class FlowsManager:
 
     # region VENTILATOR MANAGEMENT
     def _start_ventilator(self):
-        self.ventilator = FlowsVentilator.FlowsVentilator()
+        self.ventilator = flows_ventilator.FlowsVentilator()
         self.ventilator.start()
 
     def _stop_ventilator(self):
