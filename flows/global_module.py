@@ -4,7 +4,7 @@
 Global.py - singleton and utility for Flows
 """
 
-VERSION = '2.0.0.a3'
+VERSION = '2.0.0.a4'
 CONFIG_MANAGER = None
 LOGGER_INSTANCE = None
 LOGGER = None

@@ -18,7 +18,7 @@ The parameter crontab_schedule has to be in the crontab format:
 Copyright 2016 Davide Mastromatteo
 '''
 
-from flows.Actions.Action import Action
+from flows.Actions.action import Action
 import datetime
 from croniter import croniter
 import threading

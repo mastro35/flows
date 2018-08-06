@@ -12,8 +12,8 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-import flows.Global
-from flows.Actions.Action import Action
+import flows.global_module
+from flows.Actions.action import Action
 
 
 class WebserverAction(Action):
@@ -38,7 +38,7 @@ class WebserverAction(Action):
         self.my_server = DannyHTTPServer(
             (self.host_name, self.host_port), MyServerRequestHandler)
 
-        flows.Global.LOGGER.info(str.format(
+        flows.global_module.LOGGER.info(str.format(
             "Server Starts - {0}:{1}", self.host_name, self.host_port))
 
         threading.Thread(target=self.my_server.serve_forever).start()
@@ -47,7 +47,7 @@ class WebserverAction(Action):
         super().on_cycle()
 
         MyServerRequestHandler.message["sleep_interval"] = (
-            str(flows.Global.CONFIG_MANAGER.sleep_interval))
+            str(flows.global_module.CONFIG_MANAGER.sleep_interval))
 
     def on_input_received(self, action_input=None):
         super().on_input_received(action_input)
@@ -89,7 +89,7 @@ class MyServerRequestHandler(BaseHTTPRequestHandler):
                                    self.address_string(),
                                    self.log_date_time_string(),
                                    format % args)
-        flows.Global.LOGGER.debug(string_to_log)
+        flows.global_module.LOGGER.debug(string_to_log)
 
 
 class DannyHTTPServer(HTTPServer):
@@ -112,4 +112,4 @@ class DannyHTTPServer(HTTPServer):
         """
         self.is_alive = False
         self.server_close()
-        flows.Global.LOGGER.info("Server Stops " + (str(self.server_address)))
+        flows.global_module.LOGGER.info("Server Stops " + (str(self.server_address)))

@@ -7,7 +7,7 @@ SubstringAction.py
 Copyright 2016 Davide Mastromatteo
 '''
 
-from flows.Actions.Action import Action
+from flows.Actions.action import Action
 
 
 class SubstringAction(Action):

@@ -10,7 +10,7 @@ License: Apache-2.0
 
 import datetime
 import threading
-from flows.Actions.Action import Action
+from flows.Actions.action import Action
 
 
 class CountAction(Action):

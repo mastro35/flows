@@ -12,7 +12,7 @@ Copyright 2016 Davide Mastromatteo
 '''
 
 import datetime
-from flows.Actions.Action import Action
+from flows.Actions.action import Action
 
 
 class AlarmAction(Action):

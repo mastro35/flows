@@ -12,8 +12,8 @@ import urllib.parse
 import urllib.request
 from email.mime.text import MIMEText
 import time
-import flows.Global
-from flows.Actions.Action import Action
+import flows.global_module
+from flows.Actions.action import Action
 
 
 class MailIfResponseErrorAction(Action):
@@ -69,7 +69,7 @@ class MailIfResponseErrorAction(Action):
             status = ""
 
         if "verbose" in self.configuration:
-            flows.Global.LOGGER.info(str.format(
+            flows.global_module.LOGGER.info(str.format(
                 "{0} - {1}", self.name, status))
 
         # returns the output
@@ -103,10 +103,10 @@ class MailIfResponseErrorAction(Action):
                                         ":" + self.configuration["smtp_port"])
                 smtp_obj.send_message(msg)
                 smtp_obj.quit()
-                flows.Global.LOGGER.debug("Successfully sent email")
+                flows.global_module.LOGGER.debug("Successfully sent email")
             except Exception as exc:
-                flows.Global.LOGGER.error(str(exc))
-                flows.Global.LOGGER.error("Error: unable to send email")
+                flows.global_module.LOGGER.error(str(exc))
+                flows.global_module.LOGGER.error("Error: unable to send email")
 
             # returns the output
             self.send_message(body)

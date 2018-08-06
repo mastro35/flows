@@ -9,7 +9,7 @@ Copyright 2016 Davide Mastromatteo
 
 import hashlib
 
-from flows.Actions.Action import Action
+from flows.Actions.action import Action
 
 
 class HashAction(Action):

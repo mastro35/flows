@@ -12,7 +12,7 @@ import logging
 import time
 from logging.handlers import RotatingFileHandler
 
-from flows.Actions.Action import Action
+from flows.Actions.action import Action
 
 
 class LogAction(Action):

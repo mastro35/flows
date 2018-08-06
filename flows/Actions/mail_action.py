@@ -11,8 +11,8 @@ import smtplib
 import time
 from email.mime.text import MIMEText
 
-import flows.Global
-from flows.Actions.Action import Action
+import flows.global_module
+from flows.Actions.action import Action
 
 
 class MailAction(Action):
@@ -80,10 +80,10 @@ class MailAction(Action):
                                     ":" + self.configuration["smtp_port"])
             smtp_obj.send_message(msg)
             smtp_obj.quit()
-            flows.Global.LOGGER.debug("Successfully sent email")
+            flows.global_module.LOGGER.debug("Successfully sent email")
         except Exception as exc:
-            flows.Global.LOGGER.error(str(exc))
-            flows.Global.LOGGER.error("Error: unable to send email")
+            flows.global_module.LOGGER.error(str(exc))
+            flows.global_module.LOGGER.error("Error: unable to send email")
 
         # returns the output
         self.send_message(body)

@@ -12,7 +12,7 @@ License: Apache-2.0
 import logging
 import threading
 
-from flows import Global
+from flows import global_module as Global
 
 
 class FlowsLogger:

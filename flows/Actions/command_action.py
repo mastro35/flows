@@ -11,7 +11,7 @@ License: Apache-2.0
 import subprocess
 import time
 
-from flows.Actions.Action import Action
+from flows.Actions.action import Action
 
 
 class CommandAction(Action):

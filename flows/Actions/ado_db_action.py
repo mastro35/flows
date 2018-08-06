@@ -10,7 +10,7 @@
 
 import adodbapi
 
-from flows.Actions.Action import Action
+from flows.Actions.action import Action
 
 
 class AdoDBAction(Action):

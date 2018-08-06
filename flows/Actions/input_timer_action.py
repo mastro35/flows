@@ -8,7 +8,7 @@ Copyright 2016 Davide Mastromatteo
 '''
 
 import threading
-from flows.Actions.Action import Action
+from flows.Actions.action import Action
 
 
 class TimerAction(Action):
