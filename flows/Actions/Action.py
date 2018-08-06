@@ -16,12 +16,13 @@ import importlib.util
 import os
 import site
 import time
-from threading import Thread, Lock
+# from threading import Thread, Lock
 
 from flows import Global
 
 
-class Action(Thread):
+#class Action(Thread):
+class Action():
     """
     Generic abstract class that should be subclassed to create
     custom action classes.
@@ -29,7 +30,7 @@ class Action(Thread):
 
     type = ""
     name = ""
-    _instance_lock: Lock = Lock()
+    # _instance_lock: Lock = Lock()
     configuration = None
     context = None
     socket = None
@@ -55,7 +56,7 @@ class Action(Thread):
         self.on_init()
 
         # Start the action (as a thread, the run method will be executed)
-        self.start()
+        # self.start()
 
     def on_init(self):
         """
@@ -136,10 +137,13 @@ class Action(Thread):
 
     @classmethod
     def load_module(cls, module_name, module_filename):
+        """
+        Load a single module passed as parameter
+        """
         try:
             spec = importlib.util.spec_from_file_location(module_name, module_filename)
-            foo = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(foo)
+            my_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(my_module)
         except Exception as ex:
             Global.LOGGER.warn(f"{ex}")
             Global.LOGGER.warn(f"an error occurred while importing {module_name}"
@@ -147,8 +151,11 @@ class Action(Thread):
 
     @classmethod
     def search_actions(cls):
+        """
+        Search for all the installed actions
+        """
         # if we load the actions yet, return them
-        if len(Action.python_files) > 0:
+        if Action.python_files:
             return Action.python_files
 
         # elsewere, load all the custom actions you find
@@ -165,25 +172,26 @@ class Action(Thread):
             # This try/except block is needed for the use with PyInstaller, because
             # in this case you don't have any site and the getsitepackages would raise
             # an AttributeError Exception.
-            pass
 
         Global.LOGGER.debug(f"current path: {os.getcwd()}")
-        # get custom actions in current path 
+        # get custom actions in current path
         Global.LOGGER.debug("looking inside the current directory")
-        tmp_python_files_in_current_directory = glob.glob(f"{os.getcwd()}/*Action.py", recursive=False)
-        Global.LOGGER.debug(f"found {len(tmp_python_files_in_current_directory)} actions in current directory")
-        basenames = list(map(os.path.basename, tmp_python_files_in_current_directory))
-        tmp_python_files_dict = dict(zip(basenames, tmp_python_files_in_current_directory))
+        py_files_in_current_directory = glob.glob(f"{os.getcwd()}/*Action.py",
+                                                  recursive=False)
+        Global.LOGGER.debug(f"found {len(py_files_in_current_directory)} \
+                              actions in current directory")
+        basenames = list(map(os.path.basename, py_files_in_current_directory))
+        tmp_python_files_dict = dict(zip(basenames, py_files_in_current_directory))
 
         # get custom actions in current /Action subdir
         Global.LOGGER.debug("looking inside any ./Actions subdirectory")
-        tmp_python_files_in_current_action_subdirectory = glob.glob(f"{os.getcwd()}"
-                                                                    f"/**/Actions/*Action.py",
-                                                                    recursive=True)
+        py_files_in_this_action_subdir = glob.glob(f"{os.getcwd()}"
+                                                   f"/**/Actions/*Action.py",
+                                                   recursive=True)
         Global.LOGGER.debug(f"found "
-                            f"{len(tmp_python_files_in_current_action_subdirectory)}"
+                            f"{len(py_files_in_this_action_subdir)}"
                             f" actions in a ./Actions subdirectory")
-        for action_file in tmp_python_files_in_current_action_subdirectory:
+        for action_file in py_files_in_this_action_subdir:
             action_filename = os.path.basename(action_file)
             if action_filename not in tmp_python_files_dict:
                 tmp_python_files_dict[action_filename] = action_file
@@ -191,12 +199,13 @@ class Action(Thread):
         # get custom actions in site_packages directory
         Global.LOGGER.debug("looking inside the Python environment")
         for my_site in site_packages:
-            tmp_python_files_in_site_directory = glob.glob(f"{my_site}/**/Actions/*Action.py", recursive=True)
+            python_files_in_site_directory = \
+                glob.glob(f"{my_site}/**/Actions/*Action.py", recursive=True)
             Global.LOGGER.debug(f"found "
-                                f"{len(tmp_python_files_in_site_directory)}"
+                                f"{len(python_files_in_site_directory)}"
                                 f" actions in {my_site}")
 
-            for action_file in tmp_python_files_in_site_directory:
+            for action_file in python_files_in_site_directory:
                 action_filename = os.path.basename(action_file)
                 if action_filename not in tmp_python_files_dict:
                     tmp_python_files_dict[action_filename] = action_file
@@ -204,15 +213,15 @@ class Action(Thread):
         # Action.python_files = list(set(tmp_python_files))
         action_files = tmp_python_files_dict.values()
 
-        if len(action_files) > 0:
+        if action_files:
             Global.LOGGER.debug(f"{len(action_files)} actions found")
 
             if Global.CONFIG_MANAGER.tracing_mode:
                 actions_found = "\n".join(action_files)
                 Global.LOGGER.debug(f"actions found: \n{actions_found}")
         else:
-            Global.LOGGER.debug(f"no actions found on {my_site}")
-        
+            Global.LOGGER.debug(f"no actions found")
+
         Action.python_files = action_files
 
         return action_files

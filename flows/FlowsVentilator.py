@@ -27,8 +27,13 @@ __status__ = "Production/Stable"
 
 
 class FlowsVentilator:
+    """Main class for the ventilator process.
+    Spawn the messages to all the workers that join the process"""
 
     def __init__(self):
+
+        self.sendersocket = None
+        self.sinksocket = None
 
         self.fetched: int = 0
         self.is_running: bool = False
@@ -42,17 +47,20 @@ class FlowsVentilator:
         Global.ZMQ_CONTEXT = zmq.Context()
 
     def start(self) -> None:
+        """Start the ventilator"""
         self._set_manager_sockets()
         self._start_message_fetcher()
 
     def stop(self) -> None:
+        """Stop the ventilator"""
         self._stop_message_fetcher()
 
     def _set_manager_sockets(self) -> None:
-        self.sendersocket = Global.ZMQ_CONTEXT.socket(zmq.PUSH)
+        """Set ZMQ Sockets"""
+        self.sendersocket = Global.ZMQ_CONTEXT.socket(zmq.PUSH) # pylint: disable=E1101
         self.sendersocket.bind("tcp://*:5557")
 
-        self.sinksocket = Global.ZMQ_CONTEXT.socket(zmq.PULL)
+        self.sinksocket = Global.ZMQ_CONTEXT.socket(zmq.PULL) # pylint: disable=E1101
         self.sinksocket.bind("tcp://*:5558")
 
     # region MESSAGE FETCHER MANAGEMENT
@@ -63,7 +71,8 @@ class FlowsVentilator:
         Global.LOGGER.info('VENT: starting the message fetcher!!!')
         event_loop = asyncio.get_event_loop()
         try:
-            Global.LOGGER.debug('VENT: entering event loop for message fetcher coroutine on the manager')
+            Global.LOGGER.debug('VENT: entering event loop for message \
+                                fetcher coroutine on the manager')
             event_loop.run_until_complete(self.message_fetcher_coroutine(event_loop))
         finally:
             Global.LOGGER.debug('VENT: closing the event loop on the manager')
@@ -80,7 +89,8 @@ class FlowsVentilator:
         """
         Register callback for message fetcher coroutines
         """
-        Global.LOGGER.debug('VENT: registering callbacks for message fetcher coroutine on the manager')
+        Global.LOGGER.debug('VENT: registering callbacks for message \
+                            fetcher coroutine on the manager')
         self.is_running = True
         while self.is_running:
             loop.call_soon(self._fetch_messages)
@@ -94,7 +104,7 @@ class FlowsVentilator:
         Get an input message from the socket
         """
         try:
-            msg = self.sinksocket.recv(flags=zmq.NOBLOCK)
+            msg = self.sinksocket.recv(flags=zmq.NOBLOCK) # pylint: disable=E1101
 
             if Global.CONFIG_MANAGER.tracing_mode:
                 Global.LOGGER.debug("VENT: the manager has fetched a new message")

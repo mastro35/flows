@@ -34,8 +34,8 @@ def _parse_input_parameters():
     Set the configuration for the Logger
     """
     Global.LOGGER.debug("VENT: define and parsing command line arguments")
-    parser = argparse.ArgumentParser(
-        description='A workflow engine for Pythonistas', formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description='A workflow engine for Pythonistas',
+                                     formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('FILENAME', nargs='+', help='name of the recipe file(s)')
     # parser.add_argument('-i', '--INTERVAL', type=int, default=500,
     #                     metavar=('MS'),
@@ -86,7 +86,7 @@ def _set_command_line_arguments(args):
 
     # if  args.MESSAGEINTERVAL is not None and args.MESSAGEINTERVAL > 0:
     #     Global.LOGGER.debug(
-    #         f"VENT: setting message fetcher sleep interval to {args.MESSAGEINTERVAL/10} milliseconds")
+    #     f"VENT: setting message fetcher sleep interval to {args.MESSAGEINTERVAL/10} milliseconds")
     #     Global.CONFIG_MANAGER.message_fetcher_sleep_interval =  float(args.MESSAGEINTERVAL)/10000
     #     Global.CONFIG_MANAGER.fixed_message_fetcher_interval = True
 
@@ -95,7 +95,7 @@ def _set_command_line_arguments(args):
 
 
 class FlowsManager:
-
+    """Orchestrator of the program"""
     def __init__(self):
         self.workers = []
         self.ventilator = None
@@ -172,7 +172,8 @@ class FlowsManager:
     #     message_sleep_interval = Global.CONFIG_MANAGER.message_fetcher_sleep_interval
     #
     #     if Global.CONFIG_MANAGER.show_stats:
-    #         if (now - self.last_stats_check_date).total_seconds() > Global.CONFIG_MANAGER.stats_timeout:
+    #         if (now - self.last_stats_check_date).total_seconds() \
+    #           > Global.CONFIG_MANAGER.stats_timeout:
     #             self.last_stats_check_date = now
     #              stats_string = f"VENT: showing stats\n" \
     #                             f"--- [STATS] ---\n" \
@@ -188,12 +189,15 @@ class FlowsManager:
     #      messages_limit_reached = sent - self.last_queue_check_count > \
     #                               Global.CONFIG_MANAGER.messages_dispatched_for_system_check
     #     queue_limit_reached = queue_length > Global.CONFIG_MANAGER.queue_length_for_system_check
-    #      time_limit_since_last_check_is_over = (now - self.last_queue_check_date).total_seconds() > \
+    #      time_limit_since_last_check_is_over = (now - \
+    #                                      self.last_queue_check_date).total_seconds() > \
     #                                            Global.CONFIG_MANAGER.seconds_between_queue_check
     #
     #     if not Global.CONFIG_MANAGER.fixed_message_fetcher_interval:
-    #         if (messages_limit_reached) or (queue_limit_reached and time_limit_since_last_check_is_over):
-    #             cause = "messages limit reached" if messages_limit_reached else "queue limit reached"
+    #         if (messages_limit_reached) or \
+    #                    (queue_limit_reached and time_limit_since_last_check_is_over):
+    #             cause = "messages limit reached"
+    #                     if messages_limit_reached else "queue limit reached"
     #             Global.LOGGER.debug(f"VENT: triggering the throttle function due to {cause}")
     #             self._adapt_sleep_interval(sent, received, queue_length, now)
 
@@ -208,7 +212,8 @@ class FlowsManager:
     #         now - self.last_queue_check_date).total_seconds()
     #
     #     Global.LOGGER.debug(
-    #         str(dispatched_since_last_check) + " dispatched in the last " + str(seconds_since_last_check))
+    #         str(dispatched_since_last_check) + " dispatched in the last "
+    #            + str(seconds_since_last_check))
     #     sleep_time = (seconds_since_last_check /
     #                   (dispatched_since_last_check + queue + 1)) * 0.75
     #

@@ -77,7 +77,7 @@ class ConfigManager:
         """
         Set a random port to be used by zmq
         """
-        Global.LOGGER.debug('defining socket addresses for zmq')        
+        Global.LOGGER.debug('defining socket addresses for zmq')
         random.seed()
         default_port = random.randrange(5001, 5999)
 

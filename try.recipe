@@ -1,0 +1,27 @@
+[my_timer]
+type=timer
+delay=1
+
+[my_timer2]
+type=timer
+delay=2
+
+[my_timer4]
+type=timer
+delay=4
+
+[scrivi]
+type=log
+input=my_timer
+text={date} - {time}
+
+[scrivi2]
+type=log
+input=my_timer2
+text={date} - {time} --- 2
+
+[scrivi4]
+type=log
+input=my_timer4
+text={date} - {time} --- 4
+

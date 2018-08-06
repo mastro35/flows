@@ -30,6 +30,7 @@ __status__ = "Production/Stable"
 
 
 class FlowsWorker(Thread):
+    """Class that represent a single worker thread"""
     _instance_lock = threading.Lock()
 
     def __init__(self):
@@ -40,7 +41,7 @@ class FlowsWorker(Thread):
         self.is_running = False
 
         # self.MESSAGE_DISPATCHER = MessageDispatcher.MessageDispatcher.default_instance()
-        self.MESSAGE_DISPATCHER = MessageDispatcher.MessageDispatcher.default_instance()
+        self.message_dispatcher = MessageDispatcher.MessageDispatcher.default_instance()
 
         self.actions: [Action] = []
         self.subscriptions: {} = {}
@@ -49,7 +50,7 @@ class FlowsWorker(Thread):
         self._start_actions()
 
         # Define the PULL socket
-        self.receivesocket = Global.ZMQ_CONTEXT.socket(zmq.PULL)
+        self.receivesocket = Global.ZMQ_CONTEXT.socket(zmq.PULL) # pylint: disable=E1101
         self.receivesocket.connect("tcp://localhost:5557")
 
         # Start the action (as a thread, the run method will be executed)
@@ -65,6 +66,9 @@ class FlowsWorker(Thread):
         Global.LOGGER.debug(f"WORK: worker is running...")
 
     def stop(self):
+        """
+        Stop the worker
+        """
         self._stop_actions()
         self.is_running = False
 
@@ -103,7 +107,7 @@ class FlowsWorker(Thread):
             if Global.CONFIG_MANAGER.tracing_mode:
                 Global.LOGGER.debug("WORK: trying fetching messages")
 
-            msg = self.receivesocket.recv(flags=zmq.NOBLOCK)
+            msg = self.receivesocket.recv(flags=zmq.NOBLOCK) # pylint: disable=E1101
             if Global.CONFIG_MANAGER.tracing_mode:
                 Global.LOGGER.debug("WORK: this worker has fetched a new message")
 
@@ -152,7 +156,7 @@ class FlowsWorker(Thread):
         action_configuration = Global.CONFIG_MANAGER.sections[
             section]
 
-        if len(action_configuration) == 0:
+        if not action_configuration:
             Global.LOGGER.warn(f"WORK: section {section} has no configuration, skipping")
             return
 
@@ -175,7 +179,8 @@ class FlowsWorker(Thread):
                                                   list(new_managed_input))
 
         if not my_action:
-            Global.LOGGER.warn(f"WORK: can't find a type for action {section}, the action will be skipped")
+            Global.LOGGER.warn(f"WORK: can't find a type for action {section}, \
+                               the action will be skipped")
             return
 
         self.actions.append(my_action)

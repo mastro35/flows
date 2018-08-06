@@ -66,10 +66,13 @@ class FlowsLogger:
         """
         if Global.LOGGER:
             Global.LOGGER.debug('reconfiguring logger level')
-        stream_handlers = filter(lambda k: type(k) is logging.StreamHandler,
+#        stream_handlers = filter(lambda k: type(k) is logging.StreamHandler,
+#                                 self._logger_instance.handlers)
+
+        stream_handlers = filter(lambda k: k.isinstance(logging.StreamHandler),
                                  self._logger_instance.handlers)
 
-        for x in stream_handlers:
-            x.level = Global.CONFIG_MANAGER.log_level
+        for stream_handler in stream_handlers:
+            stream_handler.level = Global.CONFIG_MANAGER.log_level
 
         return self.get_logger()

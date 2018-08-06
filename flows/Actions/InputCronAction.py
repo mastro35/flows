@@ -49,7 +49,7 @@ class CronAction(Action):
             self.start_timer()
 
     def start_timer(self):
-        self.next_timer = threading.Timer(self.timeout, self.run_operation)
+        self.next_timer = ing.Timer(self.timeout, self.run_operation)
         self.next_timer.start()
 
     def on_stop(self):

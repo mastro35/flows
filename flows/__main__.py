@@ -30,7 +30,10 @@ from flows.FlowsManager import FlowsManager
 # END FIX FOR PYINSTALLER
 # ############################
 
-def main(args=None):
+def main():
+    """
+    Entry point of the program
+    """
     my_flows_manager = FlowsManager()
 
     try:

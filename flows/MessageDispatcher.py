@@ -51,7 +51,7 @@ class MessageDispatcher:
         self.socket = None
 
         self.context = zmq.Context()
-        self.socket = Global.ZMQ_CONTEXT.socket(zmq.PUSH)
+        self.socket = Global.ZMQ_CONTEXT.socket(zmq.PUSH) # pylint: disable=E1101
         self.socket.connect("tcp://localhost:5558")
 
         Global.LOGGER.debug(
