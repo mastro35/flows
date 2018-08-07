@@ -38,7 +38,7 @@ class FlowsWorker(Thread):
 
         # Set the worker as a daemon
         self.daemon = True
-        self.is_running = False
+        self.is_running = True
 
         # self.MESSAGE_DISPATCHER = MessageDispatcher.MessageDispatcher.default_instance()
         self.message_dispatcher = message_dispatcher.MessageDispatcher.default_instance()
@@ -53,17 +53,19 @@ class FlowsWorker(Thread):
         self.receivesocket = Global.ZMQ_CONTEXT.socket(zmq.PULL) # pylint: disable=E1101
         self.receivesocket.connect("tcp://localhost:5557")
 
-        # Start the action (as a thread, the run method will be executed)
+        self.loop = asyncio.new_event_loop()
+        # Start the worker (as a thread, the run method will be executed)
         self.start()
 
     def run(self):
         """
         Start the action
         """
-
-        self._start_message_fetcher()
-
+        # self._start_message_fetcher()
         Global.LOGGER.debug(f"WORK: worker is running...")
+
+        # Start the asyncronous message fetcher
+        self.loop.run_until_complete(self._start_async_message_fetcher())
 
     def stop(self):
         """
@@ -71,35 +73,18 @@ class FlowsWorker(Thread):
         """
         self._stop_actions()
         self.is_running = False
+#        self.loop.close()
 
-    def _start_message_fetcher(self):
+    async def _start_async_message_fetcher(self):
         """
         Start the message fetcher (called from coroutine)
         """
         Global.LOGGER.info('WORK: starting the message fetcher')
-        event_loop = asyncio.new_event_loop()
-
-        try:
-            Global.LOGGER.debug('WORK: entering event loop for message fetcher coroutine')
-            event_loop.run_until_complete(self.message_fetcher_coroutine(event_loop))
-        finally:
-            Global.LOGGER.debug('WORK: closing the event loop')
-            event_loop.close()
-
-    async def message_fetcher_coroutine(self, loop):
-        """
-        Register callback for message fetcher coroutines
-        """
-        Global.LOGGER.debug('WORK: registering callbacks for message fetcher coroutine')
-        self.is_running = True
         while self.is_running:
-            loop.call_soon(self._fetch_messages)
-            #            loop.call_soon(self._perform_system_check)
+            asyncio.ensure_future(self._fetch_messages(), loop=self.loop)
             await asyncio.sleep(Global.CONFIG_MANAGER.message_fetcher_sleep_interval)
 
-        Global.LOGGER.debug('WORK: message fetcher stopped')
-
-    def _fetch_messages(self):
+    async def _fetch_messages(self):
         """
         Get an input message from the socket
         """
@@ -183,9 +168,13 @@ class FlowsWorker(Thread):
                                the action will be skipped")
             return
 
-
-        loop = asyncio.get_event_loop()
-        asyncio.ensure_future(my_action.run(), loop=loop)
+        if my_action.is_thread:
+            Global.LOGGER.debug(f"WORK: starting action {section} as a separated thread")
+            my_action.start()
+        else:
+            Global.LOGGER.debug(f"WORK: starting action {section} in asyncronous")
+            loop = asyncio.get_event_loop()
+            asyncio.ensure_future(my_action.async_run(), loop=loop)
 
         self.actions.append(my_action)
 

@@ -43,13 +43,16 @@ class FlowsVentilator:
         self.last_stats_check_date: datetime = datetime.now()
 
         self.workers: [FlowsWorker] = []
+        self.loop = asyncio.get_event_loop()
 
         Global.ZMQ_CONTEXT = zmq.Context()
 
     def start(self) -> None:
         """Start the ventilator"""
         self._set_manager_sockets()
-        self._start_message_fetcher()
+        self.is_running = True
+
+        self.loop.run_until_complete(self._start_async_message_fetcher())
 
     def stop(self) -> None:
         """Stop the ventilator"""
@@ -63,21 +66,16 @@ class FlowsVentilator:
         self.sinksocket = Global.ZMQ_CONTEXT.socket(zmq.PULL) # pylint: disable=E1101
         self.sinksocket.bind("tcp://*:5558")
 
-    # region MESSAGE FETCHER MANAGEMENT
-    def _start_message_fetcher(self) -> None:
+    async def _start_async_message_fetcher(self):
         """
         Start the message fetcher (called from coroutine)
         """
-        Global.LOGGER.info('VENT: starting the message fetcher!!!')
-        event_loop = asyncio.get_event_loop()
-        try:
-            Global.LOGGER.debug('VENT: entering event loop for message \
-                                fetcher coroutine on the manager')
-            event_loop.run_until_complete(self.message_fetcher_coroutine(event_loop))
-        finally:
-            Global.LOGGER.debug('VENT: closing the event loop on the manager')
-            event_loop.close()
+        Global.LOGGER.info('WORK: starting the message fetcher')
+        while self.is_running:
+            asyncio.ensure_future(self._fetch_messages(), loop=self.loop)
+            await asyncio.sleep(Global.CONFIG_MANAGER.message_fetcher_sleep_interval)
 
+    # region MESSAGE FETCHER MANAGEMENT
     def _stop_message_fetcher(self) -> None:
         """
         Stop the message fetcher
@@ -85,21 +83,7 @@ class FlowsVentilator:
         """
         self.is_running = False
 
-    async def message_fetcher_coroutine(self, loop) -> None:
-        """
-        Register callback for message fetcher coroutines
-        """
-        Global.LOGGER.debug('VENT: registering callbacks for message \
-                            fetcher coroutine on the manager')
-        self.is_running = True
-        while self.is_running:
-            loop.call_soon(self._fetch_messages)
-            #            loop.call_soon(self._perform_system_check)
-            await asyncio.sleep(Global.CONFIG_MANAGER.message_fetcher_sleep_interval)
-
-        Global.LOGGER.debug('VENT: message fetcher stopped')
-
-    def _fetch_messages(self) -> None:
+    async def _fetch_messages(self) -> None:
         """
         Get an input message from the socket
         """

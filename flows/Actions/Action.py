@@ -17,15 +17,12 @@ import importlib.util
 import os
 import site
 import time
+from threading import Lock, Thread
 
 from flows import global_module as Global
 
-# from threading import Thread, Lock
 
-
-
-#class Action(Thread):
-class Action():
+class Action(Thread):
     """
     Generic abstract class that should be subclassed to create
     custom action classes.
@@ -33,13 +30,13 @@ class Action():
 
     type = ""
     name = ""
-    # _instance_lock: Lock = Lock()
+    is_thread = False
+    _instance_lock: Lock = Lock()
     configuration = None
     context = None
     socket = None
     is_running = True
     monitored_input = None
-    #    my_action_input = None
 
     python_files = []
 
@@ -57,9 +54,6 @@ class Action():
 
         # Launch custom configuration method
         self.on_init()
-
-        # Start the action (as a thread, the run method will be executed)
-        # self.start()
 
     def on_init(self):
         """
@@ -83,12 +77,6 @@ class Action():
         """
         Code to be executed before end
         """
-
-    def send_output(self, output):
-        """
-        Send an output to the socket
-        """
-        pass
 
     def send_custom_dictionary(self, output) -> None:
         """
@@ -121,21 +109,29 @@ class Action():
         self.is_running = False
         self.on_stop()
 
-    async def run(self):
+    def run(self):
         """
-        Start the action
+        Start the action cycle if is a Thread Action
         """
         Global.LOGGER.debug(f"action {self.name} is running")
-
-        loop = asyncio.get_event_loop()
 
         try:
             while self.is_running:
                 self.on_cycle()
-                await asyncio.sleep(Global.CONFIG_MANAGER.sleep_interval)
+                time.sleep(Global.CONFIG_MANAGER.sleep_interval)
 
         except Exception as exc: # pylint: disable=W0703
             Global.LOGGER.error(f"error while running the action {self.name}: {str(exc)}")
+
+    async def async_run(self):
+        """
+        Start the action cycle if is an asynchronous Action
+        """
+        Global.LOGGER.debug(f"action {self.name} is running")
+
+        while self.is_running:
+            self.on_cycle()
+            await asyncio.sleep(Global.CONFIG_MANAGER.sleep_interval)
 
     @classmethod
     def load_module(cls, module_name, module_filename):

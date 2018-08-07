@@ -28,6 +28,8 @@ class LogAction(Action):
 
     def on_init(self):
         super().on_init()
+        self.is_thread = False
+
         if "option" in self.configuration:
             option_token = self.configuration["option"]
             if option_token == "null":

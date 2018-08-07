@@ -51,6 +51,8 @@ class CronAction(Action):
                 self.next = self.cron.get_next(datetime.datetime)
                 self.send_message("CRON : " + self.name)
 
+            await asyncio.sleep(1)
+
     def on_init(self):
         super().on_init()
 
