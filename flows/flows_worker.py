@@ -183,12 +183,17 @@ class FlowsWorker(Thread):
                                the action will be skipped")
             return
 
+
+        loop = asyncio.get_event_loop()
+        asyncio.ensure_future(my_action.run(), loop=loop)
+
         self.actions.append(my_action)
 
         Global.LOGGER.debug("WORK: updating the subscriptions table")
         for my_input in my_action.monitored_input:
             self.subscriptions.setdefault(
                 my_input, []).append(my_action)
+
 
     def _stop_actions(self):
         """

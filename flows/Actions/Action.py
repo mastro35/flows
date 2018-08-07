@@ -9,6 +9,7 @@ Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
 """
 
+import asyncio
 import gc
 import glob
 import importlib
@@ -16,9 +17,11 @@ import importlib.util
 import os
 import site
 import time
-# from threading import Thread, Lock
 
 from flows import global_module as Global
+
+# from threading import Thread, Lock
+
 
 
 #class Action(Thread):
@@ -114,26 +117,25 @@ class Action():
     def stop(self):
         """ Stop the current action """
         Global.LOGGER.debug(f"action {self.name} stopped")
+
         self.is_running = False
         self.on_stop()
 
-    def run(self):
+    async def run(self):
         """
         Start the action
         """
         Global.LOGGER.debug(f"action {self.name} is running")
 
-        for tmp_monitored_input in self.monitored_input:
-            sender = "*" + tmp_monitored_input + "*"
-            Global.LOGGER.debug(f"action {self.name} is monitoring {sender}")
+        loop = asyncio.get_event_loop()
 
-        while self.is_running:
-            try:
-                time.sleep(Global.CONFIG_MANAGER.sleep_interval)
+        try:
+            while self.is_running:
                 self.on_cycle()
+                await asyncio.sleep(Global.CONFIG_MANAGER.sleep_interval)
 
-            except Exception as exc: # pylint: disable=W0703
-                Global.LOGGER.error(f"error while running the action {self.name}: {str(exc)}")
+        except Exception as exc: # pylint: disable=W0703
+            Global.LOGGER.error(f"error while running the action {self.name}: {str(exc)}")
 
     @classmethod
     def load_module(cls, module_name, module_filename):

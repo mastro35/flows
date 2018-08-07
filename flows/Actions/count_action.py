@@ -9,7 +9,7 @@ License: Apache-2.0
 '''
 
 import datetime
-import threading
+import asyncio
 from flows.Actions.action import Action
 
 
@@ -26,25 +26,6 @@ class CountAction(Action):
     timer_start = datetime.datetime.now()
     timeout = 0
     partial_counter = False
-    next_timer = None
-
-    def run_operation(self):
-        self.send_message(str(self.counter))
-        if self.partial_counter:
-            self.counter = 0
-
-        if self.is_running:
-            self.start_timer()
-
-    def start_timer(self):
-        self.next_timer = threading.Timer(self.timeout, self.run_operation)
-        self.next_timer.start()
-
-    def on_stop(self):
-        if self.next_timer is not None:
-            self.next_timer.cancel()
-
-        super().on_stop()
 
     def on_init(self):
         super().on_init()
@@ -55,11 +36,23 @@ class CountAction(Action):
         if "partial" in self.configuration:
             self.partial_counter = True
 
+        self.loop = asyncio.get_event_loop()
+
         if self.timed_counter:
-            self.start_timer()
+            asyncio.ensure_future(self.run_timer(), loop=self.loop)
 
     def on_input_received(self, action_input=None):
         super().on_input_received(action_input)
         self.counter = self.counter + 1
         if not self.timed_counter:
             self.send_message(str(self.counter))
+
+    async def run_timer(self):
+        """
+        Execute the timer action when the delay is over
+        """
+        while self.is_running:
+            await asyncio.sleep(self.timeout)
+            self.send_message(str(self.counter))
+            if self.partial_counter:
+                self.counter = 0

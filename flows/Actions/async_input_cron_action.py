@@ -39,31 +39,17 @@ class CronAction(Action):
     timeout = 60
     loop = None
 
-    def run_operation(self):
+    async def run_operation(self):
         """
         Execute the action when the cront time has reached
         """
-        now = datetime.datetime.now()
-        now = now.replace(microsecond=0)
+        while self.is_running:
+            now = datetime.datetime.now()
+            now = now.replace(microsecond=0)
 
-        if now >= self.next:
-            self.next = self.cron.get_next(datetime.datetime)
-            self.send_message("CRON : " + self.name)
-
-        if self.is_running:
-            self.start_timer()
-        else:
-            self.loop.close()
-
-    def start_timer(self):
-        """
-        Schedule the next run
-        """
-        self.loop.call_later(self.timeout, self.run_operation)
-
-    def on_stop(self):
-        self.is_running = False
-        super().on_stop()
+            if now >= self.next:
+                self.next = self.cron.get_next(datetime.datetime)
+                self.send_message("CRON : " + self.name)
 
     def on_init(self):
         super().on_init()
@@ -73,8 +59,6 @@ class CronAction(Action):
                                         "The crontab_schedule parameter is missing",
                                         self.name))
 
-        self.loop = asyncio.get_event_loop()
-
         self.crontab_schedule = self.configuration["crontab_schedule"]
 
         now = datetime.datetime.now()
@@ -82,4 +66,6 @@ class CronAction(Action):
 
         self.cron = croniter(self.crontab_schedule, now)
         self.next = self.cron.get_next(datetime.datetime)
-        self.start_timer()
+
+        self.loop = asyncio.get_event_loop()
+        asyncio.ensure_future(self.run_operation(), loop=self.loop)

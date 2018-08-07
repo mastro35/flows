@@ -75,7 +75,7 @@ delay = N
 # date = %d/%m/%Y %H:%M
 #
 type = alarm
-date = 01/11/1976 18:25:06
+date = 01/11/1976 18:25
 
 
 [my_cron_action_name]

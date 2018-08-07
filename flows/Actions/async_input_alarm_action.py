@@ -35,10 +35,10 @@ class AlarmAction(Action):
         self.next = datetime.datetime.strptime(date, "%d/%m/%Y %H:%M")
 
     def on_cycle(self):
-        super().on_cycle()
 
         now = datetime.datetime.now()
         now = now.replace(second=0, microsecond=0)
         if now >= self.next:
             self.next = None
             self.send_message("ALARM")
+            self.is_running = False

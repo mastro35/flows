@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-'''
+"""
 LogAction.py
 ------------
 
 Copyright 2016 Davide Mastromatteo
-'''
-
+"""
 
 import logging
 import time
@@ -55,7 +54,6 @@ class LogAction(Action):
                                                   backupCount=backup_count)
 
                     self.file_logger.addHandler(handler)
-
 
     def on_input_received(self, action_input=None):
         super().on_input_received(action_input)

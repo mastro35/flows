@@ -1,37 +1,47 @@
-[my_cron]
-type = cron
-crontab_schedule = */1 * * * *
+[my_watchdog]
+type = watchdog
+input = C:\
+monitor = create
+option = recursive
+patterns = *.*
+# ignore_patterns = *.pdf *.ePS
+# case_sensitive
+# ignore_directory
 
-[scrivi_mastro]
+
+[my_alarm]
+# Alarm Action Configuration
+# --------------------------
+# Send a message on a specific moment
+#
+# date = %d/%m/%Y %H:%M
+#
+type = alarm
+date = 07/08/2018 09:29
+
+[scrivi_dog_files]
 type=log
-input = my_cron
-text={time} - MASTRO
+input = conta_files
+text={input}
+
+
+[scrivi_allarme]
+type=log
+input = my_alarm
+text=ALARM!!
+
+[conta_files]
+type=count
+input=my_watchdog
+timeout = 3
+partial
 
 
 [my_timer]
 type=timer
-delay=1
+delay=10
 
-[my_timer2]
-type=timer
-delay=2
-
-[my_timer4]
-type=timer
-delay=4
-
-[scrivi]
+[scrivi_timer]
 type=log
-input=my_timer
-text={date} - {time}
-
-[scrivi2]
-type=log
-input=my_timer2
-text={date} - {time} --- 2
-
-[scrivi4]
-type=log
-input=my_timer4
-text={date} - {time} --- 4
-
+input = my_timer
+text=TIMER!!
