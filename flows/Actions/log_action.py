@@ -7,8 +7,8 @@ LogAction.py
 Copyright 2016 Davide Mastromatteo
 """
 
-import logging
 import time
+import logging
 from logging.handlers import RotatingFileHandler
 
 from flows.Actions.action import Action
@@ -78,11 +78,14 @@ class LogAction(Action):
 
         if "message_dictionary" in action_input:
             string_to_log = string_to_log.replace("{event_type}",
-                                                  action_input["message_dictionary"].event_type)
+                                                  action_input["message_dictionary"]\
+                                                  .event_type)
             string_to_log = string_to_log.replace("{file_source}",
-                                                  action_input["message_dictionary"].src_path)
+                                                  action_input["message_dictionary"]\
+                                                  .src_path)
             string_to_log = string_to_log.replace("{is_directory}",
-                                                  str(action_input["message_dictionary"].is_directory))
+                                                  str(action_input["message_dictionary"]\
+                                                  .is_directory))
             if hasattr(action_input["message_dictionary"], "dest_path"):
                 string_to_log = string_to_log.replace("{file_destination}",
                                                       action_input["message_dictionary"].src_path)
