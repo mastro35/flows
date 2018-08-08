@@ -17,16 +17,17 @@ class GenericCustomAction(Action):
     """
 
     type = "generic"
+    # is_thread = True # uncomment if you want to instanciate the Action on a new thread
 
-    def on_init(self):
+    def on_init(self): # pylint: disable=W0235
         super().on_init()
         # if needed, execute initializazion code HERE
 
-    def on_stop(self):
+    def on_stop(self): # pylint: disable=W0235
         # if needed, execute finalization code HERE
         return super().on_stop()
 
-    def on_cycle(self):
+    def on_cycle(self): # pylint: disable=W0235
         super().on_cycle()
         # if needed, execute code to be executed each cycle HERE
 
@@ -40,3 +41,5 @@ class GenericCustomAction(Action):
         # and - if needed - message other actions with the result of your
         # operation
         self.send_message(to_return)
+
+        #self.send_custom_dictionary({"my_dict":to_return}) # or return a custom dictionary
