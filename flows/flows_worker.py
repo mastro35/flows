@@ -59,7 +59,7 @@ class FlowsWorker(Thread):
 
     def run(self):
         """
-        Start the action
+        Starts the worker
         """
         # self._start_message_fetcher()
         Global.LOGGER.debug(f"WORK: worker is running...")
@@ -170,6 +170,7 @@ class FlowsWorker(Thread):
 
         if my_action.is_thread:
             Global.LOGGER.debug(f"WORK: starting action {section} as a separated thread")
+            # invokes the "start" method of the Thread class in the standard library
             my_action.start()
         else:
             Global.LOGGER.debug(f"WORK: starting action {section} in asyncronous")
