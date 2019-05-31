@@ -40,3 +40,12 @@ delay=1
 type=log
 input = my_timer
 text=TIMER!!
+
+[my_log]
+type=tail
+input=\\vitt-nas-na.vittoriaassicurazioni.it\log\Danni.Web\concurrentflat.log
+
+[log_show]
+input=my_log
+type=log
+text={input}
