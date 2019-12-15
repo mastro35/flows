@@ -23,7 +23,7 @@ import datetime
 
 from croniter import croniter
 
-from flows.Actions.action import Action
+from flows.Actions.Action import Action
 
 
 class CronAction(Action):

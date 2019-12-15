@@ -9,7 +9,6 @@ License: Apache-2.0
 """
 
 import asyncio
-import pickle
 import threading
 from threading import Thread
 
@@ -17,7 +16,7 @@ import zmq
 
 from flows import global_module as Global
 from flows import message_dispatcher
-from flows.Actions.action import Action
+from flows.Actions.Action import Action
 
 __author__ = "Davide Mastromatteo"
 __copyright__ = "Copyright 2016, Davide Mastromatteo"
@@ -97,8 +96,7 @@ class FlowsWorker(Thread):
                 Global.LOGGER.debug("WORK: this worker has fetched a new message")
 
             self.fetched = self.fetched + 1
-            obj = pickle.loads(msg)
-            self._deliver_message_to_actions(obj)
+            self._deliver_message_to_actions(msg)
             return obj
         except zmq.error.Again:
             return None

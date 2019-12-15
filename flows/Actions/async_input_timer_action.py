@@ -8,7 +8,7 @@ Copyright 2016 Davide Mastromatteo
 """
 
 import asyncio
-from flows.Actions.action import Action
+from flows.Actions.Action import Action
 
 
 class TimerAction(Action):

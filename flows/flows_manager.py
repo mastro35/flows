@@ -30,13 +30,14 @@ __status__ = "Production/Stable"
 
 
 def _parse_input_parameters():
-    """
-    Set the configuration for the Logger
+    """Set the configuration for the Logger
     """
     Global.LOGGER.debug("VENT: define and parsing command line arguments")
     parser = argparse.ArgumentParser(description='A workflow engine for Pythonistas',
                                      formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('FILENAME', nargs='+', help='name of the recipe file(s)')
+    parser.add_argument('FILENAME',
+                        nargs='+',
+                        help='name of the recipe file(s)')
     # parser.add_argument('-i', '--INTERVAL', type=int, default=500,
     #                     metavar=('MS'),
     #                     help='perform a cycle each [MS] milliseconds. (default = 500)')
@@ -58,14 +59,19 @@ def _parse_input_parameters():
 
 
 def _set_command_line_arguments(args):
-    """
-    Set internal configuration variables according to
-    the input parameters
+    """Set internal configuration variables
+    according to the input parameters
     """
     Global.LOGGER.debug("VENT: setting command line arguments")
 
     if args.VERBOSE:
         Global.LOGGER.debug("VENT: verbose mode active")
+        Global.CONFIG_MANAGER.log_level = logging.DEBUG
+        Global.LOGGER_INSTANCE.reconfigure_log_level()
+
+    if args.TRACE:
+        Global.LOGGER.debug("VENT: tracing mode active")
+        Global.CONFIG_MANAGER.tracing_mode = True
         Global.CONFIG_MANAGER.log_level = logging.DEBUG
         Global.LOGGER_INSTANCE.reconfigure_log_level()
 
@@ -78,12 +84,6 @@ def _set_command_line_arguments(args):
     #     Global.LOGGER.debug(f"VENT: setting sleep interval to {args.INTERVAL} milliseconds")
     #     Global.CONFIG_MANAGER.sleep_interval = float(args.INTERVAL)/1000
 
-    if args.TRACE:
-        Global.LOGGER.debug("VENT: tracing mode active")
-        Global.CONFIG_MANAGER.tracing_mode = True
-        Global.CONFIG_MANAGER.log_level = logging.DEBUG
-        Global.LOGGER_INSTANCE.reconfigure_log_level()
-
     # if  args.MESSAGEINTERVAL is not None and args.MESSAGEINTERVAL > 0:
     #     Global.LOGGER.debug(
     #     f"VENT: setting message fetcher sleep interval to {args.MESSAGEINTERVAL/10} milliseconds")
@@ -95,17 +95,17 @@ def _set_command_line_arguments(args):
 
 
 class FlowsManager:
-    """Orchestrator of the program"""
+    """Orchestrator of the program
+    """
     def __init__(self):
         self.workers = []
         self.ventilator = None
 
         Global.LOGGER_INSTANCE = flows_logger.FlowsLogger.default_instance()
-        Global.LOGGER = flows_logger.FlowsLogger.default_instance().get_logger()
+        Global.LOGGER = Global.LOGGER_INSTANCE.get_logger()
         Global.CONFIG_MANAGER = config_manager.ConfigManager.default_instance()
 
-        args = _parse_input_parameters()
-        _set_command_line_arguments(args)
+        _set_command_line_arguments(_parse_input_parameters())
 
         Global.ZMQ_CONTEXT = zmq.Context()
 
@@ -132,26 +132,25 @@ class FlowsManager:
     # endregion
 
     def start(self):
-        """
-        Start all the processes
+        """Start all the processes
         """
         Global.LOGGER.info("MNGR: starting the workers")
         self._start_workers()
+
         Global.LOGGER.info("MNGR: starting the ventilator")
         self._start_ventilator()
 
     def stop(self):
-        """
-        Stop all the processes
+        """Stop all the processes
         """
         Global.LOGGER.info("MNGR: stopping the workers")
         self._stop_workers()
+
         Global.LOGGER.info("MNGR: stopping the ventilator")
         self._stop_ventilator()
 
     def restart(self):
-        """
-        Restart all the processes
+        """Restart all the processes
         """
         Global.LOGGER.info("MNGR: restarting")
         self.stop()

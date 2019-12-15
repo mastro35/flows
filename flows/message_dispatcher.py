@@ -10,7 +10,6 @@ License: Apache-2.0
 """
 
 import datetime
-import pickle
 import threading
 
 import zmq
@@ -103,7 +102,7 @@ class MessageDispatcher:
                 Global.LOGGER.error(f"can't deliver message with no body")
                 return
 
-            self.socket.send(pickle.dumps(message))
+            self.socket.send(message)
 
             if Global.CONFIG_MANAGER.tracing_mode:
                 Global.LOGGER.debug(f"{message} dispatched")

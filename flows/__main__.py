@@ -2,8 +2,8 @@
 
 """
 __main__.py
-entry point of the program
-----------------------------------
+entry point
+-----------
 
 Copyright 2016 Davide Mastromatteo
 License: Apache-2.0

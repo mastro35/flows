@@ -152,12 +152,13 @@ class Action(Thread):
         """
         Search for all the installed actions
         """
-        # if we load the actions yet, return them
+        # if we've loaded the actions yet, return them
         if Action.python_files:
             return Action.python_files
 
         # elsewere, load all the custom actions you find
-        Global.LOGGER.debug("searching for installed actions... it can takes a while")
+        Global.LOGGER.debug("searching for installed actions... \
+                            it can takes a while")
 
         site_packages = []
 
@@ -172,12 +173,15 @@ class Action(Thread):
             # an AttributeError Exception.
 
         Global.LOGGER.debug(f"current path: {os.getcwd()}")
+
         # get custom actions in current path
-        Global.LOGGER.debug("looking inside the current directory")
-        py_files_in_current_directory = glob.glob(f"{os.getcwd()}/*Action.py",
-                                                  recursive=False)
-        Global.LOGGER.debug(f"found {len(py_files_in_current_directory)} \
-                              actions in current directory")
+        Global.LOGGER.debug(
+            f"looking inside the current directory {os.getcwd()}")
+        py_files_in_current_directory = glob.glob(f"{os.getcwd()}/**/*action.py",
+                                                  recursive=True)
+
+        time.sleep(5)                                                  
+        Global.LOGGER.debug(f"found {len(py_files_in_current_directory)} actions in current directory")
         basenames = list(map(os.path.basename, py_files_in_current_directory))
         tmp_python_files_dict = dict(zip(basenames, py_files_in_current_directory))
 
@@ -225,9 +229,13 @@ class Action(Thread):
         return action_files
 
     @classmethod
-    def create_action_for_code(cls, action_code, name, configuration, worker, managed_input):
-        """
-        Factory method to create an instance of an Action from an input code
+    def create_action_for_code(cls,
+                               action_code,
+                               name,
+                               configuration,
+                               worker,
+                               managed_input):
+        """Factory method to create an instance of an Action from an input code
         """
         Global.LOGGER.debug(f"creating action {name} for code {action_code}")
         Global.LOGGER.debug(f"configuration length: {len(configuration)}")

@@ -10,7 +10,7 @@ Copyright 2016 Davide Mastromatteo
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-from flows.Actions.action import Action
+from flows.Actions.Action import Action
 
 
 class DannyFileSystemEventHandler(PatternMatchingEventHandler):

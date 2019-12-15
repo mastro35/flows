@@ -10,7 +10,7 @@ License: Apache-2.0
 
 import datetime
 import asyncio
-from flows.Actions.action import Action
+from flows.Actions.Action import Action
 
 
 class CountAction(Action):

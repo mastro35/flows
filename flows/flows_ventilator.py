@@ -95,7 +95,6 @@ class FlowsVentilator:
 
             self.fetched = self.fetched + 1
 
-            #  obj = pickle.loads(msg)
             self._deliver_message_to_worker(msg)
 
         except zmq.error.Again:
