@@ -6,7 +6,6 @@ WatchdogAction.py
 
 Copyright 2016 Davide Mastromatteo
 '''
-
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
@@ -77,8 +76,9 @@ class WatchdogAction(Action):
         super().on_init()
 
         self.path = self.configuration["input"]
-        self.recursive_flag = (
-            str.lower(self.configuration["option"]) == "recursive")
+        if "option" in self.configuration:
+            self.recursive_flag = (
+                str.lower(self.configuration["option"]) == "recursive")
         self.trigger = self.configuration["monitor"]
 
         if "patterns" in self.configuration:
@@ -109,6 +109,8 @@ class WatchdogAction(Action):
                                recursive=self.recursive_flag)
         self.observer.start()
 
+        self.log(f"observer started on {self.path}")
+
     def on_stop(self):
         super().on_stop()
         self.observer.stop()
@@ -116,30 +118,40 @@ class WatchdogAction(Action):
 
     def on_created(self, event):
         '''Fired when something's been created'''
+        self.log("something has been created")
+
         if self.trigger != "create":
             return
-        self.send_custom_dictionary(event)
+        self.send_message(event)
 
     def on_modified(self, event):
         '''Fired when something's been modified'''
+        self.log("something has been modified")
+
         if self.trigger != "modify":
             return
-        self.send_custom_dictionary(event)
+        self.send_message(event)
 
     def on_deleted(self, event):
         '''Fired when something's been deleted'''
+        self.log("something has been deleted")
+
         if self.trigger != "delete":
             return
-        self.send_custom_dictionary(event)
+        self.send_message(event)
 
     def on_moved(self, event):
         '''Fired when something's been moved'''
+        self.log("something has been moved")
+
         if self.trigger != "move":
             return
-        self.send_custom_dictionary(event)
+        self.send_message(event)
 
     def on_any_event(self, event):
         '''Fired on any filesystem event'''
+        self.log("something has happened")
+
         if self.trigger != "any":
             return
-        self.send_custom_dictionary(event)
+        self.send_message(event)

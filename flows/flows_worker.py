@@ -162,7 +162,6 @@ class FlowsWorker(Thread):
                                                   action_configuration,
                                                   self,
                                                   list(new_managed_input))
-
         if not my_action:
             Global.LOGGER.warn(f"WORK: can't find a type for action {section}, \
                                the action will be skipped")

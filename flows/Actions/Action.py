@@ -77,18 +77,24 @@ class Action(Thread):
         """
         Code to be executed before end
         """
+    
+    def log(self, message):
+        Global.LOGGER.debug(message)
 
-    def send_custom_dictionary(self, output) -> None:
-        """
-        Send a message to the socket by using a custom dictionary
-        """
-        output_action = {"message": "dictionary",
-                         "message_dictionary": output,
-                         "sender": self.name,
-                         "target": "*"}
+    # def send_custom_dictionary(self, output) -> None:
+    #     """
+    #     Send a message to the socket by using a custom dictionary
+    #     """
 
-        # Global.MESSAGE_DISPATCHER.send_message(output_action)
-        self.worker.message_dispatcher.send_message(output_action)
+    #     print(output)
+        
+    #     output_action = {"message": "dictionary",
+    #                      "message_dictionary": output,
+    #                      "sender": self.name,
+    #                      "target": "*"}
+
+    #     # Global.MESSAGE_DISPATCHER.send_message(output_action)
+    #     self.worker.message_dispatcher.send_message(output_action)
 
     def send_message(self, output) -> None:
         """
