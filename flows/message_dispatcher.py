@@ -10,6 +10,7 @@ License: Apache-2.0
 """
 
 import datetime
+import json
 import threading
 
 import zmq
@@ -102,7 +103,7 @@ class MessageDispatcher:
                 Global.LOGGER.error(f"can't deliver message with no body")
                 return
 
-            self.socket.send(message)
+            self.socket.send_string(json.dumps(message))
 
             if Global.CONFIG_MANAGER.tracing_mode:
                 Global.LOGGER.debug(f"{message} dispatched")

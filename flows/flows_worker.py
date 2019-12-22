@@ -9,6 +9,7 @@ License: Apache-2.0
 """
 
 import asyncio
+import json
 import threading
 from threading import Thread
 
@@ -91,13 +92,14 @@ class FlowsWorker(Thread):
             if Global.CONFIG_MANAGER.tracing_mode:
                 Global.LOGGER.debug("WORK: trying fetching messages")
 
-            msg = self.receivesocket.recv(flags=zmq.NOBLOCK) # pylint: disable=E1101
+            jmsg = self.receivesocket.recv(flags=zmq.NOBLOCK) # pylint: disable=E1101
             if Global.CONFIG_MANAGER.tracing_mode:
                 Global.LOGGER.debug("WORK: this worker has fetched a new message")
 
             self.fetched = self.fetched + 1
+            msg = json.loads(jmsg)
             self._deliver_message_to_actions(msg)
-            return obj
+            return
         except zmq.error.Again:
             return None
         except Exception as new_exception:
