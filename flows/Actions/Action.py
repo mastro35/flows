@@ -186,7 +186,6 @@ class Action(Thread):
         py_files_in_current_directory = glob.glob(f"{os.getcwd()}/**/*action.py",
                                                   recursive=True)
 
-        time.sleep(5)                                                  
         Global.LOGGER.debug(f"found {len(py_files_in_current_directory)} actions in current directory")
         basenames = list(map(os.path.basename, py_files_in_current_directory))
         tmp_python_files_dict = dict(zip(basenames, py_files_in_current_directory))

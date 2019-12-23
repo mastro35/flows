@@ -1,0 +1,15 @@
+[my_timer]
+type=timer
+delay=1
+
+[my_watchdog]
+type = watchdog
+input = /home/dave
+monitor = any
+option = recursive
+patterns = *
+
+[my_log]
+type=log
+input=my_watchdog, my_timer
+text={input}

@@ -70,7 +70,7 @@ class FlowsVentilator:
         """
         Start the message fetcher (called from coroutine)
         """
-        Global.LOGGER.info('WORK: starting the message fetcher')
+        Global.LOGGER.info('VENT: starting the message fetcher')
         while self.is_running:
             asyncio.ensure_future(self._fetch_messages(), loop=self.loop)
             await asyncio.sleep(Global.CONFIG_MANAGER.message_fetcher_sleep_interval)
