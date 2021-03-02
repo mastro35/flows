@@ -114,7 +114,12 @@ class FlowsWorker(Thread):
         for action in my_subscribed_actions:
             if Global.CONFIG_MANAGER.tracing_mode:
                 Global.LOGGER.debug(f"WORK: delivering message to {action.name}")
-            action.on_input_received(msg)
+
+            try:
+                message_dictionary=json.loads(str(msg["message"]).replace("'", '"'))
+                action.on_input_received(message_dictionary)
+            except Exception as e:
+                action.on_input_received(str(msg["message"]))
 
     def _start_actions(self):
         """

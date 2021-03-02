@@ -15,6 +15,7 @@ from flows.Actions.Action import Action
 class DannyFileSystemEventHandler(PatternMatchingEventHandler):
     """Customized watchdog's FileSystemEventHandler"""
     delegates = None
+    is_thread = True
 
     def __init__(self, patterns=None, ignore_patterns=None,
                  ignore_directories=False, case_sensitive=False):
@@ -75,6 +76,16 @@ class WatchdogAction(Action):
 
     timeout = 1
 
+    def convert_event_to_message(self, event):
+
+        message={"event_type":event.event_type if hasattr(event, "event_type") else "",
+            "is_directory":str(event.is_directory) if hasattr(event, "is_directory") else "",
+            "src_path":event.src_path if hasattr(event, "src_path") else "",
+            "dest_path":event.dest_path if hasattr(event, "dest_path") else ""
+        }
+
+        return message
+
     def on_init(self):
         super().on_init()
 
@@ -125,7 +136,8 @@ class WatchdogAction(Action):
 
         if self.trigger != "create":
             return
-        self.send_message(event)
+        message = self.convert_event_to_message(event)
+        self.send_message(message)
 
     def on_modified(self, event):
         '''Fired when something's been modified'''
@@ -133,7 +145,8 @@ class WatchdogAction(Action):
 
         if self.trigger != "modify":
             return
-        self.send_message(event)
+        message = self.convert_event_to_message(event)
+        self.send_message(message)
 
     def on_deleted(self, event):
         '''Fired when something's been deleted'''
@@ -141,7 +154,9 @@ class WatchdogAction(Action):
 
         if self.trigger != "delete":
             return
-        self.send_message(event)
+        message = self.convert_event_to_message(event)
+        self.send_message(message)
+
 
     def on_moved(self, event):
         '''Fired when something's been moved'''
@@ -149,7 +164,8 @@ class WatchdogAction(Action):
 
         if self.trigger != "move":
             return
-        self.send_message(event)
+        message = self.convert_event_to_message(event)
+        self.send_message(message)
 
     def on_any_event(self, event):
         '''Fired on any filesystem event'''
@@ -157,4 +173,6 @@ class WatchdogAction(Action):
 
         if self.trigger != "any":
             return
-        self.send_message(event)
+        message = self.convert_event_to_message(event)
+        self.send_message(message)
+
