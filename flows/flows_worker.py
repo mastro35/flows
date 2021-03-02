@@ -125,8 +125,8 @@ class FlowsWorker(Thread):
         for recipe in Global.CONFIG_MANAGER.recipes:
             Global.CONFIG_MANAGER.read_recipe(recipe)
 
-        _ = [self._start_action_for_section(section) \
-            for section in Global.CONFIG_MANAGER.sections]
+        _ = [self._start_action_for_section(section)
+             for section in Global.CONFIG_MANAGER.sections]
 
     def _start_action_for_section(self, section):
         """
@@ -183,14 +183,13 @@ class FlowsWorker(Thread):
             self.subscriptions.setdefault(
                 my_input, []).append(my_action)
 
-
     def _stop_actions(self):
         """
         Stop all the actions
         """
         Global.LOGGER.info("WORK: stopping actions")
 
-        #list(map(lambda x: x.stop(), self.actions))
+        # list(map(lambda x: x.stop(), self.actions))
         _ = [action.stop for action in self.actions]
 
         Global.LOGGER.info("WORK: actions stopped")

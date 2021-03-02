@@ -60,10 +60,10 @@ class FlowsVentilator:
 
     def _set_manager_sockets(self) -> None:
         """Set ZMQ Sockets"""
-        self.sendersocket = Global.ZMQ_CONTEXT.socket(zmq.PUSH) # pylint: disable=E1101
+        self.sendersocket = Global.ZMQ_CONTEXT.socket(zmq.PUSH)  # pylint: disable=E1101
         self.sendersocket.bind("tcp://*:5557")
 
-        self.sinksocket = Global.ZMQ_CONTEXT.socket(zmq.PULL) # pylint: disable=E1101
+        self.sinksocket = Global.ZMQ_CONTEXT.socket(zmq.PULL)  # pylint: disable=E1101
         self.sinksocket.bind("tcp://*:5558")
 
     async def _start_async_message_fetcher(self):
@@ -88,7 +88,7 @@ class FlowsVentilator:
         Get an input message from the socket
         """
         try:
-            msg = self.sinksocket.recv(flags=zmq.NOBLOCK) # pylint: disable=E1101
+            msg = self.sinksocket.recv(flags=zmq.NOBLOCK)  # pylint: disable=E1101
 
             if Global.CONFIG_MANAGER.tracing_mode:
                 Global.LOGGER.debug("VENT: the manager has fetched a new message")

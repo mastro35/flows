@@ -19,7 +19,10 @@ class DannyFileSystemEventHandler(PatternMatchingEventHandler):
     def __init__(self, patterns=None, ignore_patterns=None,
                  ignore_directories=False, case_sensitive=False):
 
-        super().__init__(patterns, ignore_patterns, ignore_directories, case_sensitive)
+        super().__init__(patterns,
+                         ignore_patterns,
+                         ignore_directories,
+                         case_sensitive)
 
         self.delegates = []
 

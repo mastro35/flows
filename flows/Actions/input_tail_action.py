@@ -99,7 +99,9 @@ class TailAction(Action):
             self.flush_buffer()
             self.bufferize_line(line)
 
-        # If there's been something in the buffer for a long time, flush the buffer
+        # If there's been something in the buffer for a long time,
+        # flush the buffer
         # the default value is 3 seconds
-        if (datetime.datetime.now() - self.last_flush_date).total_seconds() > self.timeout:
+        el = (datetime.datetime.now() - self.last_flush_date).total_seconds()
+        if el > self.timeout:
             self.flush_buffer()

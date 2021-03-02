@@ -63,7 +63,8 @@ class Action(Thread):
 
     def on_cycle(self):
         """
-        Main cycle of the action, code to be executed before the start of each cycle
+        Main cycle of the action, code to be executed before
+        the start of each cycle
         """
         pass
 
@@ -77,7 +78,7 @@ class Action(Thread):
         """
         Code to be executed before end
         """
-    
+
     def log(self, message):
         Global.LOGGER.debug(message)
 
@@ -87,7 +88,7 @@ class Action(Thread):
     #     """
 
     #     print(output)
-        
+
     #     output_action = {"message": "dictionary",
     #                      "message_dictionary": output,
     #                      "sender": self.name,
@@ -126,8 +127,9 @@ class Action(Thread):
                 self.on_cycle()
                 time.sleep(Global.CONFIG_MANAGER.sleep_interval)
 
-        except Exception as exc: # pylint: disable=W0703
-            Global.LOGGER.error(f"error while running the action {self.name}: {str(exc)}")
+        except Exception as exc:  # pylint: disable=W0703
+            Global.LOGGER.error("error while running the action "
+                                f"{self.name}: {str(exc)}")
 
     async def async_run(self):
         """
@@ -145,12 +147,14 @@ class Action(Thread):
         Load a single module passed as parameter
         """
         try:
-            spec = importlib.util.spec_from_file_location(module_name, module_filename)
+            spec = importlib.util.spec_from_file_location(module_name,
+                                                          module_filename)
             my_module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(my_module)
-        except Exception as ex: # pylint: disable=W0703
+        except Exception as ex:  # pylint: disable=W0703
             Global.LOGGER.warn(f"{ex}")
-            Global.LOGGER.warn(f"an error occurred while importing {module_name}"
+            Global.LOGGER.warn(f"an error occurred"
+                               f" while importing {module_name}"
                                f", so the module will be skipped.")
 
     @classmethod
@@ -174,8 +178,9 @@ class Action(Thread):
             Global.LOGGER.warn(f"{ex}")
             Global.LOGGER.warn(f"Perhaps you're using a PyInstaller package?")
 
-            # This try/except block is needed for the use with PyInstaller, because
-            # in this case you don't have any site and the getsitepackages would raise
+            # This try/except block is needed for the use with PyInstaller,
+            # because in this case you don't have any site and the
+            # getsitepackages would raise
             # an AttributeError Exception.
 
         Global.LOGGER.debug(f"current path: {os.getcwd()}")
@@ -183,13 +188,14 @@ class Action(Thread):
         # get custom actions in current path
         Global.LOGGER.debug(
             f"looking inside the current directory {os.getcwd()}")
-        py_files_in_current_directory = glob.glob(f"{os.getcwd()}/**/*action.py",
-                                                  recursive=True)
+        py_files_in_current_directory = glob.glob(
+            f"{os.getcwd()}/**/*action.py", recursive=True)
 
-        time.sleep(5)                                                  
-        Global.LOGGER.debug(f"found {len(py_files_in_current_directory)} actions in current directory")
+        Global.LOGGER.debug(f"found {len(py_files_in_current_directory)}"
+                            " actions in current directory")
         basenames = list(map(os.path.basename, py_files_in_current_directory))
-        tmp_python_files_dict = dict(zip(basenames, py_files_in_current_directory))
+        tmp_python_files_dict = dict(zip(basenames,
+                                     py_files_in_current_directory))
 
         # get custom actions in current /Action subdir
         Global.LOGGER.debug("looking inside any ./Actions subdirectory")
@@ -254,13 +260,17 @@ class Action(Thread):
         for filename in my_actions_file:
             module_name = os.path.basename(os.path.normpath(filename))[:-3]
 
-            # garbage collect all the modules you load if they are not necessary
+            # garbage collect all the modules you load if
+            # they are not necessary
             #            context = {}
             Action.load_module(module_name, filename)
             for subclass in Action.__subclasses__():
                 if subclass.type == action_code:
                     action_class = subclass
-                    action = action_class(name, configuration, worker, managed_input)
+                    action = action_class(name,
+                                          configuration,
+                                          worker,
+                                          managed_input)
                     return action
             #            subclass = None
             gc.collect()
