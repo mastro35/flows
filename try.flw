@@ -2,14 +2,7 @@
 type=timer
 delay=1
 
-[my_watchdog]
-type = watchdog
-input = /home/dave
-monitor = any
-option = recursive
-patterns = *
-
-[my_log]
+[scrivi]
 type=log
-input=my_watchdog, my_timer
+input=my_timer
 text={input}

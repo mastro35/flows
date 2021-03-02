@@ -274,3 +274,7 @@ startflows.bat
 /.cache/v/cache/lastfailed
 /prova/*
 prova.recipe
+flows/.vscode
+src/flows/.vscode
+trash
+try.flw

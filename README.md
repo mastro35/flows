@@ -600,7 +600,7 @@ License: Apache-2.0
 '''
 
 import logging
-from flows.Actions.Action import Action
+from Actions.action import Action
 
 LOGGER = logging.getLogger(__name__)
 

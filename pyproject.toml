@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "flows"
+version = "2.0.0.a6"
+description = ""
+authors = ["Davide Mastromatteo <mastro35@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+croniter = "^1.0.7"
+watchdog = "^2.0.2"
+zmq = "^0.0.0"
+pytyler = "^0.3"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
