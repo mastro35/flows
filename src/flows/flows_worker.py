@@ -165,12 +165,13 @@ class FlowsWorker(Thread):
                                                   action_configuration,
                                                   self,
                                                   list(new_managed_input))
+
         if not my_action:
             Global.LOGGER.warn(f"WORK: can't find a type for action {section}, \
                                the action will be skipped")
             return
 
-        if my_action is Thread:
+        if isinstance(my_action, Thread):
             Global.LOGGER.debug(f"WORK: starting action {section} as a separated thread")
             # invokes the "start" method of the Thread class in the standard library
             my_action.start()

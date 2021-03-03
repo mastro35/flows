@@ -149,13 +149,15 @@ class Basic_Action():
             
             for Action_Type in Basic_Action.__subclasses__():
                 for subclass in Action_Type.__subclasses__():
-                    Global.LOGGER.debug(f"analyzing subclass {subclass}")
+                    Global.LOGGER.debug(f"analyzing subclass {subclass} for action_type {Action_Type}")
+                    Global.LOGGER.debug(f"subclass type {subclass.type} for action_type {action_code}")
                     if subclass.type == action_code:
                         action_class = subclass
                         action = action_class(name,
                                             configuration,
                                             worker,
                                             managed_input)
+                        Global.LOGGER.debug(f"created action {action}")
                         return action
             #            subclass = None
             gc.collect()
@@ -231,6 +233,19 @@ class Action(Basic_Action, Thread):
 
     python_files = []
 
+    def __init__(self, name, configuration, worker, managed_input):
+        Thread.__init__(self)
+        Basic_Action.__init__(self)
+
+        # Init the action instance variables
+        self.monitored_input = managed_input
+        self.configuration = configuration
+        self.worker = worker
+        self.name = name
+
+        # Launch custom configuration method
+        self.on_init()
+
     def run(self):
         """
         Start the action cycle if is a Thread Action
@@ -278,3 +293,5 @@ class Async_Action(Basic_Action):
     async def run(self):
         pass
 
+    async def sleep(self, timeout):
+        await asyncio.sleep(timeout)

@@ -1,8 +1,16 @@
 [my_timer]
 type=timer
-delay=1
+delay=6
+
+[my_alarm]
+type=alarm
+date=03/03/2021 16:39
+
+[my_cron_job]
+type=cron
+crontab_schedule = */3 * * * *
 
 [scrivi]
 type=log
-input=my_timer
+input=my_cron_job, my_alarm, my_timer
 text={input} - {time}

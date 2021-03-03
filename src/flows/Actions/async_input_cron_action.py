@@ -39,7 +39,7 @@ class CronAction(Async_Action):
     timeout = 60
     loop = None
 
-    async def run_operation(self):
+    async def run(self):
         """
         Execute the action when the cront time has reached
         """
@@ -51,7 +51,7 @@ class CronAction(Async_Action):
                 self.next = self.cron.get_next(datetime.datetime)
                 self.send_message("CRON : " + self.name)
 
-            await asyncio.sleep(1)
+            await self.sleep(1)
 
     def on_init(self):
         super().on_init()
@@ -68,6 +68,3 @@ class CronAction(Async_Action):
 
         self.cron = croniter(self.crontab_schedule, now)
         self.next = self.cron.get_next(datetime.datetime)
-
-        self.loop = asyncio.get_event_loop()
-        asyncio.ensure_future(self.run_operation(), loop=self.loop)

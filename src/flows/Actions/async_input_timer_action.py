@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """
 TimerAction.py
 --------------
@@ -7,7 +5,6 @@ TimerAction.py
 Copyright 2016 Davide Mastromatteo
 """
 
-import asyncio
 from Actions.action import Async_Action
 
 class TimerAction(Async_Action):
@@ -25,8 +22,8 @@ class TimerAction(Async_Action):
         """
         self.log("starting timer")
         while self.is_running:
-            await asyncio.sleep(self.timeout)
-            self.send_message(f"TIMER {self.id}")
+            await self.sleep(self.timeout)
+            self.send_message(f"TIMER {self.name} {self.id}")
 
     def on_init(self):
         super().on_init()

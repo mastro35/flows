@@ -11,10 +11,10 @@ import time
 import logging
 from logging.handlers import RotatingFileHandler
 
-from Actions.action import Async_Action
+from Actions.action import Action
 
 
-class LogAction(Async_Action):
+class LogAction(Action):
     """
     LogAction Class
     Log the input to the stdout, and passes it to the output

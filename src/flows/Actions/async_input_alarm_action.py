@@ -34,11 +34,18 @@ class AlarmAction(Async_Action):
         date = self.configuration["date"]
         self.next = datetime.datetime.strptime(date, "%d/%m/%Y %H:%M")
 
-    def on_cycle(self):
 
-        now = datetime.datetime.now()
-        now = now.replace(second=0, microsecond=0)
-        if now >= self.next:
-            self.next = None
-            self.send_message("ALARM")
-            self.is_running = False
+    async def run(self):
+        """
+        Execute the action when the cront time has reached
+        """
+        while self.is_running:
+            now = datetime.datetime.now()
+            now = now.replace(microsecond=0)
+
+            if now >= self.next:
+                self.send_message(f"ALARM {self.name} {self.id} ")
+                self.is_running = False
+
+            await self.sleep(1)
+    
