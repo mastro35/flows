@@ -15,7 +15,6 @@ from Actions.action import Action
 class DannyFileSystemEventHandler(PatternMatchingEventHandler):
     """Customized watchdog's FileSystemEventHandler"""
     delegates = None
-    is_thread = True
 
     def __init__(self, patterns=None, ignore_patterns=None,
                  ignore_directories=False, case_sensitive=False):

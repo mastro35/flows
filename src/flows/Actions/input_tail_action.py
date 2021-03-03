@@ -21,7 +21,6 @@ class TailAction(Action):
     """
 
     type = "tail"
-    is_thread = True
     my_log_file = None
     file_is_opened = False
     last_flush_date = datetime.datetime.now()

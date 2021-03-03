@@ -5,4 +5,4 @@ delay=1
 [scrivi]
 type=log
 input=my_timer
-text={input}
+text={input} - {time}

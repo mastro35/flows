@@ -17,7 +17,7 @@ import zmq
 
 import global_module as Global
 import message_dispatcher
-from Actions.action import Action
+from Actions.action import Basic_Action
 
 __author__ = "Davide Mastromatteo"
 __copyright__ = "Copyright 2016, Davide Mastromatteo"
@@ -43,7 +43,7 @@ class FlowsWorker(Thread):
         # self.MESSAGE_DISPATCHER = MessageDispatcher.MessageDispatcher.default_instance()
         self.message_dispatcher = message_dispatcher.MessageDispatcher.default_instance()
 
-        self.actions: [Action] = []
+        self.actions: [Basic_Action] = []
         self.subscriptions: {} = {}
         self.fetched = 0
 
@@ -160,7 +160,7 @@ class FlowsWorker(Thread):
             new_managed_input = (item.strip()
                                  for item in action_input.split(","))
 
-        my_action = Action.create_action_for_code(action_type,
+        my_action = Basic_Action.create_action_for_code(action_type,
                                                   section,
                                                   action_configuration,
                                                   self,
@@ -170,14 +170,14 @@ class FlowsWorker(Thread):
                                the action will be skipped")
             return
 
-        if my_action.is_thread:
+        if my_action is Thread:
             Global.LOGGER.debug(f"WORK: starting action {section} as a separated thread")
             # invokes the "start" method of the Thread class in the standard library
             my_action.start()
         else:
             Global.LOGGER.debug(f"WORK: starting action {section} in asyncronous")
             loop = asyncio.get_event_loop()
-            asyncio.ensure_future(my_action.async_run(), loop=loop)
+            asyncio.ensure_future(my_action.run(), loop=loop)
 
         self.actions.append(my_action)
 

@@ -17,130 +17,12 @@ import importlib.util
 import os
 import site
 import time
+import uuid
 from threading import Lock, Thread
 
 import global_module as Global
 
-
-class Action(Thread):
-    """
-    Generic abstract class that should be subclassed to create
-    custom action classes.
-    """
-
-    type = ""
-    name = ""
-    is_thread = False
-    _instance_lock: Lock = Lock()
-    configuration = None
-    context = None
-    socket = None
-    is_running = True
-    monitored_input = None
-
-    python_files = []
-
-    def __init__(self, name, configuration, worker, managed_input):
-        super().__init__()
-
-        # Set the action as a daemon
-        self.daemon = True
-
-        # Init the action instance variables
-        self.monitored_input = managed_input
-        self.configuration = configuration
-        self.worker = worker
-        self.name = name
-
-        # Launch custom configuration method
-        self.on_init()
-
-    def on_init(self):
-        """
-        Initialization of the action, code to be executed before start
-        """
-        pass
-
-    def on_cycle(self):
-        """
-        Main cycle of the action, code to be executed before
-        the start of each cycle
-        """
-        pass
-
-    def on_input_received(self, action_input=None):
-        """
-        Fire the current action
-        """
-        pass
-
-    def on_stop(self):
-        """
-        Code to be executed before end
-        """
-
-    def log(self, message):
-        Global.LOGGER.debug(message)
-
-    # def send_custom_dictionary(self, output) -> None:
-    #     """
-    #     Send a message to the socket by using a custom dictionary
-    #     """
-
-    #     print(output)
-
-    #     output_action = {"message": "dictionary",
-    #                      "message_dictionary": output,
-    #                      "sender": self.name,
-    #                      "target": "*"}
-
-    #     # Global.MESSAGE_DISPATCHER.send_message(output_action)
-    #     self.worker.message_dispatcher.send_message(output_action)
-
-    def send_message(self, output) -> None:
-        """
-        Send a message to the socket
-        """
-
-        output_action = {"message": output,
-                         "sender": self.name,
-                         "target": "*"}
-
-        # Global.MESSAGE_DISPATCHER.send_message(output_action)
-        self.worker.message_dispatcher.send_message(output_action)
-
-    def stop(self):
-        """ Stop the current action """
-        Global.LOGGER.debug(f"action {self.name} stopped")
-
-        self.is_running = False
-        self.on_stop()
-
-    def run(self):
-        """
-        Start the action cycle if is a Thread Action
-        """
-        Global.LOGGER.debug(f"action {self.name} is running")
-
-        try:
-            while self.is_running:
-                self.on_cycle()
-                time.sleep(Global.CONFIG_MANAGER.sleep_interval)
-
-        except Exception as exc:  # pylint: disable=W0703
-            Global.LOGGER.error("error while running the action "
-                                f"{self.name}: {str(exc)}")
-
-    async def async_run(self):
-        """
-        Start the action cycle if is an asynchronous Action
-        """
-        Global.LOGGER.debug(f"action {self.name} is running")
-
-        while self.is_running:
-            self.on_cycle()
-            await asyncio.sleep(Global.CONFIG_MANAGER.sleep_interval)
-
+class Basic_Action():
     @classmethod
     def load_module(cls, module_name, module_filename):
         """
@@ -162,11 +44,11 @@ class Action(Thread):
         """
         Search for all the installed actions
         """
-        # if we've loaded the actions yet, return them
+        # if we've already loaded the actions, return them
         if Action.python_files:
             return Action.python_files
 
-        # elsewere, load all the custom actions you find
+        # else, load all the custom actions you find
         Global.LOGGER.debug("searching for installed actions... \
                             it can takes a while")
 
@@ -263,14 +145,136 @@ class Action(Thread):
             # garbage collect all the modules you load if
             # they are not necessary
             #            context = {}
-            Action.load_module(module_name, filename)
-            for subclass in Action.__subclasses__():
-                if subclass.type == action_code:
-                    action_class = subclass
-                    action = action_class(name,
-                                          configuration,
-                                          worker,
-                                          managed_input)
-                    return action
+            Basic_Action.load_module(module_name, filename)
+            
+            for Action_Type in Basic_Action.__subclasses__():
+                for subclass in Action_Type.__subclasses__():
+                    Global.LOGGER.debug(f"analyzing subclass {subclass}")
+                    if subclass.type == action_code:
+                        action_class = subclass
+                        action = action_class(name,
+                                            configuration,
+                                            worker,
+                                            managed_input)
+                        return action
             #            subclass = None
             gc.collect()
+
+    def __init__(self):
+        """
+        Basic Constructor
+        """
+        self.id = uuid.uuid4()
+
+    def on_init(self):
+        """
+        Initialization of the action, code to be executed before start
+        """
+        pass
+
+    def on_cycle(self):
+        """
+        Main cycle of the action, code to be executed before
+        the start of each cycle
+        """
+        pass
+
+    def on_input_received(self, action_input=None):
+        """
+        Fire the current action
+        """
+        pass
+
+    def on_stop(self):
+        """
+        Code to be executed before end
+        """
+        pass
+
+    def log(self, message):
+        Global.LOGGER.debug(message)
+
+    def send_message(self, output) -> None:
+        """
+        Send a message to the socket
+        """
+
+        output_action = {"message": output,
+                         "sender": self.name,
+                         "target": "*"}
+
+        # Global.MESSAGE_DISPATCHER.send_message(output_action)
+        self.worker.message_dispatcher.send_message(output_action)
+
+    def stop(self):
+        """ Stop the current action """
+        Global.LOGGER.debug(f"action {self.name} stopped")
+
+        self.is_running = False
+        self.on_stop()
+
+
+class Action(Basic_Action, Thread):
+    """
+    Generic abstract class that should be subclassed to create
+    custom action classes.
+    """
+
+    type = ""
+    name = ""
+    _instance_lock: Lock = Lock()
+    configuration = None
+#    context = None
+#    socket = None
+    is_running = True
+    monitored_input = None
+
+    python_files = []
+
+    def run(self):
+        """
+        Start the action cycle if is a Thread Action
+        """
+        Global.LOGGER.debug(f"action {self.name} is running")
+
+        try:
+            while self.is_running:
+                self.on_cycle()
+                time.sleep(Global.CONFIG_MANAGER.sleep_interval)
+
+        except Exception as exc:  # pylint: disable=W0703
+            Global.LOGGER.error("error while running the action "
+                                f"{self.name}: {str(exc)}")
+
+class Async_Action(Basic_Action):
+    """
+    Generic abstract class that should be subclassed to create
+    custom action classes.
+    """
+
+    type = ""
+    name = ""
+    configuration = None
+#    context = None
+#    socket = None
+    is_running = True
+    monitored_input = None
+
+    python_files = []
+
+    def __init__(self, name, configuration, worker, managed_input):
+        super().__init__()
+
+        # Init the action instance variables
+        self.monitored_input = managed_input
+        self.configuration = configuration
+        self.worker = worker
+        self.name = name
+
+        # Launch custom configuration method
+        self.on_init()
+
+
+    async def run(self):
+        pass
+

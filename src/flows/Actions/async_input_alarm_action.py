@@ -12,10 +12,10 @@ Copyright 2016 Davide Mastromatteo
 '''
 
 import datetime
-from Actions.action import Action
+from Actions.action import Async_Action
 
 
-class AlarmAction(Action):
+class AlarmAction(Async_Action):
     """
     AlarmAction Class
     """

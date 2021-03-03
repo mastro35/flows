@@ -8,9 +8,9 @@ Copyright 2016 Davide Mastromatteo
 """
 
 import asyncio
-from Actions.action import Action
+from Actions.action import Async_Action
 
-class TimerAction(Action):
+class TimerAction(Async_Action):
     """
     TimerAction Class
     """
@@ -19,16 +19,16 @@ class TimerAction(Action):
     timeout = 0
     loop = None
 
-    async def run_timer(self):
+    async def run(self):
         """
         Execute the timer action when the delay is over
         """
+        self.log("starting timer")
         while self.is_running:
             await asyncio.sleep(self.timeout)
-            self.send_message(f"TIMER")
+            self.send_message(f"TIMER {self.id}")
 
     def on_init(self):
         super().on_init()
+        self.log("initializing timer")
         self.timeout = int(self.configuration["delay"])
-        self.loop = asyncio.get_event_loop()
-        asyncio.ensure_future(self.run_timer(), loop=self.loop)

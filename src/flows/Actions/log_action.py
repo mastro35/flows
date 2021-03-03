@@ -11,10 +11,10 @@ import time
 import logging
 from logging.handlers import RotatingFileHandler
 
-from Actions.action import Action
+from Actions.action import Async_Action
 
 
-class LogAction(Action):
+class LogAction(Async_Action):
     """
     LogAction Class
     Log the input to the stdout, and passes it to the output
@@ -28,7 +28,6 @@ class LogAction(Action):
 
     def on_init(self):
         super().on_init()
-        self.is_thread = False
 
         if "option" in self.configuration:
             option_token = self.configuration["option"]

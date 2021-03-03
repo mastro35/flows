@@ -23,10 +23,10 @@ import datetime
 
 from croniter import croniter
 
-from Actions.action import Action
+from Actions.action import Async_Action
 
 
-class CronAction(Action):
+class CronAction(Async_Action):
     """
     CronAction Class
     """
