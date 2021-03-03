@@ -25,7 +25,7 @@ __credits__ = [""]
 __license__ = "Apache-2.0"
 __version__ = Global.VERSION
 __maintainer__ = "Davide Mastromatteo"
-__email__ = "dave35@me.com"
+__email__ = "mastro35@gmail.com"
 __status__ = "Production/Stable"
 
 

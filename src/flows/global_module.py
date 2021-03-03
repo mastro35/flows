@@ -4,7 +4,9 @@
 Global.py - singleton and utility for Flows
 """
 
-VERSION = '2.0.0.a6'
+import pkg_resources
+
+VERSION = pkg_resources.get_distribution('flows').version
 CONFIG_MANAGER = None
 LOGGER_INSTANCE = None
 LOGGER = None

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flows"
-version = "2.0.0.a6"
+version = "2.0.0.a7"
 description = ""
 authors = ["Davide Mastromatteo <mastro35@gmail.com>"]
 

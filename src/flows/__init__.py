@@ -1,1 +1,2 @@
-__version__ = '2.0.0.a6'
+import global_module
+__version__ = global_module.VERSION
