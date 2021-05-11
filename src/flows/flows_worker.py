@@ -113,7 +113,7 @@ class FlowsWorker(Thread):
         my_subscribed_actions = self.subscriptions.get(msg["sender"], [])
         for action in my_subscribed_actions:
             if Global.CONFIG_MANAGER.tracing_mode:
-                Global.LOGGER.debug(f"WORK: delivering message to {action.name}")
+                Global.LOGGER.debug(f"WORK: delivering message to {action}")
             try:
                 action.on_input_received.remote(msg)
             except Exception as e:
@@ -175,7 +175,7 @@ class FlowsWorker(Thread):
 
         # invokes the "start" method of the Thread class in the standard library
         ray.get(my_action.start.remote())
-            
+
         self.actions.append(my_action)
 
         Global.LOGGER.debug("WORK: updating the subscriptions table")
