@@ -107,9 +107,9 @@ class FlowsManager:
         Global.CONFIG_MANAGER = config_manager.ConfigManager.default_instance()
 
         _set_command_line_arguments(_parse_input_parameters())
-
-        ray.init()
-
+        
+        # ray.init()
+        ray.init(address='auto', _redis_password='5241590000000000')
         self.is_running = True
 
     # region WORKERS MANAGEMENT
@@ -138,7 +138,7 @@ class FlowsManager:
         Global.LOGGER.info("MNGR: stopping the workers")
         self._stop_workers()
         self.is_running = False
-
+        time.sleep(3)
         Global.LOGGER.info("MNGR: flows has been stopped. \nSo long, and thanks for all the fish.")
 
     def restart(self):
