@@ -5,24 +5,32 @@ Action.py
 Action superclasses
 -------------------
 
-Copyright 2016 Davide Mastromatteo
+Copyright 2016-2021 Davide Mastromatteo
 License: Apache-2.0
 """
 
-import asyncio
 import gc
 import glob
 import importlib
 import importlib.util
 import os
+import ray
 import site
 import time
 import uuid
-from threading import Lock, Thread
+from threading import Thread, Lock
 
+import flows_logger
+import config_manager
+import message_dispatcher
 import global_module as Global
 
 class Basic_Action():
+
+    LOGGER = flows_logger.FlowsLogger.default_instance().get_logger()
+    CONFIG_MANAGER = config_manager.ConfigManager()
+    message_dispatcher = message_dispatcher.MessageDispatcher.default_instance()
+
     @classmethod
     def load_module(cls, module_name, module_filename):
         """
@@ -34,8 +42,8 @@ class Basic_Action():
             my_module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(my_module)
         except Exception as ex:  # pylint: disable=W0703
-            Global.LOGGER.warn(f"{ex}")
-            Global.LOGGER.warn(f"an error occurred"
+            cls.LOGGER.warn(f"{ex}")
+            cls.LOGGER.warn(f"an error occurred"
                                f" while importing {module_name}"
                                f", so the module will be skipped.")
 
@@ -49,55 +57,57 @@ class Basic_Action():
             return Action.python_files
 
         # else, load all the custom actions you find
-        Global.LOGGER.debug("searching for installed actions... \
+        cls.LOGGER.debug("searching for installed actions... \
                             it can takes a while")
 
         site_packages = []
-
-        try:
-            site_packages = site.getsitepackages()
-        except AttributeError as ex:
-            Global.LOGGER.warn(f"{ex}")
-            Global.LOGGER.warn(f"Perhaps you're using a PyInstaller package?")
 
             # This try/except block is needed for the use with PyInstaller,
             # because in this case you don't have any site and the
             # getsitepackages would raise
             # an AttributeError Exception.
 
-        Global.LOGGER.debug(f"current path: {os.getcwd()}")
+        try:
+            site_packages = site.getsitepackages()
+        except AttributeError as ex:
+            cls.LOGGER.warn(f"{ex}")
+            cls.LOGGER.warn(f"Perhaps you're using a PyInstaller package?")
+
+
+        cls.LOGGER.debug(f"current path: {os.getcwd()}")
 
         # get custom actions in current path
-        Global.LOGGER.debug(
-            f"looking inside the current directory {os.getcwd()}")
-        py_files_in_current_directory = glob.glob(
-            f"{os.getcwd()}/**/*action.py", recursive=True)
+        cls.LOGGER.debug(f"looking inside the current directory {os.getcwd()}")
 
-        Global.LOGGER.debug(f"found {len(py_files_in_current_directory)}"
+        py_files_in_current_directory = glob.glob(f"{os.getcwd()}/**/*action.py", recursive=True)
+
+        cls.LOGGER.debug(f"found {len(py_files_in_current_directory)}"
                             " actions in current directory")
+
         basenames = list(map(os.path.basename, py_files_in_current_directory))
         tmp_python_files_dict = dict(zip(basenames,
                                      py_files_in_current_directory))
 
         # get custom actions in current /Action subdir
-        Global.LOGGER.debug("looking inside any ./Actions subdirectory")
+        cls.LOGGER.debug("looking inside any ./Actions subdirectory")
         py_files_in_this_action_subdir = glob.glob(f"{os.getcwd()}"
                                                    f"/**/Actions/*Action.py",
                                                    recursive=True)
-        Global.LOGGER.debug(f"found "
+        cls.LOGGER.debug(f"found "
                             f"{len(py_files_in_this_action_subdir)}"
                             f" actions in a ./Actions subdirectory")
+
         for action_file in py_files_in_this_action_subdir:
             action_filename = os.path.basename(action_file)
             if action_filename not in tmp_python_files_dict:
                 tmp_python_files_dict[action_filename] = action_file
 
         # get custom actions in site_packages directory
-        Global.LOGGER.debug("looking inside the Python environment")
+        cls.LOGGER.debug("looking inside the Python environment")
         for my_site in site_packages:
             python_files_in_site_directory = \
                 glob.glob(f"{my_site}/**/Actions/*Action.py", recursive=True)
-            Global.LOGGER.debug(f"found "
+            cls.LOGGER.debug(f"found "
                                 f"{len(python_files_in_site_directory)}"
                                 f" actions in {my_site}")
 
@@ -110,13 +120,13 @@ class Basic_Action():
         action_files = tmp_python_files_dict.values()
 
         if action_files:
-            Global.LOGGER.debug(f"{len(action_files)} actions found")
+            cls.LOGGER.debug(f"{len(action_files)} actions found")
 
-            if Global.CONFIG_MANAGER.tracing_mode:
+            if cls.CONFIG_MANAGER.tracing_mode:
                 actions_found = "\n".join(action_files)
-                Global.LOGGER.debug(f"actions found: \n{actions_found}")
+                cls.LOGGER.debug(f"actions found: \n{actions_found}")
         else:
-            Global.LOGGER.debug(f"no actions found")
+            cls.LOGGER.debug(f"no actions found")
 
         Action.python_files = action_files
 
@@ -127,13 +137,15 @@ class Basic_Action():
                                action_code,
                                name,
                                configuration,
-                               worker,
-                               managed_input):
+                               managed_input,
+                               queue):
+
         """Factory method to create an instance of an Action from an input code
         """
-        Global.LOGGER.debug(f"creating action {name} for code {action_code}")
-        Global.LOGGER.debug(f"configuration length: {len(configuration)}")
-        Global.LOGGER.debug(f"input: {managed_input}")
+
+        cls.LOGGER.debug(f"creating action {name} for code {action_code}")
+        cls.LOGGER.debug(f"configuration length: {len(configuration)}")
+        cls.LOGGER.debug(f"input: {managed_input}")
 
         # get the actions catalog
         my_actions_file = Action.search_actions()
@@ -144,23 +156,24 @@ class Basic_Action():
 
             # garbage collect all the modules you load if
             # they are not necessary
-            #            context = {}
             Basic_Action.load_module(module_name, filename)
             
             for Action_Type in Basic_Action.__subclasses__():
                 for subclass in Action_Type.__subclasses__():
-                    Global.LOGGER.debug(f"analyzing subclass {subclass} for action_type {Action_Type}")
-                    Global.LOGGER.debug(f"subclass type {subclass.type} for action_type {action_code}")
+                    cls.LOGGER.debug(f"analyzing subclass {subclass} for action_type {Action_Type}")
+                    cls.LOGGER.debug(f"subclass type {subclass.type} for action_type {action_code}")
                     if subclass.type == action_code:
                         action_class = subclass
-                        action = action_class(name,
+                        action = ray.remote(action_class).remote(name,
                                             configuration,
-                                            worker,
-                                            managed_input)
-                        Global.LOGGER.debug(f"created action {action}")
+                                            managed_input,
+                                            queue)
+                        cls.LOGGER.debug(f"created action {action}")
                         return action
-            #            subclass = None
             gc.collect()
+
+    def getattr(self, attr):
+        return getattr(self, attr)
 
     def __init__(self):
         """
@@ -194,7 +207,7 @@ class Basic_Action():
         pass
 
     def log(self, message):
-        Global.LOGGER.debug(message)
+        self.LOGGER.debug(message)
 
     def send_message(self, output) -> None:
         """
@@ -206,11 +219,11 @@ class Basic_Action():
                          "target": "*"}
 
         # Global.MESSAGE_DISPATCHER.send_message(output_action)
-        self.worker.message_dispatcher.send_message(output_action)
+        self.message_dispatcher.send_message(output_action, self.queue)
 
     def stop(self):
         """ Stop the current action """
-        Global.LOGGER.debug(f"action {self.name} stopped")
+        self.LOGGER.debug(f"action {self.name} stopped")
 
         self.is_running = False
         self.on_stop()
@@ -224,74 +237,36 @@ class Action(Basic_Action, Thread):
 
     type = ""
     name = ""
-    _instance_lock: Lock = Lock()
     configuration = None
-#    context = None
-#    socket = None
     is_running = True
     monitored_input = None
 
     python_files = []
 
-    def __init__(self, name, configuration, worker, managed_input):
+    def __init__(self, name, configuration, managed_input, queue):
         Thread.__init__(self)
         Basic_Action.__init__(self)
 
         # Init the action instance variables
         self.monitored_input = managed_input
         self.configuration = configuration
-        self.worker = worker
         self.name = name
+        self.queue = queue
 
         # Launch custom configuration method
         self.on_init()
 
     def run(self):
         """
-        Start the action cycle if is a Thread Action
+        Start the action cycle (called by Thread.start()) 
         """
-        Global.LOGGER.debug(f"action {self.name} is running")
+        self.LOGGER.debug(f"action {self.name} is running")
 
         try:
             while self.is_running:
                 self.on_cycle()
-                time.sleep(Global.CONFIG_MANAGER.sleep_interval)
+                time.sleep(self.CONFIG_MANAGER.sleep_interval)
 
         except Exception as exc:  # pylint: disable=W0703
-            Global.LOGGER.error("error while running the action "
+            self.LOGGER.error("error while running the action "
                                 f"{self.name}: {str(exc)}")
-
-class Async_Action(Basic_Action):
-    """
-    Generic abstract class that should be subclassed to create
-    custom action classes.
-    """
-
-    type = ""
-    name = ""
-    configuration = None
-#    context = None
-#    socket = None
-    is_running = True
-    monitored_input = None
-
-    python_files = []
-
-    def __init__(self, name, configuration, worker, managed_input):
-        super().__init__()
-
-        # Init the action instance variables
-        self.monitored_input = managed_input
-        self.configuration = configuration
-        self.worker = worker
-        self.name = name
-
-        # Launch custom configuration method
-        self.on_init()
-
-
-    async def run(self):
-        pass
-
-    async def sleep(self, timeout):
-        await asyncio.sleep(timeout)

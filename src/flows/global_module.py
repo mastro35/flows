@@ -8,6 +8,6 @@ import pkg_resources
 
 VERSION = pkg_resources.get_distribution('flows').version
 CONFIG_MANAGER = None
-LOGGER_INSTANCE = None
 LOGGER = None
 ZMQ_CONTEXT = None
+MESSAGES = None 

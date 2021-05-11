@@ -5,7 +5,7 @@
 TailAction.py
 -------------
 
-Copyright 2016 Davide Mastromatteo
+Copyright 2016-2021 Davide Mastromatteo
 '''
 
 import datetime

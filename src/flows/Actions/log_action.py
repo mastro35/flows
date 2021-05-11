@@ -4,7 +4,7 @@
 LogAction.py
 ------------
 
-Copyright 2016 Davide Mastromatteo
+Copyright 2016-2021 Davide Mastromatteo
 """
 
 import time
@@ -12,7 +12,6 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 from Actions.action import Action
-
 
 class LogAction(Action):
     """

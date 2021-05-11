@@ -5,15 +5,13 @@ ConfigManager.py
 Handle the configuration for flows
 ----------------------------------
 
-Copyright 2016 Davide Mastromatteo
+Copyright 2016-2021 Davide Mastromatteo
 License: Apache-2.0
 """
 
 import configparser
 import logging
 import os
-import random
-import threading
 
 import global_module as Global
 
@@ -48,7 +46,7 @@ class ConfigManager:
         of the object or a new instance
         """
         if ConfigManager._instance is None:
-            with threading.Lock():
+            # with threading.Lock():
                 if ConfigManager._instance is None:
                     ConfigManager._instance = ConfigManager()
 
@@ -72,26 +70,6 @@ class ConfigManager:
             self.sections[section] = config[section]
 
         Global.LOGGER.debug("Read recipe " + filename)
-
-    def set_socket_address(self):
-        """
-        Set a random port to be used by zmq
-        """
-        Global.LOGGER.debug('defining socket addresses for zmq')
-        random.seed()
-        default_port = random.randrange(5001, 5999)
-
-        internal_0mq_address = "tcp://127.0.0.1"
-        internal_0mq_port_subscriber = str(default_port)
-        internal_0mq_port_publisher = str(default_port)
-
-        Global.LOGGER.info(str.format(
-            f"zmq subsystem subscriber on {internal_0mq_port_subscriber} port"))
-        Global.LOGGER.info(str.format(
-            f"zmq subsystem publisher on {internal_0mq_port_publisher} port"))
-
-        self.subscriber_socket_address = f"{internal_0mq_address}:{internal_0mq_port_subscriber}"
-        self.publisher_socket_address = f"{internal_0mq_address}:{internal_0mq_port_publisher}"
 
     def get_section(self, section_name):
         """

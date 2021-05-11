@@ -8,14 +8,15 @@ Use the parameter "date" as following to set an alarm
 
 date = 01/11/2017 18:25
 
-Copyright 2016 Davide Mastromatteo
+Copyright 2016-2021 Davide Mastromatteo
 '''
 
 import datetime
-from Actions.action import Async_Action
+import time
+from Actions.action import Action
 
 
-class AlarmAction(Async_Action):
+class AlarmAction(Action):
     """
     AlarmAction Class
     """
@@ -35,7 +36,7 @@ class AlarmAction(Async_Action):
         self.next = datetime.datetime.strptime(date, "%d/%m/%Y %H:%M")
 
 
-    async def run(self):
+    def run(self):
         """
         Execute the action when the cront time has reached
         """
@@ -47,5 +48,5 @@ class AlarmAction(Async_Action):
                 self.send_message(f"ALARM {self.name} {self.id} ")
                 self.is_running = False
 
-            await self.sleep(1)
+            time.sleep(1)
     

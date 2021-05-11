@@ -1,4 +1,41 @@
+[y_timer]
+type=timer
+delay=1
+
+[y_timer2]
+type=timer
+delay=2
+
+[y_timer3]
+type=timer
+delay=3
+
+[y_timer4]
+type=timer
+delay=4
+
+[y_timer5]
+type=timer
+delay=6
+
+
 [my_timer]
+type=timer
+delay=1
+
+[my_timer2]
+type=timer
+delay=2
+
+[my_timer3]
+type=timer
+delay=3
+
+[my_timer4]
+type=timer
+delay=4
+
+[my_timer5]
 type=timer
 delay=6
 
@@ -6,9 +43,9 @@ delay=6
 type=alarm
 date=03/03/2021 16:39
 
-[my_cron_job]
-type=cron
-crontab_schedule = */3 * * * *
+# [my_cron_job]
+# type=cron
+# crontab_schedule = */3 * * * *
 
 [scrivi]
 type=log

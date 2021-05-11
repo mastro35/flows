@@ -5,7 +5,7 @@ flows.py
 entry point
 -----------
 
-Copyright 2016 Davide Mastromatteo
+Copyright 2016-2021 Davide Mastromatteo
 License: Apache-2.0
 """
 
@@ -34,6 +34,7 @@ def main():
     """
     Entry point of the program
     """
+
     my_flows_manager = FlowsManager()
 
     try:

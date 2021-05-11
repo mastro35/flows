@@ -4,11 +4,12 @@
 CountAction.py
 --------------
 
-Copyright 2016 Davide Mastromatteo
+Copyright 2016-2021 Davide Mastromatteo
 License: Apache-2.0
 '''
 
 import datetime
+import time
 from Actions.action import Action
 
 
@@ -41,15 +42,15 @@ class CountAction(Action):
         if not self.timed_counter:
             self.send_message(str(self.counter))
 
-    async def run(self):
+    def run(self):
         """
         Execute the timer action when the delay is over
         """
         while self.is_running:
             if self.timed_counter:
-                await self.sleep(self.timeout)
+                time.sleep(self.timeout)
                 self.send_message(str(self.counter))
                 if self.partial_counter:
                     self.counter = 0
             else:
-                await self.sleep(1)
+                time.sleep(1)

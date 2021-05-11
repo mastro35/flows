@@ -5,7 +5,7 @@ FlowsLogger.py
 Logging facility module for flows
 ----------------------------------
 
-Copyright 2016 Davide Mastromatteo
+Copyright 2016-2021 Davide Mastromatteo
 License: Apache-2.0
 """
 
@@ -66,8 +66,6 @@ class FlowsLogger:
         """
         if Global.LOGGER:
             Global.LOGGER.debug('reconfiguring logger level')
-#        stream_handlers = filter(lambda k: type(k) is logging.StreamHandler,
-#                                 self._logger_instance.handlers)
 
         stream_handlers = filter(lambda k: isinstance(k, logging.StreamHandler),
                                  self._logger_instance.handlers)

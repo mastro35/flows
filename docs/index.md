@@ -595,7 +595,7 @@ To make it simpler, in the Actions subdirectory you can find a file called Gener
 GenericCustomAction.py
 ----------------------
 
-Copyright 2016 Davide Mastromatteo
+Copyright 2016-2021 Davide Mastromatteo
 License: Apache-2.0
 '''
 
