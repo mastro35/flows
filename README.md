@@ -1,17 +1,13 @@
 # FLOWS
 
+*Flows* is a workflow engine for Python(istas).
+With *flows* you will be able to create complex workflows based on both built-in actions and other custom actions you can design by your own.
 
-*Flows* is a workflow engine for Python(istas). 
-With *flows* you will be able to create complex workflows based on the built-in actions and other custom actions that you will be able to create.
-
-With *flows*, creating a custom action is as easy as subclassing a standard Python class and the building of a workflow is even simpler.
-
-
-# Installation
+## Installation
 
 *flows* can be build from sources or can be obtained from binary distribution.
 
-## For Windows user
+### For Windows user
 
 If you want to install flows on a Windows machine, please start installing the pypiwin32 package using:
 
@@ -21,7 +17,7 @@ c:\pip install pypiwin32
 
 This is necessary due of a [problem on the pypiwin32 that the maintainer is not going to fix](https://sourceforge.net/p/pywin32/bugs/522/) (basically pypiwin32 doesn't support source builds on Python3 and doesn't have binary builds for Python 3.6. yet)
 
-## Get *flows* from pypi
+### Get *flows* from pypi
 
 The raccomended method to get *flows* is by using pip and the [pypi repository](https://pypi.python.org/pypi).
 
@@ -29,7 +25,7 @@ $ pip install flows
 
 Yes, it's so simple.
 
-## Build *flows* from sources
+### Build *flows* from sources
 
 To build *flows* from sources, just install all the requirements listed in requirements.txt by typing
 
@@ -44,7 +40,7 @@ $ python setup.py install
 ```
 
 
-# Usage
+## Usage
 
 To start a flow simply start a terminal and type
 
@@ -78,7 +74,7 @@ Beside, you can add verbosity to the output of the command just specifying the -
 Don't be afraid from the -i option, we will discuss it later. However, the standard usage of *flows* is just by specifing the name of the recipes files to start.
 
 
-# "Actions": The flows' building blocks
+## "Actions": The flows' building blocks
 
 To create your first flow you just need to know what kind of *actions* you can use, because a workflow is just a set of actions that are chained together and that works together to get something. This is why you should consider actions like "building blocks" that you can mix and match with other building blocks to create a workflow.
 
@@ -87,12 +83,12 @@ There are a lot of actions that are ready to use out of the box and here we will
 To make it more clear to the reader, we will talk about two different kind of actions: **input actions** and **work actions**. The former is a type of action that is executed when an event occurs, the latter is a type of action that is called by another action to do something specific.
 
 
-## Input actions
+### Input actions
 
 Input actions don't usually need to listen to other actions, they are usually at the beginning of a flow and are the starters of the whole process.
 
 
-### Alarm
+#### Alarm
 
 The alarm action sends a message to listening actions at a specific time of a given date. 
 
@@ -107,7 +103,7 @@ date = 01/11/2035 18:25:06
 In this example, the alarm will send a message at 6:25.06 pm on November the 1st, 2035.
 
 
-### Cron
+#### Cron
 
 The cron lets you create a schedule to execute actions.
 
@@ -133,7 +129,7 @@ crontab_schedule = 06 06 06 06 *
 In this example, the action will send a message yearly at 06:06 am on June the 6th, regardless of the weekday.
 
 
-### Readfile
+#### Readfile
 
 The readfile action reads a text file one line at a time and sends a message that contains the read line to the listeners.
 
@@ -146,7 +142,7 @@ input = /home/user/path/to/filename
 ```
 
 
-### Tail
+#### Tail
 
 The tail action is like the "tail -f" command on *nix OS. It sends the message to the listeners with all the new lines created on a text file by the time they are created. 
 It is particularly useful when you are creating a flow to check a log file. 
@@ -162,7 +158,7 @@ input = /home/user/path/of/the/file/to/be/tailed
 ```
 
 
-### Timer
+#### Timer
 
 The timer action sends a message every N seconds. The number of the seconds can be set in the configuration of this action.
 
@@ -177,7 +173,7 @@ delay = 300
 In this example, the timer will send a message every 5 minutes.
 
 
-### Watchdog
+#### Watchdog
 
 A watchdog can monitor the filesystem for changes and send a message when something happen. 
 
@@ -200,12 +196,12 @@ patterns = *.*
 In this example where are monitoring just the creation of new files under /directory_to/be/monitored/ and recursively under all its subdirectories regardless of the name of the file (\*.\*) .
 
 
-## Work actions
+### Work actions
 
 Work actions are the actions that actually do the real work. They are usually set to listen input actions or other work actions because they can't start without input.
 
 
-### Log
+#### Log
 
 The log action can write a message on the standard output or on a text file.
 
@@ -248,7 +244,7 @@ If the action is set to listen to a watchdog you can also use:
 If you are redirecting the log to a file, consider the possibility to use the "rolling" keywork to create a rolling file of "maxBytes", with "backupCount" backup files.
 
 
-### Mail
+#### Mail
 
 The mail action sends a mail to recipients when the listened action occurs.
 
@@ -268,7 +264,7 @@ smtp_port = 25
 Note that in "subject" and "body" configuration you can use variables like in the "log" action.
 
 
-### Pass_on_interval
+#### Pass_on_interval
 
 The "pass_on_interval" action simply sends the input message received from the listened action to the listeners when it's running on a specific time of the day.
 
@@ -291,7 +287,7 @@ weekdays = 0
 In this example, the action sends the input message to the listeners only if the current date is between 1976 November the 1st and 2035 December the 28th, it's a monday and the time is between 8am and 8pm.
 
 
-### Restart
+#### Restart
 
 The restart action stops all the current actions and restart the flow. It is useful just if you need to create a flow that restarts itself when the flow file is changed, so it is usually set to listen to a watchdog action that monitors the "." directory for changes.
 
@@ -304,7 +300,7 @@ input = any_other_action
 ```
 
 
-### Substring
+#### Substring
 
 The substring action lets you substring an input string by cutting it or by choosing a field in a character delimited string. To use this action, put this code in your flow file
 
@@ -321,7 +317,7 @@ item = 1
 ```
 
 
-### Webserver
+#### Webserver
 
 The webserver action starts a webserver that provides a Json dictionary of all latest values received from the listened actions. 
 
@@ -338,7 +334,7 @@ hostport = 3535
 In this example to access the webserver you would need to visit http://localhost:3535
 
 
-### Append_variable_by_time
+#### Append_variable_by_time
 
 This action allows you append a value depending on the time of the day to the message got in input. This is very useful for the check_if action if you want to choose dinamically the second operand of the check_if action depending of the time of the day.
 
@@ -358,7 +354,7 @@ separator = ";"
 In this example, from 12:00 am to 08:00 am, to the input message will be appended the value ";0"
 
 
-### Buffer
+#### Buffer
 
 The buffer action is very useful when you are working with the tail action and you need to consider a multiline entry like a single entry. Since the tail action sends every single line as a different message you may consider to use a buffer action to collect all the lines and flush the buffer only when a specific regular expression matches.
 
@@ -374,7 +370,7 @@ regex_new_buffer = ^(ERROR|INFO|WARN|DEBUG)
 In this example, the buffer is flushed only when you receive a line that starts with "ERROR", "INFO", "WARN" or "DEBUG". This is useful to parse a log file that handles multiline exception.
 
 
-### Check_if
+#### Check_if
 
 The check_if action sends the input message to the listeners only if a condition is met.
 
@@ -396,7 +392,7 @@ limit = 100
 In this example, if the integer value of the input  is less then 100 the condition is met and the message is sent to listeners.
 
 
-### Command
+#### Command
 
 The command action executes a shell command and sends the results of the standard output to the listeners.
 
@@ -412,7 +408,7 @@ command = cp {file_source} /home/mastro35/myDestination
 Note that in the "command" configuration you can use the variables of the log action.
 
 
-### Count
+#### Count
 
 The count action is just a counter that counts how many times the action is executed. In the default configuration the counter value is sent to the listeners after each hit, but if you specify a timeout you can notify listeners every N seconds on the status of the counter. The "partial" keyword, if specified, resets the counter when the message of the counter value is sent to listeners (so it's useful only if used with a timeout).
 
@@ -427,7 +423,7 @@ input = any_other_action
 ```
 
 
-### Filter
+#### Filter
 
 The filter action sends the input received to listeners only if it matches any of the given regular expressions.
 
@@ -446,7 +442,7 @@ regex = /^ERROR
 If you need to match just one regular expression you can put it on the configuration like in this example, but if you need to match more regular expressions you can use a regex_file (that is a normal plain text file containing all the regexes to be matched)
 
 
-### Get_url
+#### Get_url
 
 The get_url action visits a web address and returns a string like HTTP_CODE;HTTP_STATUS_DESCRIPTION;HTML
 
@@ -460,7 +456,7 @@ url = url_to_get
 ```
 
 
-### Check url for 200
+#### Check url for 200
 The check_url_for_200 action visit a web address and returns the status code of the request when it is equal to 200.
 If the "invert" keywork is specified, it returns the status code when it is NOT equal to 200.
 
@@ -473,7 +469,7 @@ invert
 ```
 
 
-### Hash
+#### Hash
 
 This action creates a md5 hash of the input received and sends it to listeners.
 
@@ -486,7 +482,7 @@ input = any_other_action
 ```
 
 
-### AdoDBAction
+#### AdoDBAction
 
 This action use the adodbapi module to execute query against a database.
 
@@ -504,7 +500,7 @@ query = SELECT avg(duration) as duration, count(*) as number from entry where da
 The results are sent one at a time to the listeners.
 
 
-# Some example
+## Some example
 
 Here you will find just a couple of example to whet your appetite :)
 
@@ -582,7 +578,7 @@ text =  {date} - {time} : Too much files created in the last 5 minutes ({input})
 ```
 
 
-# How to create custom actions
+## How to create custom actions
 
 Creating custom actions is really easy. All you have to do is to subclass the Action class and put the file you are creating under the "\Actions" subdirectory.
 
@@ -663,7 +659,7 @@ You can add all the configuration needed by your action within the action config
 self.configuration["myparameter"]
 ```
 
-# How to contribute 
+## How to contribute 
 
 This software is free, so your contribution is very precious.
 
