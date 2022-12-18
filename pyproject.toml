@@ -5,11 +5,11 @@ description = ""
 authors = ["Davide Mastromatteo <mastro35@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.9"
 croniter = "^1.0.7"
 watchdog = "^2.0.2"
 pytyler = "^0.3"
-ray = {extras = ["default"], version = "^1.3.0"}
+ray = "^2.2.0"
 
 [tool.poetry.dev-dependencies]
 
