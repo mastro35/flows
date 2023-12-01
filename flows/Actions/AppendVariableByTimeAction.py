@@ -1,12 +1,10 @@
-#!/usr/bin/env python3
-
-'''
+"""
 AppendVariableByTime.py
 -----------------------
 
 Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
-'''
+"""
 
 import datetime
 import collections
@@ -29,8 +27,7 @@ class AppendVariableByTime(Action):
         if "separator" in self.configuration:
             self.separator = self.configuration["separator"]
 
-        self.time_config = collections.OrderedDict(
-            sorted(self.configuration.items()))
+        self.time_config = collections.OrderedDict(sorted(self.configuration.items()))
 
     def on_input_received(self, action_input=None):
         super().on_input_received(action_input)
@@ -44,8 +41,7 @@ class AppendVariableByTime(Action):
                 if now >= limit:
                     variable = self.configuration[config]
 
-        msg = str.format("{0}{1}{2}", action_input.message,
-                         self.separator, variable)
+        msg = str.format("{0}{1}{2}", action_input.message, self.separator, variable)
 
         # returns the output
         self.send_message(msg)

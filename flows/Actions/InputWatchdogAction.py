@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-
-'''
+"""
 WatchdogAction.py
 --------------
 
 Copyright 2016 Davide Mastromatteo
-'''
+"""
 
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
@@ -16,11 +14,16 @@ import flows.Global
 
 class DannyFileSystemEventHandler(PatternMatchingEventHandler):
     """Customized watchdog's FileSystemEventHandler"""
+
     delegates = None
 
-    def __init__(self, patterns=None, ignore_patterns=None,
-                 ignore_directories=False, case_sensitive=False):
-
+    def __init__(
+        self,
+        patterns=None,
+        ignore_patterns=None,
+        ignore_directories=False,
+        case_sensitive=False,
+    ):
         super().__init__(patterns, ignore_patterns, ignore_directories, case_sensitive)
 
         self.delegates = []
@@ -78,16 +81,14 @@ class WatchdogAction(Action):
         super().on_init()
 
         self.path = self.configuration["input"]
-        self.recursive_flag = (
-            str.lower(self.configuration["option"]) == "recursive")
+        self.recursive_flag = str.lower(self.configuration["option"]) == "recursive"
         self.trigger = self.configuration["monitor"]
 
         if "patterns" in self.configuration:
             self.patterns = self.configuration["patterns"].split(" ")
 
         if "ignore_patterns" in self.configuration:
-            self.ignore_patterns = self.configuration[
-                "ignore_patterns"].split(" ")
+            self.ignore_patterns = self.configuration["ignore_patterns"].split(" ")
 
         if "ignore_directories" in self.configuration:
             self.ignore_directories = True
@@ -95,10 +96,12 @@ class WatchdogAction(Action):
         if "case_sensitive" in self.configuration:
             self.case_sensitive = True
 
-        my_event_handler = DannyFileSystemEventHandler(self.patterns,
-                                                       self.ignore_patterns,
-                                                       self.ignore_directories,
-                                                       self.case_sensitive)
+        my_event_handler = DannyFileSystemEventHandler(
+            self.patterns,
+            self.ignore_patterns,
+            self.ignore_directories,
+            self.case_sensitive,
+        )
         my_event_handler.delegates.append(self)
 
         if "timeout" in self.configuration:
@@ -106,8 +109,9 @@ class WatchdogAction(Action):
 
         self.observer = Observer(self.timeout)
 
-        self.observer.schedule(my_event_handler, self.path,
-                               recursive=self.recursive_flag)
+        self.observer.schedule(
+            my_event_handler, self.path, recursive=self.recursive_flag
+        )
         self.observer.start()
 
     def on_stop(self):
@@ -116,35 +120,35 @@ class WatchdogAction(Action):
         self.observer.join()
 
     def on_created(self, event):
-        '''Fired when something's been created'''
+        """Fired when something's been created"""
         if self.trigger != "create":
             return
         action_input = ActionInput(event, "", self.name)
         flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
 
     def on_modified(self, event):
-        '''Fired when something's been modified'''
+        """Fired when something's been modified"""
         if self.trigger != "modify":
             return
         action_input = ActionInput(event, "", self.name)
         flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
 
     def on_deleted(self, event):
-        '''Fired when something's been deleted'''
+        """Fired when something's been deleted"""
         if self.trigger != "delete":
             return
         action_input = ActionInput(event, "", self.name)
         flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
 
     def on_moved(self, event):
-        '''Fired when something's been moved'''
+        """Fired when something's been moved"""
         if self.trigger != "move":
             return
         action_input = ActionInput(event, "", self.name)
         flows.Global.MESSAGE_DISPATCHER.send_message(action_input)
 
     def on_any_event(self, event):
-        '''Fired on any filesystem event'''
+        """Fired on any filesystem event"""
         if self.trigger != "any":
             return
         action_input = ActionInput(event, "", self.name)

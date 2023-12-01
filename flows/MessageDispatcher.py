@@ -1,13 +1,11 @@
-#!/usr/bin/env python3
-
-'''
+"""
 MessageDispatcher.py
 Class to handle the dispatching of zmq messages
 -----------------------------------------------
 
 Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
-'''
+"""
 
 import datetime
 import pickle
@@ -25,6 +23,7 @@ class MessageDispatcher:
     MessageDispatcher class
     Messages broadcaster
     """
+
     # singleton variables
     _instance = None
     _instance_lock = threading.Lock()
@@ -55,27 +54,30 @@ class MessageDispatcher:
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
 
-        Global.LOGGER.debug(
-            "configuring the socket address for messaging subsystem")
+        Global.LOGGER.debug("configuring the socket address for messaging subsystem")
         for attempt in range(0, 6):
             try:
                 Global.CONFIG_MANAGER.set_socket_address()
-                self.socket.bind(
-                    Global.CONFIG_MANAGER.publisher_socket_address)
+                self.socket.bind(Global.CONFIG_MANAGER.publisher_socket_address)
                 break
             except zmq.error.ZMQError:
                 if attempt == 5:
                     Global.LOGGER.error(
                         """Can't find a suitable tcp port to connect.
-                        The execution will be terminated""")
+                        The execution will be terminated"""
+                    )
                     sys.exit(8)
 
-                Global.LOGGER.warning(str.format(
-                    "error occured trying to connect to {0} ",
-                    Global.CONFIG_MANAGER.publisher_socket_address))
+                Global.LOGGER.warning(
+                    str.format(
+                        "error occured trying to connect to {0} ",
+                        Global.CONFIG_MANAGER.publisher_socket_address,
+                    )
+                )
 
-                Global.LOGGER.warning(str.format(
-                    "retrying... ({0}/{1})", attempt + 1, 5))
+                Global.LOGGER.warning(
+                    str.format("retrying... ({0}/{1})", attempt + 1, 5)
+                )
 
                 time.sleep(1)
 
@@ -91,28 +93,34 @@ class MessageDispatcher:
                 return
 
             if message.sender is None:
-                Global.LOGGER.error(f"can't deliver anonymous messages with body {message.body}")
+                Global.LOGGER.error(
+                    f"can't deliver anonymous messages with body {message.body}"
+                )
                 return
 
             if message.receiver is None:
                 Global.LOGGER.error(
-                    f"can't deliver message from {message.sender}: recipient not specified")
+                    f"can't deliver message from {message.sender}: recipient not specified"
+                )
                 return
 
             if message.message is None:
-                Global.LOGGER.error(f"can't deliver message with no body from {message.sender}")
+                Global.LOGGER.error(
+                    f"can't deliver message with no body from {message.sender}"
+                )
                 return
 
             sender = "*" + message.sender + "*"
-            self.socket.send_multipart(
-                [bytes(sender, 'utf-8'), pickle.dumps(message)])
+            self.socket.send_multipart([bytes(sender, "utf-8"), pickle.dumps(message)])
 
             if Global.CONFIG_MANAGER.tracing_mode:
-                Global.LOGGER.debug("dispatched : "
-                                    + message.sender
-                                    + "-"
-                                    + message.message
-                                    + "-"
-                                    + message.receiver)
+                Global.LOGGER.debug(
+                    "dispatched : "
+                    + message.sender
+                    + "-"
+                    + message.message
+                    + "-"
+                    + message.receiver
+                )
 
             self.dispatched = self.dispatched + 1

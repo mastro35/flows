@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-
-'''
+"""
 BufferAction.py
 ----------------------------
 
 Copyright 2016 Davide Mastromatteo
-'''
+"""
 
 import re
 
@@ -24,9 +22,13 @@ class BufferAction(Action):
     def on_init(self):
         super().on_init()
         if "regex_new_buffer" not in self.configuration:
-            raise ValueError(str.format("The buffer action {0} is not properly configured."
-                                        "The regex_new_buffer parameter is missing",
-                                        self.name))
+            raise ValueError(
+                str.format(
+                    "The buffer action {0} is not properly configured."
+                    "The regex_new_buffer parameter is missing",
+                    self.name,
+                )
+            )
 
         self.buffer = []
         self.regex = self.configuration["regex_new_buffer"]
@@ -42,7 +44,7 @@ class BufferAction(Action):
             return (None, "*")
 
         if len(self.buffer) > 0:
-            return_value = ''.join(self.buffer)
+            return_value = "".join(self.buffer)
             self.buffer.clear()
             self.buffer.append(action_input.message)
             self.send_message(return_value)

@@ -1,12 +1,10 @@
-# #!/usr/bin/env python3
+"""
+AdoDBAction.py
+----------------------
 
-# '''
-# AdoDBAction.py
-# ----------------------
-
-# Copyright 2016 Davide Mastromatteo
-# License: Apache-2.0
-# '''
+Copyright 2016 Davide Mastromatteo
+License: Apache-2.0
+"""
 
 import adodbapi
 from flows.Actions.Action import Action
@@ -26,12 +24,12 @@ class AdoDBAction(Action):
     def on_init(self):
         super().on_init()
 
-        connstring = self.configuration['connstring']
+        connstring = self.configuration["connstring"]
         self.conn = adodbapi.connect(connstring)
 
-        self.query = self.configuration['query']
-        if 'separator' in self.configuration:
-            self.separator = self.configuration['separator']
+        self.query = self.configuration["query"]
+        if "separator" in self.configuration:
+            self.separator = self.configuration["separator"]
 
     def on_stop(self):
         super().on_stop()

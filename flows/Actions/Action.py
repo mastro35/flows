@@ -1,13 +1,11 @@
-#!/usr/bin/env python3
-
-'''
+"""
 Action.py
 Action superclasses
 -------------------
 
 Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
-'''
+"""
 
 import gc
 import glob
@@ -27,6 +25,7 @@ class ActionInput:
     """
     Standard input for every action in flows
     """
+
     sender = ""
     receiver = ""
     message = ""
@@ -113,15 +112,12 @@ class Action(Thread):
         if self.my_action_input:
             file_system_event = self.my_action_input.file_system_event or None
 
-        output_action = ActionInput(file_system_event,
-                                    output,
-                                    self.name,
-                                    "*")
+        output_action = ActionInput(file_system_event, output, self.name, "*")
 
         Global.MESSAGE_DISPATCHER.send_message(output_action)
 
     def stop(self):
-        ''' Stop the current action '''
+        """Stop the current action"""
         Global.LOGGER.debug(f"action {self.name} stopped")
         self.is_running = False
         self.on_stop()
@@ -142,7 +138,9 @@ class Action(Thread):
                 self.on_cycle()
 
             except Exception as exc:
-                Global.LOGGER.error(f"error while running the action {self.name}: {str(exc)}")
+                Global.LOGGER.error(
+                    f"error while running the action {self.name}: {str(exc)}"
+                )
 
     @classmethod
     def load_module(cls, module_name, module_filename):
@@ -152,8 +150,9 @@ class Action(Thread):
             spec.loader.exec_module(foo)
         except Exception as ex:
             Global.LOGGER.warn(f"{ex}")
-            Global.LOGGER.warn(f"an error occured while importing {module_name}, so the module will be skipped.")
-
+            Global.LOGGER.warn(
+                f"an error occured while importing {module_name}, so the module will be skipped."
+            )
 
     @classmethod
     def search_actions(cls):
@@ -166,17 +165,27 @@ class Action(Thread):
         site_packages = site.getsitepackages()
 
         Global.LOGGER.debug(f"current path: {os.getcwd()}")
-        # get custom actions in current path 
+        # get custom actions in current path
         Global.LOGGER.debug("looking inside the current directory")
-        tmp_python_files_in_current_directory = glob.glob(f"{os.getcwd()}/*Action.py", recursive=False)
-        Global.LOGGER.debug(f"found {len(tmp_python_files_in_current_directory)} actions in current directory")
+        tmp_python_files_in_current_directory = glob.glob(
+            f"{os.getcwd()}/*Action.py", recursive=False
+        )
+        Global.LOGGER.debug(
+            f"found {len(tmp_python_files_in_current_directory)} actions in current directory"
+        )
         basenames = list(map(os.path.basename, tmp_python_files_in_current_directory))
-        tmp_python_files_dict = dict(zip(basenames, tmp_python_files_in_current_directory))
+        tmp_python_files_dict = dict(
+            zip(basenames, tmp_python_files_in_current_directory)
+        )
 
         # get custom actions in current /Action subdir
-        Global.LOGGER.debug("looking inside any ./Actions subdirectory")        
-        tmp_python_files_in_current_action_subdirectory = glob.glob(f"{os.getcwd()}/**/Actions/*Action.py", recursive=True)
-        Global.LOGGER.debug(f"found {len(tmp_python_files_in_current_action_subdirectory)} actions in a ./Actions subdirectory")        
+        Global.LOGGER.debug("looking inside any ./Actions subdirectory")
+        tmp_python_files_in_current_action_subdirectory = glob.glob(
+            f"{os.getcwd()}/**/Actions/*Action.py", recursive=True
+        )
+        Global.LOGGER.debug(
+            f"found {len(tmp_python_files_in_current_action_subdirectory)} actions in a ./Actions subdirectory"
+        )
         for action_file in tmp_python_files_in_current_action_subdirectory:
             action_filename = os.path.basename(action_file)
             if action_filename not in tmp_python_files_dict:
@@ -185,8 +194,12 @@ class Action(Thread):
         # get custom actions in site_packages directory
         Global.LOGGER.debug("looking inside the Python environment")
         for my_site in site_packages:
-            tmp_python_files_in_site_directory = glob.glob(f"{my_site}/**/Actions/*Action.py", recursive=True) 
-            Global.LOGGER.debug(f"found {len(tmp_python_files_in_site_directory)} actions in {my_site}")
+            tmp_python_files_in_site_directory = glob.glob(
+                f"{my_site}/**/Actions/*Action.py", recursive=True
+            )
+            Global.LOGGER.debug(
+                f"found {len(tmp_python_files_in_site_directory)} actions in {my_site}"
+            )
 
             for action_file in tmp_python_files_in_site_directory:
                 action_filename = os.path.basename(action_file)
@@ -204,11 +217,10 @@ class Action(Thread):
                 Global.LOGGER.debug(f"actions found: \n{actions_found}")
         else:
             Global.LOGGER.debug(f"no actions found on {my_site}")
-        
+
         Action.python_files = action_files
 
         return action_files
-
 
     @classmethod
     def create_action_for_code(cls, action_code, name, configuration, managed_input):

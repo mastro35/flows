@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-'''
+"""
 CronAction.py
 --------------
 
@@ -16,7 +14,7 @@ The parameter crontab_schedule has to be in the crontab format:
 *  *  *  *  *
 
 Copyright 2016 Davide Mastromatteo
-'''
+"""
 
 from flows.Actions.Action import Action
 import datetime
@@ -62,9 +60,13 @@ class CronAction(Action):
         super().on_init()
 
         if "crontab_schedule" not in self.configuration:
-            raise ValueError(str.format("The cron action {0} is not properly configured."
-                                        "The crontab_schedule parameter is missing",
-                                        self.name))
+            raise ValueError(
+                str.format(
+                    "The cron action {0} is not properly configured."
+                    "The crontab_schedule parameter is missing",
+                    self.name,
+                )
+            )
 
         self.crontab_schedule = self.configuration["crontab_schedule"]
 
@@ -74,4 +76,3 @@ class CronAction(Action):
         self.cron = croniter(self.crontab_schedule, now)
         self.next = self.cron.get_next(datetime.datetime)
         self.start_timer()
-

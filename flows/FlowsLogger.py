@@ -1,13 +1,11 @@
-#!/usr/bin/env python3
-
-'''
+"""
 FlowsLogger.py
 Logging facility module for flows
 ----------------------------------
 
 Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
-'''
+"""
 
 import logging
 import threading
@@ -19,6 +17,7 @@ class FlowsLogger:
     """
     FlowsLogger class - Logger Factory
     """
+
     _instance = None
     _instance_lock = threading.Lock()
     _logger_instance = None
@@ -41,15 +40,15 @@ class FlowsLogger:
         Returns the standard logger
         """
         if Global.LOGGER:
-            Global.LOGGER.debug('configuring a logger')
+            Global.LOGGER.debug("configuring a logger")
         if self._logger_instance is not None:
             return self._logger_instance
 
         self._logger_instance = logging.getLogger("flowsLogger")
         self._logger_instance.setLevel(logging.DEBUG)
 
-        log_format = '%(asctime)s - [%(levelname)s]|%(thread)d\t%(message)s'
-        log_date_format = '%Y-%m-%d %H:%M:%S'
+        log_format = "%(asctime)s - [%(levelname)s]|%(thread)d\t%(message)s"
+        log_date_format = "%Y-%m-%d %H:%M:%S"
         formatter = logging.Formatter(log_format, log_date_format)
 
         new_log_stream_handler = logging.StreamHandler()
@@ -65,9 +64,10 @@ class FlowsLogger:
         Returns a new standard logger instance
         """
         if Global.LOGGER:
-            Global.LOGGER.debug('reconfiguring logger level')
-        stream_handlers = filter(lambda x: type(x) is logging.StreamHandler,
-                                 self._logger_instance.handlers)
+            Global.LOGGER.debug("reconfiguring logger level")
+        stream_handlers = filter(
+            lambda x: type(x) is logging.StreamHandler, self._logger_instance.handlers
+        )
 
         for x in stream_handlers:
             x.level = Global.CONFIG_MANAGER.log_level

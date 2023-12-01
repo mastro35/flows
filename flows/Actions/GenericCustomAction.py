@@ -1,12 +1,10 @@
-#!/usr/bin/env python3
-
-'''
+"""
 GenericCustomAction.py
 ----------------------
 
 Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
-'''
+"""
 
 from flows.Actions.Action import Action
 

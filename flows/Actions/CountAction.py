@@ -1,12 +1,10 @@
-#!/usr/bin/env python3
-
-'''
+"""
 CountAction.py
 --------------
 
 Copyright 2016 Davide Mastromatteo
 License: Apache-2.0
-'''
+"""
 
 import datetime
 import threading

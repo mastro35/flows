@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-'''
+"""
 TailAction.py
 -------------
 
 Copyright 2016 Davide Mastromatteo
-'''
+"""
 
 import datetime
 import os.path
@@ -45,7 +42,7 @@ class TailAction(Action):
         self.try_opening_file()
 
     def try_opening_file(self):
-        '''Try to open the input file'''
+        """Try to open the input file"""
         # read all the file to tail til the end...
         if os.path.isfile(self.path):
             self.my_log_file = tyler.Tyler(self.path)
@@ -58,13 +55,13 @@ class TailAction(Action):
             self.file_is_opened = True
 
     def bufferize_line(self, line):
-        ''' Insert a new line into the buffer '''
+        """Insert a new line into the buffer"""
         self.buffer.append(line)
 
     def flush_buffer(self):
-        ''' Flush the buffer of the tail '''
+        """Flush the buffer of the tail"""
         if len(self.buffer) > 0:
-            return_value = ''.join(self.buffer)
+            return_value = "".join(self.buffer)
             self.buffer.clear()
             self.send_message(return_value)
             self.last_flush_date = datetime.datetime.now()
@@ -95,5 +92,7 @@ class TailAction(Action):
 
         # If there's been something in the buffer for a long time, flush the buffer
         # the default value is 3 seconds
-        if (datetime.datetime.now() - self.last_flush_date).total_seconds() > self.timeout:
+        if (
+            datetime.datetime.now() - self.last_flush_date
+        ).total_seconds() > self.timeout:
             self.flush_buffer()

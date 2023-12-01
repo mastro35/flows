@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-
-'''
+"""
 WebserverAction.py
 ------------------
 
 Copyright 2016 Davide Mastromatteo
-'''
+"""
 
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -35,25 +33,27 @@ class WebserverAction(Action):
         self.host_port = int(my_hostport)
 
         self.my_server = DannyHTTPServer(
-            (self.host_name, self.host_port), MyServerRequestHandler)
+            (self.host_name, self.host_port), MyServerRequestHandler
+        )
 
-        flows.Global.LOGGER.info(str.format(
-            "Server Starts - {0}:{1}", self.host_name, self.host_port))
+        flows.Global.LOGGER.info(
+            str.format("Server Starts - {0}:{1}", self.host_name, self.host_port)
+        )
 
         threading.Thread(target=self.my_server.serve_forever).start()
 
     def on_cycle(self):
         super().on_cycle()
 
-        MyServerRequestHandler.message["sleep_interval"] = (
-            str(flows.Global.CONFIG_MANAGER.sleep_interval))
+        MyServerRequestHandler.message["sleep_interval"] = str(
+            flows.Global.CONFIG_MANAGER.sleep_interval
+        )
 
     def on_input_received(self, action_input=None):
         super().on_input_received(action_input)
         # Action
 
-        MyServerRequestHandler.message[
-            action_input.sender] = action_input.message
+        MyServerRequestHandler.message[action_input.sender] = action_input.message
         self.send_message(action_input.message)
 
     def on_stop(self):
@@ -65,6 +65,7 @@ class MyServerRequestHandler(BaseHTTPRequestHandler):
     """
     MyServerRequestHandler Class
     """
+
     message = {}
 
     def initialize_server(self):
@@ -84,10 +85,12 @@ class MyServerRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(bytes(json.dumps(self.message), "utf-8"))
 
     def log_message(self, format, *args):
-        string_to_log = str.format("{0} - - [{1}] {2}",
-                                   self.address_string(),
-                                   self.log_date_time_string(),
-                                   format % args)
+        string_to_log = str.format(
+            "{0} - - [{1}] {2}",
+            self.address_string(),
+            self.log_date_time_string(),
+            format % args,
+        )
         flows.Global.LOGGER.debug(string_to_log)
 
 
@@ -95,6 +98,7 @@ class DannyHTTPServer(HTTPServer):
     """
     DannyHTTPServer Class
     """
+
     is_alive = True
 
     def serve_forever(self, poll_interval=0.5):

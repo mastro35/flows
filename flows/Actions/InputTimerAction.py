@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-
-'''
+"""
 TimerAction.py
 --------------
 
 Copyright 2016 Davide Mastromatteo
-'''
+"""
 
 import threading
 from flows.Actions.Action import Action

@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-
-'''
+"""
 HashAction.py
 -------------
 
 Copyright 2016 Davide Mastromatteo
-'''
+"""
 
 import hashlib
 from flows.Actions.Action import Action
@@ -27,7 +25,7 @@ class HashAction(Action):
         input_message = action_input.message
 
         md5_object = hashlib.md5()
-        md5_object.update(input_message.encode('utf-8'))
+        md5_object.update(input_message.encode("utf-8"))
         return_value = md5_object.hexdigest()
 
         # returns the output

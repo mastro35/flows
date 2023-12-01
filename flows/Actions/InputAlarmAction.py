@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-'''
+"""
 AlarmAction.py
 --------------
 
@@ -9,7 +7,7 @@ Use the parameter "date" as following to set an alarm
 date = 01/11/2017 18:25
 
 Copyright 2016 Davide Mastromatteo
-'''
+"""
 
 import datetime
 from flows.Actions.Action import Action
@@ -27,9 +25,13 @@ class AlarmAction(Action):
         super().on_init()
 
         if "date" not in self.configuration:
-            raise ValueError(str.format("The alarm action {0} is not properly configured."
-                                        "The Date parameter is missing",
-                                        self.name))
+            raise ValueError(
+                str.format(
+                    "The alarm action {0} is not properly configured."
+                    "The Date parameter is missing",
+                    self.name,
+                )
+            )
 
         date = self.configuration["date"]
         self.next = datetime.datetime.strptime(date, "%d/%m/%Y %H:%M")

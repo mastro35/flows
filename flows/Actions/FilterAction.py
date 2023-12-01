@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-
-'''
+"""
 FilterAction.py
 ----------------------------
 
 Copyright 2016 Davide Mastromatteo
-'''
+"""
 
 
 import re

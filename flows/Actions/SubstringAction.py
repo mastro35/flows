@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-
-'''
+"""
 SubstringAction.py
 ------------------
 
 Copyright 2016 Davide Mastromatteo
-'''
+"""
 
 from flows.Actions.Action import Action
 
@@ -54,7 +52,7 @@ class SubstringAction(Action):
         input_string = action_input.message
 
         if self.substring_type == "cut":
-            return_value = input_string[self.from_index:self.to_index]
+            return_value = input_string[self.from_index : self.to_index]
 
         if self.substring_type == "split":
             return_value = input_string.split(self.separator)[self.item]

@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-
-'''
+"""
 LogAction.py
 ------------
 
 Copyright 2016 Davide Mastromatteo
-'''
+"""
 
 
 import time
@@ -36,10 +34,10 @@ class LogAction(Action):
                 self.output_file = option_token
 
                 if "rolling" in self.configuration:
-
                     self.rolling = True
                     self.file_logger = logging.getLogger(
-                        "Rotating Log" + self.output_file)
+                        "Rotating Log" + self.output_file
+                    )
                     self.file_logger.setLevel(logging.DEBUG)
 
                     max_bytes = 20000000
@@ -50,11 +48,11 @@ class LogAction(Action):
                     if "backupCount" in self.configuration:
                         backup_count = int(self.configuration["backupCount"])
 
-                    handler = RotatingFileHandler(self.output_file, maxBytes=max_bytes,
-                                                  backupCount=backup_count)
+                    handler = RotatingFileHandler(
+                        self.output_file, maxBytes=max_bytes, backupCount=backup_count
+                    )
 
                     self.file_logger.addHandler(handler)
-
 
     def on_input_received(self, action_input=None):
         super().on_input_received(action_input)
@@ -67,24 +65,26 @@ class LogAction(Action):
 
         input_message = action_input.message
 
-        string_to_log = string_to_log.replace("\\n", '\n')
-        string_to_log = string_to_log.replace("\\t", '\t')
+        string_to_log = string_to_log.replace("\\n", "\n")
+        string_to_log = string_to_log.replace("\\t", "\t")
         string_to_log = string_to_log.replace("{input}", input_message)
-        string_to_log = string_to_log.replace(
-            "{date}", time.strftime("%d/%m/%Y"))
-        string_to_log = string_to_log.replace(
-            "{time}", time.strftime("%H:%M:%S"))
+        string_to_log = string_to_log.replace("{date}", time.strftime("%d/%m/%Y"))
+        string_to_log = string_to_log.replace("{time}", time.strftime("%H:%M:%S"))
 
         if action_input.file_system_event is not None:
-            string_to_log = string_to_log.replace("{event_type}",
-                                                  action_input.file_system_event.event_type)
-            string_to_log = string_to_log.replace("{file_source}",
-                                                  action_input.file_system_event.src_path)
-            string_to_log = string_to_log.replace("{is_directory}",
-                                                  str(action_input.file_system_event.is_directory))
+            string_to_log = string_to_log.replace(
+                "{event_type}", action_input.file_system_event.event_type
+            )
+            string_to_log = string_to_log.replace(
+                "{file_source}", action_input.file_system_event.src_path
+            )
+            string_to_log = string_to_log.replace(
+                "{is_directory}", str(action_input.file_system_event.is_directory)
+            )
             if hasattr(action_input.file_system_event, "dest_path"):
-                string_to_log = string_to_log.replace("{file_destination}",
-                                                      action_input.file_system_event.src_path)
+                string_to_log = string_to_log.replace(
+                    "{file_destination}", action_input.file_system_event.src_path
+                )
 
         if string_to_log == "":
             string_to_log = input_message

@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-
-'''
+"""
 ReadFileAction.py
 -----------------
 
 Copyright 2016 Davide Mastromatteo
-'''
+"""
 
 import os.path
 from flows.Actions.Action import Action
@@ -31,9 +29,9 @@ class ReadFileAction(Action):
         self.try_opening_file()
 
     def try_opening_file(self):
-        '''Try to open the input file'''
+        """Try to open the input file"""
         if os.path.isfile(self.path):
-            self.file = open(self.path, 'r')
+            self.file = open(self.path, "r")
             self.file_is_opened = True
 
     def on_stop(self):
