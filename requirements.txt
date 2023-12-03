@@ -1,7 +1,15 @@
-adodbapi>=2.6.0.7
-croniter>=0.3.12
-watchdog>=0.8.3
-zmq>=0.0.0
-pytyler>=0.2
+
+# dependency of the project 
+# adodbapi>=2.6.0.7
+croniter
+watchdog
+zmq
+pytyler
+
+# packages needed to the devs
 black
-pylsp-server
+python-lsp-server
+
+# packages needed to build the pypi package
+wheel
+twine

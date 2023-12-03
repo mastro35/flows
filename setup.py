@@ -16,7 +16,7 @@ from setuptools import setup
 from flows.Global import VERSION
 
 setup_requires = [
-    "adodbapi>=2.6.0.7",
+    #    "adodbapi>=2.6.0.7",
     "watchdog>=0.8.3",
     "zmq>=0.0.0",
     "croniter>=0.3.12",
@@ -32,7 +32,7 @@ setup(
     url="http://github.com/mastro35/flows/",
     license="Apache-2.0",
     author="Davide Mastromatteo",
-    author_email="dave35@me.com",
+    author_email="mastro35@gmail.com",
     description="a Python automated workflow generator",
     long_description=__doc__,
     packages=["flows", "flows.Actions"],
