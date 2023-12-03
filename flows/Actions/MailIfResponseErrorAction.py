@@ -97,7 +97,7 @@ class MailIfResponseErrorAction(Action):
             status = ""
 
         if "verbose" in self.configuration:
-            flows.Global.LOGGER.info(str.format("{0} - {1}", self.name, status))
+            self.LOGGER.info(str.format("{0} - {1}", self.name, status))
 
         # returns the output
         if status != 200:
@@ -133,10 +133,10 @@ class MailIfResponseErrorAction(Action):
                 )
                 smtp_obj.send_message(msg)
                 smtp_obj.quit()
-                flows.Global.LOGGER.debug("Successfully sent email")
+                self.LOGGER.debug("Successfully sent email")
             except Exception as exc:
-                flows.Global.LOGGER.error(str(exc))
-                flows.Global.LOGGER.error("Error: unable to send email")
+                self.LOGGER.error(str(exc))
+                self.LOGGER.error("Error: unable to send email")
 
             # returns the output
             self.send_message(body)

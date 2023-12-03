@@ -111,10 +111,10 @@ class MailAction(Action):
             )
             smtp_obj.send_message(msg)
             smtp_obj.quit()
-            flows.Global.LOGGER.debug("Successfully sent email")
+            self.LOGGER.debug("Successfully sent email")
         except Exception as exc:
-            flows.Global.LOGGER.error(str(exc))
-            flows.Global.LOGGER.error("Error: unable to send email")
+            self.LOGGER.error(str(exc))
+            self.LOGGER.error("Error: unable to send email")
 
         # returns the output
         self.send_message(body)

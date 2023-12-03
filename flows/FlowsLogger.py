@@ -10,8 +10,6 @@ License: Apache-2.0
 import logging
 import threading
 
-from flows import Global
-
 
 class FlowsLogger:
     """
@@ -21,6 +19,7 @@ class FlowsLogger:
     _instance = None
     _instance_lock = threading.Lock()
     _logger_instance = None
+    log_level = logging.INFO  # -v parameter
 
     @classmethod
     def default_instance(cls):
@@ -39,8 +38,6 @@ class FlowsLogger:
         """
         Returns the standard logger
         """
-        if Global.LOGGER:
-            Global.LOGGER.debug("configuring a logger")
         if self._logger_instance is not None:
             return self._logger_instance
 
@@ -63,13 +60,11 @@ class FlowsLogger:
         """
         Returns a new standard logger instance
         """
-        if Global.LOGGER:
-            Global.LOGGER.debug("reconfiguring logger level")
         stream_handlers = filter(
             lambda x: type(x) is logging.StreamHandler, self._logger_instance.handlers
         )
 
         for x in stream_handlers:
-            x.level = Global.CONFIG_MANAGER.log_level
+            x.level = self.log_level
 
         return self.get_logger()

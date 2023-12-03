@@ -13,7 +13,7 @@ import os
 import random
 import threading
 
-from flows import Global
+from flows.FlowsLogger import FlowsLogger
 
 
 class ConfigManager:
@@ -33,12 +33,13 @@ class ConfigManager:
     queue_length_for_system_check = 100
     messages_dispatched_for_system_check = 5000
     seconds_between_queue_check = 60
-    log_level = logging.INFO  # -v parameter
     recipes = []  # parameters from command line
     show_stats = False  # -s <> 0 parameter
-    tracing_mode = False  # -t parameter
+    tracing_mode: bool = False  # -t parameter
     stats_timeout = 60  # -s parameter
     fixed_message_fetcher_interval = False  # -m parameter
+
+    LOGGER = FlowsLogger.default_instance().get_logger()
 
     @staticmethod
     def default_instance():
@@ -57,9 +58,9 @@ class ConfigManager:
         """
         Read a recipe file from disk
         """
-        Global.LOGGER.debug(f"reading recipe {filename}")
+        self.LOGGER.debug(f"reading recipe {filename}")
         if not os.path.isfile(filename):
-            Global.LOGGER.error(filename + " recipe not found, skipping")
+            self.LOGGER.error(filename + " recipe not found, skipping")
             return
 
         config = configparser.ConfigParser(allow_no_value=True, delimiters="=")
@@ -69,13 +70,13 @@ class ConfigManager:
         for section in config.sections():
             self.sections[section] = config[section]
 
-        Global.LOGGER.debug("Read recipe " + filename)
+        self.LOGGER.debug("Read recipe " + filename)
 
     def set_socket_address(self):
         """
         Set a random port to be used by zmq
         """
-        Global.LOGGER.debug("defining socket addresses for zmq")
+        self.LOGGER.debug("defining socket addresses for zmq")
         random.seed()
         default_port = random.randrange(5001, 5999)
 
@@ -83,12 +84,12 @@ class ConfigManager:
         internal_0mq_port_subscriber = str(default_port)
         internal_0mq_port_publisher = str(default_port)
 
-        Global.LOGGER.info(
+        self.LOGGER.info(
             str.format(
                 f"zmq subsystem subscriber on {internal_0mq_port_subscriber} port"
             )
         )
-        Global.LOGGER.info(
+        self.LOGGER.info(
             str.format(f"zmq subsystem publisher on {internal_0mq_port_publisher} port")
         )
 

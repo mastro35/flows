@@ -1,5 +1,4 @@
 from flows.FlowsManager import FlowsManager
-from flows import Global
 
 
 def main():
@@ -8,7 +7,6 @@ def main():
     try:
         my_flows_manager.start()
     except KeyboardInterrupt:
-        Global.LOGGER.info("Quit command received")
         my_flows_manager.stop()
 
 

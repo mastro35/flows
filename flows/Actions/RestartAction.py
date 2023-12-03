@@ -21,4 +21,4 @@ class RestartAction(Action):
         super().on_input_received(action_input)
 
         # Action
-        flows.Global.PROCESS_MANAGER.restart()
+        self.PROCESS_MANAGER.restart()

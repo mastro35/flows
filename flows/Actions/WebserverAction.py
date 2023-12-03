@@ -36,7 +36,7 @@ class WebserverAction(Action):
             (self.host_name, self.host_port), MyServerRequestHandler
         )
 
-        flows.Global.LOGGER.info(
+        self.LOGGER.info(
             str.format("Server Starts - {0}:{1}", self.host_name, self.host_port)
         )
 
@@ -46,7 +46,7 @@ class WebserverAction(Action):
         super().on_cycle()
 
         MyServerRequestHandler.message["sleep_interval"] = str(
-            flows.Global.CONFIG_MANAGER.sleep_interval
+            self.CONFIG_MANAGER.sleep_interval
         )
 
     def on_input_received(self, action_input=None):
@@ -91,7 +91,7 @@ class MyServerRequestHandler(BaseHTTPRequestHandler):
             self.log_date_time_string(),
             format % args,
         )
-        flows.Global.LOGGER.debug(string_to_log)
+        self.LOGGER.debug(string_to_log)
 
 
 class DannyHTTPServer(HTTPServer):
@@ -115,4 +115,4 @@ class DannyHTTPServer(HTTPServer):
         """
         self.is_alive = False
         self.server_close()
-        flows.Global.LOGGER.info("Server Stops " + (str(self.server_address)))
+        self.LOGGER.info("Server Stops " + (str(self.server_address)))

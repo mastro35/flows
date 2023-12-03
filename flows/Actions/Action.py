@@ -13,12 +13,13 @@ import importlib
 import importlib.util
 import os
 import site
-import sys
 import time
 import threading
 from threading import Thread
 
-from flows import Global
+from flows.ConfigManager import ConfigManager
+from flows.FlowsLogger import FlowsLogger
+from flows.MessageDispatcher import MessageDispatcher
 
 
 class ActionInput:
@@ -52,12 +53,15 @@ class Action(Thread):
     context = None
     socket = None
     is_running = True
-    monitored_input = None
+    monitored_input: list
     my_action_input = None
+    LOGGER = FlowsLogger.default_instance().get_logger()
+    CONFIG_MANAGER = ConfigManager.default_instance()
+    MESSAGE_DISPATCHER = MessageDispatcher.default_instance()
 
     python_files = []
 
-    def __init__(self, name, configuration, managed_input):
+    def __init__(self, name: str, configuration, managed_input: list):
         super().__init__()
 
         # Set the action as a daemon
@@ -101,7 +105,7 @@ class Action(Thread):
         """
         Send an output to the socket
         """
-        Global.MESSAGE_DISPATCHER.send_message(output)
+        self.MESSAGE_DISPATCHER.send_message(output)
 
     def send_message(self, output):
         """
@@ -114,11 +118,11 @@ class Action(Thread):
 
         output_action = ActionInput(file_system_event, output, self.name, "*")
 
-        Global.MESSAGE_DISPATCHER.send_message(output_action)
+        self.MESSAGE_DISPATCHER.send_message(output_action)
 
     def stop(self):
         """Stop the current action"""
-        Global.LOGGER.debug(f"action {self.name} stopped")
+        self.LOGGER.debug(f"action {self.name} stopped")
         self.is_running = False
         self.on_stop()
 
@@ -126,19 +130,19 @@ class Action(Thread):
         """
         Start the action
         """
-        Global.LOGGER.debug(f"action {self.name} is running")
+        self.LOGGER.debug(f"action {self.name} is running")
 
         for tmp_monitored_input in self.monitored_input:
             sender = "*" + tmp_monitored_input + "*"
-            Global.LOGGER.debug(f"action {self.name} is monitoring {sender}")
+            self.LOGGER.debug(f"action {self.name} is monitoring {sender}")
 
         while self.is_running:
             try:
-                time.sleep(Global.CONFIG_MANAGER.sleep_interval)
+                time.sleep(self.CONFIG_MANAGER.sleep_interval)
                 self.on_cycle()
 
             except Exception as exc:
-                Global.LOGGER.error(
+                self.LOGGER.error(
                     f"error while running the action {self.name}: {str(exc)}"
                 )
 
@@ -149,8 +153,8 @@ class Action(Thread):
             foo = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(foo)
         except Exception as ex:
-            Global.LOGGER.warn(f"{ex}")
-            Global.LOGGER.warn(
+            cls.LOGGER.warn(f"{ex}")
+            cls.LOGGER.warn(
                 f"an error occured while importing {module_name}, so the module will be skipped."
             )
 
@@ -161,16 +165,16 @@ class Action(Thread):
             return Action.python_files
 
         # elsewere, load all the custom actions you find
-        Global.LOGGER.debug("searching for installed actions... it can takes a while")
+        cls.LOGGER.debug("searching for installed actions... it can takes a while")
         site_packages = site.getsitepackages()
 
-        Global.LOGGER.debug(f"current path: {os.getcwd()}")
+        cls.LOGGER.debug(f"current path: {os.getcwd()}")
         # get custom actions in current path
-        Global.LOGGER.debug("looking inside the current directory")
+        cls.LOGGER.debug("looking inside the current directory")
         tmp_python_files_in_current_directory = glob.glob(
             f"{os.getcwd()}/*Action.py", recursive=False
         )
-        Global.LOGGER.debug(
+        cls.LOGGER.debug(
             f"found {len(tmp_python_files_in_current_directory)} actions in current directory"
         )
         basenames = list(map(os.path.basename, tmp_python_files_in_current_directory))
@@ -179,11 +183,11 @@ class Action(Thread):
         )
 
         # get custom actions in current /Action subdir
-        Global.LOGGER.debug("looking inside any ./Actions subdirectory")
+        cls.LOGGER.debug("looking inside any ./Actions subdirectory")
         tmp_python_files_in_current_action_subdirectory = glob.glob(
             f"{os.getcwd()}/**/Actions/*Action.py", recursive=True
         )
-        Global.LOGGER.debug(
+        cls.LOGGER.debug(
             f"found {len(tmp_python_files_in_current_action_subdirectory)} actions in a ./Actions subdirectory"
         )
         for action_file in tmp_python_files_in_current_action_subdirectory:
@@ -192,12 +196,12 @@ class Action(Thread):
                 tmp_python_files_dict[action_filename] = action_file
 
         # get custom actions in site_packages directory
-        Global.LOGGER.debug("looking inside the Python environment")
+        cls.LOGGER.debug("looking inside the Python environment")
         for my_site in site_packages:
             tmp_python_files_in_site_directory = glob.glob(
                 f"{my_site}/**/Actions/*Action.py", recursive=True
             )
-            Global.LOGGER.debug(
+            cls.LOGGER.debug(
                 f"found {len(tmp_python_files_in_site_directory)} actions in {my_site}"
             )
 
@@ -210,13 +214,13 @@ class Action(Thread):
         action_files = tmp_python_files_dict.values()
 
         if len(action_files) > 0:
-            Global.LOGGER.debug(f"{len(action_files)} actions found")
+            cls.LOGGER.debug(f"{len(action_files)} actions found")
 
-            if Global.CONFIG_MANAGER.tracing_mode:
+            if cls.CONFIG_MANAGER.tracing_mode:
                 actions_found = "\n".join(action_files)
-                Global.LOGGER.debug(f"actions found: \n{actions_found}")
+                cls.LOGGER.debug(f"actions found: \n{actions_found}")
         else:
-            Global.LOGGER.debug(f"no actions found on {my_site}")
+            cls.LOGGER.debug(f"no actions found on {my_site}")
 
         Action.python_files = action_files
 
@@ -227,9 +231,9 @@ class Action(Thread):
         """
         Factory method to create an instance of an Action from an input code
         """
-        Global.LOGGER.debug(f"creating action {name} for code {action_code}")
-        Global.LOGGER.debug(f"configuration length: {len(configuration)}")
-        Global.LOGGER.debug(f"input: {managed_input}")
+        cls.LOGGER.debug(f"creating action {name} for code {action_code}")
+        cls.LOGGER.debug(f"configuration length: {len(configuration)}")
+        cls.LOGGER.debug(f"input: {managed_input}")
 
         # get the actions catalog
         my_actions_file = Action.search_actions()
