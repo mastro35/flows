@@ -81,7 +81,7 @@ class LogAction(Action):
             string_to_log = string_to_log.replace(
                 "{is_directory}", str(msg["file_system_event"]["is_directory"])
             )
-            if hasattr(action_input.file_system_event, "dest_path"):
+            if hasattr(file_system_event, "dest_path"):
                 string_to_log = string_to_log.replace(
                     "{file_destination}", action_input.file_system_event.src_path
                 )

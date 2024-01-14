@@ -7,7 +7,6 @@ License: Apache-2.0
 """
 
 from flows.Actions.Action import Action
-import flows.Global
 
 
 class RestartAction(Action):

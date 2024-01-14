@@ -8,7 +8,9 @@ License: Apache-2.0
 """
 
 import datetime
-import pickle
+
+# import pickle
+import json
 import sys
 import threading
 import time
@@ -51,7 +53,7 @@ class MessageDispatcher:
 
         self.dispatched = 0
         self.last_stat = datetime.datetime.now()
-        self.context = None
+        #        self.context = None
         self.socket = None
 
         self.context = zmq.Context()
@@ -67,20 +69,20 @@ class MessageDispatcher:
                 if attempt == 5:
                     self.LOGGER.error(
                         """Can't find a suitable tcp port to connect.
-                        The execution will be terminated"""
+                           The execution will be terminated"""
                     )
                     sys.exit(8)
 
-                self.LOGGER.warning(
-                    str.format(
-                        "error occured trying to connect to {0} ",
-                        self.CONFIG_MANAGER.publisher_socket_address,
-                    )
+            self.LOGGER.warning(
+                str.format(
+                    "error occured trying to connect to {0} ",
+                    self.CONFIG_MANAGER.publisher_socket_address,
                 )
+            )
 
-                self.LOGGER.warning(str.format("retrying... ({0}/{1})", attempt + 1, 5))
+            self.LOGGER.warning(str.format("retrying... ({0}/{1})", attempt + 1, 5))
 
-                time.sleep(1)
+            time.sleep(1)
 
         self.LOGGER.debug("message dispatcher initialized successfully")
 
@@ -93,35 +95,39 @@ class MessageDispatcher:
                 self.LOGGER.error("can't deliver a null messages")
                 return
 
-            if message.sender is None:
+            if message["sender"] is None:
                 self.LOGGER.error(
-                    f"can't deliver anonymous messages with body {message.body}"
+                    f"can't deliver anonymous messages with body {message['body']}"
                 )
                 return
 
-            if message.receiver is None:
+            if message["target"] is None:
                 self.LOGGER.error(
-                    f"can't deliver message from {message.sender}: recipient not specified"
+                    f"can't deliver message from {message['sender']}: recipient not specified"
                 )
                 return
 
-            if message.message is None:
+            if message["message"] is None:
                 self.LOGGER.error(
-                    f"can't deliver message with no body from {message.sender}"
+                    f"can't deliver message with no body from {message['sender']}"
                 )
                 return
 
-            sender = "*" + message.sender + "*"
-            self.socket.send_multipart([bytes(sender, "utf-8"), pickle.dumps(message)])
+            json_message = json.dumps(message)
+
+            sender = "*" + message["sender"] + "*"
+            self.socket.send_multipart(
+                [bytes(sender, "utf-8"), bytes(json_message, "utf-8")]
+            )
 
             if self.CONFIG_MANAGER.tracing_mode:
                 self.LOGGER.debug(
                     "dispatched : "
-                    + message.sender
+                    + message["sender"]
                     + "-"
-                    + message.message
+                    + message["message"]
                     + "-"
-                    + message.receiver
+                    + message["target"]
                 )
 
             self.dispatched = self.dispatched + 1

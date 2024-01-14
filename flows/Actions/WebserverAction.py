@@ -10,7 +10,6 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import time
 import json
 from flows.Actions.Action import Action
-import flows.Global
 
 
 class WebserverAction(Action):

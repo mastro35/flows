@@ -4,6 +4,7 @@
 croniter
 watchdog
 zmq
+# pynng
 pytyler
 
 # packages needed to the devs

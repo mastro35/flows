@@ -22,22 +22,22 @@ from flows.FlowsLogger import FlowsLogger
 from flows.MessageDispatcher import MessageDispatcher
 
 
-class ActionInput:
-    """
-    Standard input for every action in flows
-    """
+# class ActionInput:
+#     """
+#     Standard input for every action in flows
+#     """
 
-    sender = ""
-    receiver = ""
-    message = ""
-    file_system_event = None
+#     sender = ""
+#     receiver = ""
+#     message = ""
+#     file_system_event = None
 
-    def __init__(self, event, message, sender, receiver="*"):
-        super().__init__()
-        self.message = message
-        self.file_system_event = event
-        self.sender = sender
-        self.receiver = receiver
+#     def __init__(self, event, message, sender, receiver="*"):
+#         super().__init__()
+#         self.message = message
+#         self.file_system_event = event
+#         self.sender = sender
+#         self.receiver = receiver
 
 
 class Action(Thread):
@@ -107,16 +107,21 @@ class Action(Thread):
         """
         self.MESSAGE_DISPATCHER.send_message(output)
 
+    def log(self, message):
+        self.LOGGER.debug(message)
+
     def send_message(self, output):
         """
         Send a message to the socket
         """
 
-        file_system_event = None
-        if self.my_action_input:
-            file_system_event = self.my_action_input.file_system_event or None
+        #        file_system_event = None
+        #        if self.my_action_input:
+        #            file_system_event = self.my_action_input.file_system_event or None
 
-        output_action = ActionInput(file_system_event, output, self.name, "*")
+        #        output_action = ActionInput(file_system_event, output, self.name, "*")
+
+        output_action = {"message": output, "sender": self.name, "target": "*"}
 
         self.MESSAGE_DISPATCHER.send_message(output_action)
 

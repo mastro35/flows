@@ -10,8 +10,9 @@ import argparse
 import asyncio
 import datetime
 import logging
-import pickle
+import json
 
+# import pickle
 import zmq
 
 from flows import ConfigManager
@@ -30,7 +31,15 @@ __status__: str = "Production/Stable"
 
 
 class FlowsManager:
+    """
+    FlowsManager: the mail class that create all the others object
+    to run a Flow
+    """
+
     def __init__(self) -> None:
+        """
+        Default Contrsuctor of the FlowsManager class
+        """
         self.actions = []
         self.subscriptions = {}
 
@@ -192,58 +201,57 @@ class FlowsManager:
 
         self.LOGGER.info("actions stopped")
 
-    def _perform_system_check(self):
-        """
-        Perform a system check to define if we need to throttle to handle
-        all the incoming messages
-        """
-        if self.CONFIG_MANAGER.tracing_mode:
-            self.LOGGER.debug("performing a system check")
+    # def _perform_system_check(self):
+    #     """
+    #     Perform a system check to define if we need to throttle to handle
+    #     all the incoming messages
+    #     """
+    #     if self.CONFIG_MANAGER.tracing_mode:
+    #         self.LOGGER.debug("performing a system check")
 
-        now = datetime.datetime.now()
-        sent = self.MESSAGE_DISPATCHER.dispatched
-        received = self.fetched
-        queue_length = sent - received
-        message_sleep_interval = self.CONFIG_MANAGER.message_fetcher_sleep_interval
+    #     now = datetime.datetime.now()
+    #     sent = self.MESSAGE_DISPATCHER.dispatched
+    #     received = self.fetched
+    #     queue_length = sent - received
+    #     message_sleep_interval = self.CONFIG_MANAGER.message_fetcher_sleep_interval
 
-        if self.CONFIG_MANAGER.show_stats:
-            if (
-                now - self.last_stats_check_date
-            ).total_seconds() > self.CONFIG_MANAGER.stats_timeout:
-                self.last_stats_check_date = now
-                stats_string = f"showing stats\n--- [STATS] ---\nMessage Sent: {sent}\nMessage Received: {received}\nMessage Sleep Interval = {message_sleep_interval}\nQueue length = {queue_length}\n--- [ END ] ---"
-                self.LOGGER.info(stats_string)
+    #     if self.CONFIG_MANAGER.show_stats:
+    #         if (
+    #             now - self.last_stats_check_date
+    #         ).total_seconds() > self.CONFIG_MANAGER.stats_timeout:
+    #             self.last_stats_check_date = now
+    #             stats_string = f"showing stats\n--- [STATS] ---\nMessage Sent: {sent}\nMessage Received: {received}\nMessage Sleep Interval = {message_sleep_interval}\nQueue length = {queue_length}\n--- [ END ] ---"
+    #             self.LOGGER.info(stats_string)
 
-        # if we are accumulating messages, or we have processed at least 5000 messages
-        # since last check, we need to speed up the process
-        messages_limit_reached = (
-            sent - self.last_queue_check_count
-            > self.CONFIG_MANAGER.messages_dispatched_for_system_check
-        )
-        queue_limit_reached = (
-            queue_length > self.CONFIG_MANAGER.queue_length_for_system_check
-        )
-        time_limit_since_last_check_is_over = (
-            now - self.last_queue_check_date
-        ).total_seconds() > self.CONFIG_MANAGER.seconds_between_queue_check
+    #     # if we are accumulating messages, or we have processed at least 5000 messages
+    #     # since last check, we need to speed up the process
+    #     messages_limit_reached = (
+    #         sent - self.last_queue_check_count
+    #         > self.CONFIG_MANAGER.messages_dispatched_for_system_check
+    #     )
+    #     queue_limit_reached = (
+    #         queue_length > self.CONFIG_MANAGER.queue_length_for_system_check
+    #     )
+    #     time_limit_since_last_check_is_over = (
+    #         now - self.last_queue_check_date
+    #     ).total_seconds() > self.CONFIG_MANAGER.seconds_between_queue_check
 
-        if not self.CONFIG_MANAGER.fixed_message_fetcher_interval:
-            if (messages_limit_reached) or (
-                queue_limit_reached and time_limit_since_last_check_is_over
-            ):
-                cause = (
-                    "messages limit reached"
-                    if messages_limit_reached
-                    else "queue limit reached"
-                )
-                self.LOGGER.debug(f"triggering the throttle function due to {cause}")
-                self._adapt_sleep_interval(sent, received, queue_length, now)
-
+    #     if not self.CONFIG_MANAGER.fixed_message_fetcher_interval:
+    #         if (messages_limit_reached) or (
+    #             queue_limit_reached and time_limit_since_last_check_is_over
+    #         ):
+    #             cause = (
+    #                 "messages limit reached"
+    #                 if messages_limit_reached
+    #                 else "queue limit reached"
+    #             )
+    #             self.LOGGER.debug(f"triggering the throttle function due to {cause}")
+    #             # self._adapt_sleep_interval(sent, received, queue_length, now)
     def _deliver_message(self, msg):
         """
         Deliver the message to the subscripted actions
         """
-        my_subscribed_actions = self.subscriptions.get(msg.sender, [])
+        my_subscribed_actions = self.subscriptions.get(msg["sender"], [])
         for action in my_subscribed_actions:
             if self.CONFIG_MANAGER.tracing_mode:
                 self.LOGGER.debug(f"delivering message to {action.name}")
@@ -259,7 +267,8 @@ class FlowsManager:
                 self.LOGGER.debug("fetched a new message")
 
             self.fetched = self.fetched + 1
-            obj = pickle.loads(msg)
+            # obj = pickle.loads(msg)
+            obj = json.loads(msg)
             self._deliver_message(obj)
             return obj
         except zmq.error.Again:
@@ -276,7 +285,7 @@ class FlowsManager:
         self.isrunning = True
         while self.isrunning:
             loop.call_soon(self._fetch_messages)
-            loop.call_soon(self._perform_system_check)
+            # loop.call_soon(self._perform_system_check)
             await asyncio.sleep(self.CONFIG_MANAGER.message_fetcher_sleep_interval)
 
         self.LOGGER.debug("message fetcher stopped")
@@ -294,40 +303,40 @@ class FlowsManager:
             self.LOGGER.debug("closing the event loop")
             event_loop.close()
 
-    def _adapt_sleep_interval(self, sent, received, queue, now):
-        """
-        Adapt sleep time based on the number of the messages in queue
-        """
-        self.LOGGER.debug("adjusting sleep interval")
+    # def _adapt_sleep_interval(self, sent, received, queue, now):
+    #     """
+    #     Adapt sleep time based on the number of the messages in queue
+    #     """
+    #     self.LOGGER.debug("adjusting sleep interval")
 
-        dispatched_since_last_check = sent - self.last_queue_check_count
-        seconds_since_last_check = (now - self.last_queue_check_date).total_seconds()
+    #     dispatched_since_last_check = sent - self.last_queue_check_count
+    #     seconds_since_last_check = (now - self.last_queue_check_date).total_seconds()
 
-        self.LOGGER.debug(
-            str(dispatched_since_last_check)
-            + " dispatched in the last "
-            + str(seconds_since_last_check)
-        )
-        sleep_time = (
-            seconds_since_last_check / (dispatched_since_last_check + queue + 1)
-        ) * 0.75
+    #     self.LOGGER.debug(
+    #         str(dispatched_since_last_check)
+    #         + " dispatched in the last "
+    #         + str(seconds_since_last_check)
+    #     )
+    #     sleep_time = (
+    #         seconds_since_last_check / (dispatched_since_last_check + queue + 1)
+    #     ) * 0.75
 
-        if sleep_time > 0.5:
-            sleep_time = 0.5
+    #     if sleep_time > 0.5:
+    #         sleep_time = 0.5
 
-        if sleep_time < 0.0001:
-            sleep_time = 0.0001
+    #     if sleep_time < 0.0001:
+    #         sleep_time = 0.0001
 
-        self.last_queue_check_date = now
-        self.last_queue_check_count = sent
+    #     self.last_queue_check_date = now
+    #     self.last_queue_check_count = sent
 
-        self.CONFIG_MANAGER.message_fetcher_sleep_interval = sleep_time
+    #     self.CONFIG_MANAGER.message_fetcher_sleep_interval = sleep_time
 
-        sleep_interval_log_string = f"new sleep_interval = {sleep_time}"
-        self.LOGGER.debug(sleep_interval_log_string)
+    #     sleep_interval_log_string = f"new sleep_interval = {sleep_time}"
+    #     self.LOGGER.debug(sleep_interval_log_string)
 
-        if self.CONFIG_MANAGER.show_stats:
-            self.LOGGER.info(sleep_interval_log_string)
+    #     if self.CONFIG_MANAGER.show_stats:
+    #         self.LOGGER.info(sleep_interval_log_string)
 
     def _parse_input_parameters(self):
         """

@@ -10,7 +10,6 @@ import urllib.parse
 import urllib.request
 from email.mime.text import MIMEText
 import time
-import flows.Global
 from flows.Actions.Action import Action
 
 

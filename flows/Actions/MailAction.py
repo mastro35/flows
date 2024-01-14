@@ -9,7 +9,6 @@ import smtplib
 import time
 from email.mime.text import MIMEText
 
-import flows.Global
 from flows.Actions.Action import Action
 
 
