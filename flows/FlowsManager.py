@@ -255,6 +255,7 @@ class FlowsManager:
         for action in my_subscribed_actions:
             if self.CONFIG_MANAGER.tracing_mode:
                 self.LOGGER.debug(f"delivering message to {action.name}")
+
             action.on_input_received(msg)
 
     def _fetch_messages(self):

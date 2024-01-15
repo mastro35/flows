@@ -1,14 +1,16 @@
+#!/usr/bin/env python3
+
 """
 LogAction.py
 ------------
 
-Copyright 2016 Davide Mastromatteo
+Copyright 2016-2021 Davide Mastromatteo
 """
-
 
 import time
 import logging
 from logging.handlers import RotatingFileHandler
+
 from flows.Actions.Action import Action
 
 
@@ -26,6 +28,7 @@ class LogAction(Action):
 
     def on_init(self):
         super().on_init()
+
         if "option" in self.configuration:
             option_token = self.configuration["option"]
             if option_token == "null":
@@ -54,8 +57,8 @@ class LogAction(Action):
 
                     self.file_logger.addHandler(handler)
 
-    def on_input_received(self, msg):
-        super().on_input_received(msg)
+    def on_input_received(self, action_input=None):
+        super().on_input_received(action_input)
 
         # Action
         string_to_log = ""
@@ -63,28 +66,33 @@ class LogAction(Action):
         if "text" in self.configuration:
             string_to_log = self.configuration["text"]
 
-        input_message = msg["message"]
+        input_message = action_input["message"]
 
         string_to_log = string_to_log.replace("\\n", "\n")
         string_to_log = string_to_log.replace("\\t", "\t")
-        string_to_log = string_to_log.replace("{input}", input_message)
+        string_to_log = string_to_log.replace("{input}", repr(input_message))
         string_to_log = string_to_log.replace("{date}", time.strftime("%d/%m/%Y"))
         string_to_log = string_to_log.replace("{time}", time.strftime("%H:%M:%S"))
 
-        if msg["file_system_event"] is not None:
+        if "event_type" in input_message:
             string_to_log = string_to_log.replace(
-                "{event_type}", msg["file_system_event"]["event_type"]
+                "{event_type}", input_message["event_type"]
             )
+
+        if "src_path" in input_message:
             string_to_log = string_to_log.replace(
-                "{file_source}", msg["file_system_event"]["src_path"]
+                "{file_source}", input_message["src_path"]
             )
+
+        if "is_directory" in input_message:
             string_to_log = string_to_log.replace(
-                "{is_directory}", str(msg["file_system_event"]["is_directory"])
+                "{is_directory}", str(input_message["is_directory"])
             )
-            if hasattr(action_input.file_system_event, "dest_path"):
-                string_to_log = string_to_log.replace(
-                    "{file_destination}", action_input.file_system_event.src_path
-                )
+
+        if "dest_path" in input_message:
+            string_to_log = string_to_log.replace(
+                "{file_destination}", input_message["src_path"]
+            )
 
         if string_to_log == "":
             string_to_log = input_message
