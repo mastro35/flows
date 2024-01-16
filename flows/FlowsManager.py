@@ -81,10 +81,10 @@ class FlowsManager:
             FlowsLogger.default_instance().reconfigure_log_level(logging.INFO)
             self.logger.info("verbose mode active")
 
-        if args.STATS > 0:
-            self.logger.debug(f"stats requested every {args.STATS} seconds")
-            self.config_manager.show_stats = True
-            self.config_manager.stats_timeout = args.STATS
+        # if args.STATS > 0:
+        #     self.logger.debug(f"stats requested every {args.STATS} seconds")
+        #     self.config_manager.show_stats = True
+        #     self.config_manager.stats_timeout = args.STATS
 
         # if args.INTERVAL > 0:
         #     self.logger.debug(f"setting sleep interval to {args.INTERVAL} milliseconds")
@@ -371,14 +371,14 @@ class FlowsManager:
         #     help="dequeue a message each [X] tenth of milliseconds. (default = auto)",
         # )
 
-        parser.add_argument(
-            "-s",
-            "--STATS",
-            type=int,
-            default=0,
-            metavar=("SEC"),
-            help="show stats each [SEC] seconds. (default = NO STATS)",
-        )
+        # parser.add_argument(
+        #     "-s",
+        #     "--STATS",
+        #     type=int,
+        #     default=0,
+        #     metavar=("SEC"),
+        #     help="show stats each [SEC] seconds. (default = NO STATS)",
+        # )
 
         parser.add_argument(
             "-t",
