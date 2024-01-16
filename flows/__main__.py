@@ -2,7 +2,7 @@
 Flows main Module
 ---------
 
-Copyright 2016 - 2024 Davide Mastromatteo
+Copyright 2016-2024 Davide Mastromatteo
 License: GPL 2.0
 """
 

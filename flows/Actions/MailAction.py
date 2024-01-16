@@ -110,10 +110,10 @@ class MailAction(Action):
             )
             smtp_obj.send_message(msg)
             smtp_obj.quit()
-            self.LOGGER.debug("Successfully sent email")
+            self.logger.debug("Successfully sent email")
         except Exception as exc:
-            self.LOGGER.error(str(exc))
-            self.LOGGER.error("Error: unable to send email")
+            self.logger.error(str(exc))
+            self.logger.error("Error: unable to send email")
 
         # returns the output
         self.send_message(body)

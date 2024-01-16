@@ -35,7 +35,7 @@ class WebserverAction(Action):
             (self.host_name, self.host_port), MyServerRequestHandler
         )
 
-        self.LOGGER.info(
+        self.logger.info(
             str.format("Server Starts - {0}:{1}", self.host_name, self.host_port)
         )
 
@@ -45,7 +45,7 @@ class WebserverAction(Action):
         super().on_cycle()
 
         MyServerRequestHandler.message["sleep_interval"] = str(
-            self.CONFIG_MANAGER.sleep_interval
+            self.config_manager.sleep_interval
         )
 
     def on_input_received(self, action_input=None):

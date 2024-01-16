@@ -3,8 +3,8 @@ ConfigManager.py
 Handle the configuration for flows
 ----------------------------------
 
-Copyright 2016 Davide Mastromatteo
-License: Apache-2.0
+Copyright 2016-2024 Davide Mastromatteo
+License: GPL-2.0
 """
 
 import configparser
@@ -60,14 +60,13 @@ class ConfigManager:
         """
         Read a recipe file from disk
         """
-
         self.logger.debug(f"reading recipe {filename}")
+
         if not os.path.isfile(filename):
             self.logger.error(filename + " recipe not found, skipping")
             return
 
         config = configparser.ConfigParser(allow_no_value=True, delimiters="=")
-
         config.read(filename)
 
         for section in config.sections():
@@ -92,6 +91,7 @@ class ConfigManager:
                 f"zmq subsystem subscriber on {internal_0mq_port_subscriber} port"
             )
         )
+
         self.logger.info(
             str.format(f"zmq subsystem publisher on {internal_0mq_port_publisher} port")
         )
@@ -99,6 +99,7 @@ class ConfigManager:
         self.subscriber_socket_address = (
             f"{internal_0mq_address}:{internal_0mq_port_subscriber}"
         )
+
         self.publisher_socket_address = (
             f"{internal_0mq_address}:{internal_0mq_port_publisher}"
         )

@@ -3,7 +3,7 @@ FlowsLogger.py
 Logging facility module for flows
 ----------------------------------
 
-Copyright 2016 - 2024 Davide Mastromatteo
+Copyright 2016-2024 Davide Mastromatteo
 License: GPL 2.0
 """
 
@@ -19,7 +19,7 @@ class FlowsLogger:
     _instance_lock = threading.Lock()
     _instance = None
     _logger_instance = None
-    log_level = logging.ERROR
+    log_level = logging.WARN
 
     @classmethod
     def default_instance(cls):

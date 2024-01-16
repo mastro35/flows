@@ -96,7 +96,7 @@ class MailIfResponseErrorAction(Action):
             status = ""
 
         if "verbose" in self.configuration:
-            self.LOGGER.info(str.format("{0} - {1}", self.name, status))
+            self.logger.info(str.format("{0} - {1}", self.name, status))
 
         # returns the output
         if status != 200:
@@ -132,10 +132,10 @@ class MailIfResponseErrorAction(Action):
                 )
                 smtp_obj.send_message(msg)
                 smtp_obj.quit()
-                self.LOGGER.debug("Successfully sent email")
+                self.logger.debug("Successfully sent email")
             except Exception as exc:
-                self.LOGGER.error(str(exc))
-                self.LOGGER.error("Error: unable to send email")
+                self.logger.error(str(exc))
+                self.logger.error("Error: unable to send email")
 
             # returns the output
             self.send_message(body)

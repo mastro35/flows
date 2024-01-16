@@ -2,7 +2,7 @@
 FlowsManager.py
 ---------
 
-Copyright 2016 - 2024 Davide Mastromatteo
+Copyright 2016-2024 Davide Mastromatteo
 License: GPL 2.0
 """
 
@@ -86,23 +86,23 @@ class FlowsManager:
             self.config_manager.show_stats = True
             self.config_manager.stats_timeout = args.STATS
 
-        if args.INTERVAL > 0:
-            self.logger.debug(f"setting sleep interval to {args.INTERVAL} milliseconds")
-            self.config_manager.sleep_interval = float(args.INTERVAL) / 1000
+        # if args.INTERVAL > 0:
+        #     self.logger.debug(f"setting sleep interval to {args.INTERVAL} milliseconds")
+        #     self.config_manager.sleep_interval = float(args.INTERVAL) / 1000
 
         if args.TRACE:
             self.config_manager.tracing_mode = True
             FlowsLogger.default_instance().reconfigure_log_level(logging.DEBUG)
             self.logger.debug("tracing mode active")
 
-        if args.MESSAGEINTERVAL is not None and args.MESSAGEINTERVAL > 0:
-            self.logger.debug(
-                f"setting message fetcher sleep interval to {args.MESSAGEINTERVAL/10} milliseconds"
-            )
-            self.config_manager.message_fetcher_sleep_interval = (
-                float(args.MESSAGEINTERVAL) / 10000
-            )
-            self.config_manager.fixed_message_fetcher_interval = True
+        # if args.MESSAGEINTERVAL is not None and args.MESSAGEINTERVAL > 0:
+        #     self.logger.debug(
+        #         f"setting message fetcher sleep interval to {args.MESSAGEINTERVAL/10} milliseconds"
+        #     )
+        #     self.config_manager.message_fetcher_sleep_interval = (
+        #         float(args.MESSAGEINTERVAL) / 10000
+        #     )
+        #     self.config_manager.fixed_message_fetcher_interval = True
 
         self.logger.debug(f"recipes to be parsed: {args.FILENAME}")
         self.config_manager.recipes = args.FILENAME
