@@ -41,25 +41,33 @@ class FlowsManager:
         """
         self.actions = []
         self.subscriptions = {}
+
         self.fetched = 0
         self.isrunning = False
+
+        # For auto throttling feature
         self.last_queue_check_count = 0
         self.last_queue_check_date = datetime.datetime.now()
         self.last_stats_check_date = datetime.datetime.now()
-        self.logger_instance = FlowsLogger.default_instance()
-        self.logger = self.logger_instance.get_logger()
+
+        # Set up of other objects needed by the manager
+        self.logger = FlowsLogger.default_instance().get_logger()
         self.config_manager = ConfigManager.default_instance()
-
-        args = self._parse_input_parameters()
-        self._set_command_line_arguments(args)
-
-        self.logger.debug("Initializing the message dispatcher")
         self.message_dispatcher = MessageDispatcher.default_instance()
 
-        # setting up the SUB ZMQ socket
+        # Preliminary set up of the parameters and the socket
+        self._set_command_line_arguments(self._parse_input_parameters())
+        self._set_subscriber_socket()
+
+    def _set_subscriber_socket(self):
+        """
+        Set up the SUB ZMQ socket
+        """
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
         self.socket.connect(self.config_manager.subscriber_socket_address)
+
+        # filter the multipart messages with a "*" in part 1
         self.socket.setsockopt(zmq.SUBSCRIBE, bytes("*", "utf-8"))
 
     def _set_command_line_arguments(self, args):
@@ -70,8 +78,8 @@ class FlowsManager:
         self.logger.debug("setting command line arguments")
 
         if args.VERBOSE:
-            self.logger_instance.reconfigure_log_level(logging.INFO)
-            self.logger.debug("verbose mode active")
+            FlowsLogger.default_instance().reconfigure_log_level(logging.INFO)
+            self.logger.info("verbose mode active")
 
         if args.STATS > 0:
             self.logger.debug(f"stats requested every {args.STATS} seconds")
@@ -83,9 +91,9 @@ class FlowsManager:
             self.config_manager.sleep_interval = float(args.INTERVAL) / 1000
 
         if args.TRACE:
-            self.logger.debug("tracing mode active")
             self.config_manager.tracing_mode = True
-            self.logger_instance.reconfigure_log_level(logging.DEBUG)
+            FlowsLogger.default_instance().reconfigure_log_level(logging.DEBUG)
+            self.logger.debug("tracing mode active")
 
         if args.MESSAGEINTERVAL is not None and args.MESSAGEINTERVAL > 0:
             self.logger.debug(
@@ -114,7 +122,7 @@ class FlowsManager:
         """
         self.logger.info("stopping the flow manager")
         self._stop_actions()
-        self.isrunning = False
+        self.isrunning = False  # stop the message fetcher
         self.logger.debug("flow manager stopped")
 
     def restart(self):
@@ -344,22 +352,24 @@ class FlowsManager:
             formatter_class=argparse.RawTextHelpFormatter,
         )
         parser.add_argument("FILENAME", nargs="+", help="name of the recipe file(s)")
-        parser.add_argument(
-            "-i",
-            "--INTERVAL",
-            type=int,
-            default=500,
-            metavar=("MS"),
-            help="perform a cycle each [MS] milliseconds. (default = 500)",
-        )
 
-        parser.add_argument(
-            "-m",
-            "--MESSAGEINTERVAL",
-            type=int,
-            metavar=("X"),
-            help="dequeue a message each [X] tenth of milliseconds. (default = auto)",
-        )
+        # parser.add_argument(
+        #     "-i",
+        #     "--INTERVAL",
+        #     type=int,
+        #     default=500,
+        #     metavar=("MS"),
+        #     help="perform a cycle each [MS] milliseconds. (default = 500)",
+        # )
+
+        # parser.add_argument(
+        #     "-m",
+        #     "--MESSAGEINTERVAL",
+        #     type=int,
+        #     metavar=("X"),
+        #     help="dequeue a message each [X] tenth of milliseconds. (default = auto)",
+        # )
+
         parser.add_argument(
             "-s",
             "--STATS",
@@ -368,15 +378,18 @@ class FlowsManager:
             metavar=("SEC"),
             help="show stats each [SEC] seconds. (default = NO STATS)",
         )
+
         parser.add_argument(
             "-t",
             "--TRACE",
             action="store_true",
             help="enable super verbose output, only useful for tracing",
         )
+
         parser.add_argument(
             "-v", "--VERBOSE", action="store_true", help="enable verbose output"
         )
+
         parser.add_argument("-V", "--VERSION", action="version", version=__version__)
 
         args = parser.parse_args()

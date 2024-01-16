@@ -35,6 +35,9 @@ class FlowsLogger:
         return cls._instance
 
     def __init__(self):
+        """
+        Default constructor: it should never be called directly!
+        """
         self._create_logger_instance()
 
     def get_logger(self):
@@ -48,7 +51,6 @@ class FlowsLogger:
         """
         Create a logger instance
         """
-
         self._logger_instance = logging.getLogger("flowsLogger")
         self._logger_instance.setLevel(self.log_level)
 
@@ -68,6 +70,5 @@ class FlowsLogger:
         """
         Returns a new standard logger instance
         """
-
         self.log_level = log_level
         self._create_logger_instance()
