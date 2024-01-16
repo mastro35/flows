@@ -209,37 +209,37 @@ class FlowsManager:
     #     Perform a system check to define if we need to throttle to handle
     #     all the incoming messages
     #     """
-    #     if self.CONFIG_MANAGER.tracing_mode:
-    #         self.LOGGER.debug("performing a system check")
+    #     if self.config_manager.tracing_mode:
+    #         self.logger.debug("performing a system check")
 
     #     now = datetime.datetime.now()
-    #     sent = self.MESSAGE_DISPATCHER.dispatched
+    #     sent = self.message_dispatcher.dispatched
     #     received = self.fetched
     #     queue_length = sent - received
-    #     message_sleep_interval = self.CONFIG_MANAGER.message_fetcher_sleep_interval
+    #     message_sleep_interval = self.config_manager.message_fetcher_sleep_interval
 
-    #     if self.CONFIG_MANAGER.show_stats:
+    #     if self.config_manager.show_stats:
     #         if (
     #             now - self.last_stats_check_date
-    #         ).total_seconds() > self.CONFIG_MANAGER.stats_timeout:
+    #         ).total_seconds() > self.config_manager.stats_timeout:
     #             self.last_stats_check_date = now
     #             stats_string = f"showing stats\n--- [STATS] ---\nMessage Sent: {sent}\nMessage Received: {received}\nMessage Sleep Interval = {message_sleep_interval}\nQueue length = {queue_length}\n--- [ END ] ---"
-    #             self.LOGGER.info(stats_string)
+    #             self.logger.info(stats_string)
 
     #     # if we are accumulating messages, or we have processed at least 5000 messages
     #     # since last check, we need to speed up the process
     #     messages_limit_reached = (
     #         sent - self.last_queue_check_count
-    #         > self.CONFIG_MANAGER.messages_dispatched_for_system_check
+    #         > self.config_manager.messages_dispatched_for_system_check
     #     )
     #     queue_limit_reached = (
-    #         queue_length > self.CONFIG_MANAGER.queue_length_for_system_check
+    #         queue_length > self.config_manager.queue_length_for_system_check
     #     )
     #     time_limit_since_last_check_is_over = (
     #         now - self.last_queue_check_date
-    #     ).total_seconds() > self.CONFIG_MANAGER.seconds_between_queue_check
+    #     ).total_seconds() > self.config_manager.seconds_between_queue_check
 
-    #     if not self.CONFIG_MANAGER.fixed_message_fetcher_interval:
+    #     if not self.config_manager.fixed_message_fetcher_interval:
     #         if (messages_limit_reached) or (
     #             queue_limit_reached and time_limit_since_last_check_is_over
     #         ):
@@ -248,8 +248,9 @@ class FlowsManager:
     #                 if messages_limit_reached
     #                 else "queue limit reached"
     #             )
-    #             self.LOGGER.debug(f"triggering the throttle function due to {cause}")
+    #             self.logger.debug(f"triggering the throttle function due to {cause}")
     #             # self._adapt_sleep_interval(sent, received, queue_length, now)
+
     def _deliver_message(self, msg):
         """
         Deliver the message to the subscripted actions
