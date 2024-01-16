@@ -3,8 +3,8 @@ FlowsLogger.py
 Logging facility module for flows
 ----------------------------------
 
-Copyright 2016 Davide Mastromatteo
-License: Apache-2.0
+Copyright 2016 - 2024 Davide Mastromatteo
+License: GPL 2.0
 """
 
 import logging
@@ -16,10 +16,10 @@ class FlowsLogger:
     FlowsLogger class - Logger Factory
     """
 
-    _instance = None
     _instance_lock = threading.Lock()
+    _instance = None
     _logger_instance = None
-    log_level = logging.INFO  # -v parameter
+    log_level = logging.ERROR
 
     @classmethod
     def default_instance(cls):
@@ -34,15 +34,23 @@ class FlowsLogger:
 
         return cls._instance
 
+    def __init__(self):
+        self._create_logger_instance()
+
     def get_logger(self):
         """
-        Returns the standard logger
+        Returns the existing logger instance or, if it doesn't exists,
+        create a new instance and return it
         """
-        if self._logger_instance is not None:
-            return self._logger_instance
+        return self._logger_instance or self._create_logger_instance
+
+    def _create_logger_instance(self):
+        """
+        Create a logger instance
+        """
 
         self._logger_instance = logging.getLogger("flowsLogger")
-        self._logger_instance.setLevel(logging.DEBUG)
+        self._logger_instance.setLevel(self.log_level)
 
         log_format = "%(asctime)s - [%(levelname)s]|%(thread)d\t%(message)s"
         log_date_format = "%Y-%m-%d %H:%M:%S"
@@ -50,21 +58,16 @@ class FlowsLogger:
 
         new_log_stream_handler = logging.StreamHandler()
         new_log_stream_handler.setFormatter(formatter)
-        new_log_stream_handler.setLevel(logging.INFO)
+        new_log_stream_handler.setLevel(self.log_level)
 
         self._logger_instance.addHandler(new_log_stream_handler)
 
         return self._logger_instance
 
-    def reconfigure_log_level(self):
+    def reconfigure_log_level(self, log_level):
         """
         Returns a new standard logger instance
         """
-        stream_handlers = filter(
-            lambda x: type(x) is logging.StreamHandler, self._logger_instance.handlers
-        )
 
-        for x in stream_handlers:
-            x.level = self.log_level
-
-        return self.get_logger()
+        self.log_level = log_level
+        self._create_logger_instance()

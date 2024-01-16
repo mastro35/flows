@@ -8,7 +8,6 @@ License: Apache-2.0
 """
 
 import configparser
-import logging
 import os
 import random
 import threading
@@ -39,28 +38,32 @@ class ConfigManager:
     stats_timeout = 60  # -s parameter
     fixed_message_fetcher_interval = False  # -m parameter
 
-    LOGGER = FlowsLogger.default_instance().get_logger()
+    logger = FlowsLogger.default_instance().get_logger()
 
-    @staticmethod
-    def default_instance():
+    _instance = None
+    _instance_lock = threading.Lock()
+
+    @classmethod
+    def default_instance(cls):
         """
         For use like a singleton, return the existing instance
         of the object or a new instance
         """
-        if ConfigManager._instance is None:
-            with threading.Lock():
-                if ConfigManager._instance is None:
-                    ConfigManager._instance = ConfigManager()
+        if cls._instance is None:
+            with cls._instance_lock:
+                if cls._instance is None:
+                    cls._instance = ConfigManager()
 
-        return ConfigManager._instance
+        return cls._instance
 
     def read_recipe(self, filename):
         """
         Read a recipe file from disk
         """
-        self.LOGGER.debug(f"reading recipe {filename}")
+
+        self.logger.debug(f"reading recipe {filename}")
         if not os.path.isfile(filename):
-            self.LOGGER.error(filename + " recipe not found, skipping")
+            self.logger.error(filename + " recipe not found, skipping")
             return
 
         config = configparser.ConfigParser(allow_no_value=True, delimiters="=")
@@ -70,13 +73,13 @@ class ConfigManager:
         for section in config.sections():
             self.sections[section] = config[section]
 
-        self.LOGGER.debug("Read recipe " + filename)
+        self.logger.debug("Read recipe " + filename)
 
     def set_socket_address(self):
         """
         Set a random port to be used by zmq
         """
-        self.LOGGER.debug("defining socket addresses for zmq")
+        self.logger.debug("defining socket addresses for zmq")
         random.seed()
         default_port = random.randrange(5001, 5999)
 
@@ -84,12 +87,12 @@ class ConfigManager:
         internal_0mq_port_subscriber = str(default_port)
         internal_0mq_port_publisher = str(default_port)
 
-        self.LOGGER.info(
+        self.logger.info(
             str.format(
                 f"zmq subsystem subscriber on {internal_0mq_port_subscriber} port"
             )
         )
-        self.LOGGER.info(
+        self.logger.info(
             str.format(f"zmq subsystem publisher on {internal_0mq_port_publisher} port")
         )
 

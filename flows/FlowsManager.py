@@ -2,8 +2,8 @@
 FlowsManager.py
 ---------
 
-Copyright 2016-2017 Davide Mastromatteo
-License: Apache-2.0
+Copyright 2016 - 2024 Davide Mastromatteo
+License: GPL 2.0
 """
 
 import argparse
@@ -12,19 +12,18 @@ import datetime
 import logging
 import json
 
-# import pickle
 import zmq
 
-from flows import ConfigManager
-from flows import FlowsLogger
-from flows import MessageDispatcher
+from flows.ConfigManager import ConfigManager
+from flows.FlowsLogger import FlowsLogger
+from flows.MessageDispatcher import MessageDispatcher
 from flows.Actions.Action import Action
 
 __author__: str = "Davide Mastromatteo"
-__copyright__: str = "Copyright 2016, Davide Mastromatteo"
+__copyright__: str = "Copyright 2024, Davide Mastromatteo"
 __credits__: list = [""]
-__license__: str = "Apache-2.0"
-__version__: str = "1.2.5"
+__license__: str = "GPL-2.0"
+__version__: str = "3.0 beta1"
 __maintainer__: str = "Davide Mastromatteo"
 __email__: str = "mastro35@gmail.com"
 __status__: str = "Production/Stable"
@@ -42,27 +41,25 @@ class FlowsManager:
         """
         self.actions = []
         self.subscriptions = {}
-
         self.fetched = 0
         self.isrunning = False
-
         self.last_queue_check_count = 0
         self.last_queue_check_date = datetime.datetime.now()
         self.last_stats_check_date = datetime.datetime.now()
-
-        self.LOGGER_INSTANCE = FlowsLogger.FlowsLogger.default_instance()
-        self.LOGGER = FlowsLogger.FlowsLogger.default_instance().get_logger()
-        self.CONFIG_MANAGER = ConfigManager.ConfigManager.default_instance()
+        self.logger_instance = FlowsLogger.default_instance()
+        self.logger = self.logger_instance.get_logger()
+        self.config_manager = ConfigManager.default_instance()
 
         args = self._parse_input_parameters()
         self._set_command_line_arguments(args)
 
-        self.MESSAGE_DISPATCHER = MessageDispatcher.MessageDispatcher.default_instance()
+        self.logger.debug("Initializing the message dispatcher")
+        self.message_dispatcher = MessageDispatcher.default_instance()
 
-        self.LOGGER.debug("Initializing the message dispatcher")
+        # setting up the SUB ZMQ socket
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
-        self.socket.connect(self.CONFIG_MANAGER.subscriber_socket_address)
+        self.socket.connect(self.config_manager.subscriber_socket_address)
         self.socket.setsockopt(zmq.SUBSCRIBE, bytes("*", "utf-8"))
 
     def _set_command_line_arguments(self, args):
@@ -70,81 +67,79 @@ class FlowsManager:
         Set internal configuration variables according to
         the input parameters
         """
-        self.LOGGER.debug("setting command line arguments")
+        self.logger.debug("setting command line arguments")
 
         if args.VERBOSE:
-            self.LOGGER.debug("verbose mode active")
-            self.CONFIG_MANAGER.log_level = logging.DEBUG
-            self.LOGGER_INSTANCE.reconfigure_log_level()
+            self.logger_instance.reconfigure_log_level(logging.INFO)
+            self.logger.debug("verbose mode active")
 
         if args.STATS > 0:
-            self.LOGGER.debug(f"stats requested every {args.STATS} seconds")
-            self.CONFIG_MANAGER.show_stats = True
-            self.CONFIG_MANAGER.stats_timeout = args.STATS
+            self.logger.debug(f"stats requested every {args.STATS} seconds")
+            self.config_manager.show_stats = True
+            self.config_manager.stats_timeout = args.STATS
 
         if args.INTERVAL > 0:
-            self.LOGGER.debug(f"setting sleep interval to {args.INTERVAL} milliseconds")
-            self.CONFIG_MANAGER.sleep_interval = float(args.INTERVAL) / 1000
+            self.logger.debug(f"setting sleep interval to {args.INTERVAL} milliseconds")
+            self.config_manager.sleep_interval = float(args.INTERVAL) / 1000
 
         if args.TRACE:
-            self.LOGGER.debug("tracing mode active")
-            self.CONFIG_MANAGER.tracing_mode = True
-            self.CONFIG_MANAGER.log_level = logging.DEBUG
-            self.LOGGER_INSTANCE.reconfigure_log_level()
+            self.logger.debug("tracing mode active")
+            self.config_manager.tracing_mode = True
+            self.logger_instance.reconfigure_log_level(logging.DEBUG)
 
         if args.MESSAGEINTERVAL is not None and args.MESSAGEINTERVAL > 0:
-            self.LOGGER.debug(
+            self.logger.debug(
                 f"setting message fetcher sleep interval to {args.MESSAGEINTERVAL/10} milliseconds"
             )
-            self.CONFIG_MANAGER.message_fetcher_sleep_interval = (
+            self.config_manager.message_fetcher_sleep_interval = (
                 float(args.MESSAGEINTERVAL) / 10000
             )
-            self.CONFIG_MANAGER.fixed_message_fetcher_interval = True
+            self.config_manager.fixed_message_fetcher_interval = True
 
-        self.LOGGER.debug(f"recipes to be parsed: {args.FILENAME}")
-        self.CONFIG_MANAGER.recipes = args.FILENAME
+        self.logger.debug(f"recipes to be parsed: {args.FILENAME}")
+        self.config_manager.recipes = args.FILENAME
 
     def start(self):
         """
         Start all the processes
         """
-        self.LOGGER.info("starting the flow manager")
+        self.logger.info("starting the flow manager")
         self._start_actions()
         self._start_message_fetcher()
-        self.LOGGER.debug("flow manager started")
+        self.logger.debug("flow manager started")
 
     def stop(self):
         """
         Stop all the processes
         """
-        self.LOGGER.info("stopping the flow manager")
+        self.logger.info("stopping the flow manager")
         self._stop_actions()
         self.isrunning = False
-        self.LOGGER.debug("flow manager stopped")
+        self.logger.debug("flow manager stopped")
 
     def restart(self):
         """
         Restart all the processes
         """
-        self.LOGGER.info("restarting the flow manager")
+        self.logger.info("restarting the flow manager")
         self._stop_actions()  # stop the old actions
         self.actions = []  # clear the action list
         self._start_actions()  # start the configured actions
-        self.LOGGER.debug("flow manager restarted")
+        self.logger.debug("flow manager restarted")
 
     def _start_actions(self):
         """
         Start all the actions for the recipes
         """
-        self.LOGGER.info("starting actions")
+        self.logger.info("starting actions")
 
-        for recipe in self.CONFIG_MANAGER.recipes:
-            self.CONFIG_MANAGER.read_recipe(recipe)
+        for recipe in self.config_manager.recipes:
+            self.config_manager.read_recipe(recipe)
 
         list(
             map(
                 lambda section: self._start_action_for_section(section),
-                self.CONFIG_MANAGER.sections,
+                self.config_manager.sections,
             )
         )
 
@@ -155,13 +150,13 @@ class FlowsManager:
         if section == "configuration":
             return
 
-        self.LOGGER.debug("starting actions for section " + section)
+        self.logger.debug("starting actions for section " + section)
 
         # read the configuration of the action
-        action_configuration = self.CONFIG_MANAGER.sections[section]
+        action_configuration = self.config_manager.sections[section]
 
         if len(action_configuration) == 0:
-            self.LOGGER.warn(f"section {section} has no configuration, skipping")
+            self.logger.warn(f"section {section} has no configuration, skipping")
             return
 
         action_type = None
@@ -180,14 +175,14 @@ class FlowsManager:
         )
 
         if not my_action:
-            self.LOGGER.warn(
+            self.logger.warn(
                 f"can't find a type for action {section}, the action will be skipped"
             )
             return
 
         self.actions.append(my_action)
 
-        self.LOGGER.debug("updating the subscriptions table")
+        self.logger.debug("updating the subscriptions table")
         for my_input in my_action.monitored_input:
             self.subscriptions.setdefault(my_input, []).append(my_action)
 
@@ -195,11 +190,11 @@ class FlowsManager:
         """
         Stop all the actions
         """
-        self.LOGGER.info("stopping actions")
+        self.logger.info("stopping actions")
 
         list(map(lambda x: x.stop(), self.actions))
 
-        self.LOGGER.info("actions stopped")
+        self.logger.info("actions stopped")
 
     # def _perform_system_check(self):
     #     """
@@ -253,8 +248,8 @@ class FlowsManager:
         """
         my_subscribed_actions = self.subscriptions.get(msg["sender"], [])
         for action in my_subscribed_actions:
-            if self.CONFIG_MANAGER.tracing_mode:
-                self.LOGGER.debug(f"delivering message to {action.name}")
+            if self.config_manager.tracing_mode:
+                self.logger.debug(f"delivering message to {action.name}")
 
             action.on_input_received(msg)
 
@@ -264,8 +259,8 @@ class FlowsManager:
         """
         try:
             [_, msg] = self.socket.recv_multipart(flags=zmq.NOBLOCK)
-            if self.CONFIG_MANAGER.tracing_mode:
-                self.LOGGER.debug("fetched a new message")
+            if self.config_manager.tracing_mode:
+                self.logger.debug("fetched a new message")
 
             self.fetched = self.fetched + 1
             # obj = pickle.loads(msg)
@@ -275,33 +270,33 @@ class FlowsManager:
         except zmq.error.Again:
             return None
         except Exception as new_exception:
-            self.LOGGER.error(new_exception)
+            self.logger.error(new_exception)
             raise new_exception
 
     async def message_fetcher_coroutine(self, loop):
         """
         Register callback for message fetcher coroutines
         """
-        self.LOGGER.debug("registering callbacks for message fetcher coroutine")
+        self.logger.debug("registering callbacks for message fetcher coroutine")
         self.isrunning = True
         while self.isrunning:
             loop.call_soon(self._fetch_messages)
             # loop.call_soon(self._perform_system_check)
-            await asyncio.sleep(self.CONFIG_MANAGER.message_fetcher_sleep_interval)
+            await asyncio.sleep(self.config_manager.message_fetcher_sleep_interval)
 
-        self.LOGGER.debug("message fetcher stopped")
+        self.logger.debug("message fetcher stopped")
 
     def _start_message_fetcher(self):
         """
         Start the message fetcher (called from coroutine)
         """
-        self.LOGGER.debug("starting the message fetcher")
+        self.logger.debug("starting the message fetcher")
         event_loop = asyncio.get_event_loop()
         try:
-            self.LOGGER.debug("entering event loop for message fetcher coroutine")
+            self.logger.debug("entering event loop for message fetcher coroutine")
             event_loop.run_until_complete(self.message_fetcher_coroutine(event_loop))
         finally:
-            self.LOGGER.debug("closing the event loop")
+            self.logger.debug("closing the event loop")
             event_loop.close()
 
     # def _adapt_sleep_interval(self, sent, received, queue, now):
@@ -343,7 +338,7 @@ class FlowsManager:
         """
         Set the configuration for the Logger
         """
-        self.LOGGER.debug("define and parsing command line arguments")
+        self.logger.debug("define and parsing command line arguments")
         parser = argparse.ArgumentParser(
             description="A workflow engine for Pythonistas",
             formatter_class=argparse.RawTextHelpFormatter,
