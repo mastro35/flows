@@ -56,10 +56,10 @@ class FlowsManager:
         self.message_dispatcher = MessageDispatcher.default_instance()
 
         # Preliminary set up of the parameters and the socket
-        self._set_command_line_arguments(self._parse_input_parameters())
-        self._set_subscriber_socket()
+        self.__set_command_line_arguments(self.__parse_input_parameters())
+        self.__set_subscriber_socket()
 
-    def _set_subscriber_socket(self):
+    def __set_subscriber_socket(self):
         """
         Set up the SUB ZMQ socket
         """
@@ -70,7 +70,7 @@ class FlowsManager:
         # filter the multipart messages with a "*" in part 1
         self.socket.setsockopt(zmq.SUBSCRIBE, bytes("*", "utf-8"))
 
-    def _set_command_line_arguments(self, args):
+    def __set_command_line_arguments(self, args):
         """
         Set internal configuration variables according to
         the input parameters
@@ -112,8 +112,8 @@ class FlowsManager:
         Start all the processes
         """
         self.logger.info("starting the flow manager")
-        self._start_actions()
-        self._start_message_fetcher()
+        self.__start_actions()
+        self.__start_message_fetcher()
         self.logger.debug("flow manager started")
 
     def stop(self):
@@ -121,7 +121,7 @@ class FlowsManager:
         Stop all the processes
         """
         self.logger.info("stopping the flow manager")
-        self._stop_actions()
+        self.__stop_actions()
         self.isrunning = False  # stop the message fetcher
         self.logger.debug("flow manager stopped")
 
@@ -130,12 +130,12 @@ class FlowsManager:
         Restart all the processes
         """
         self.logger.info("restarting the flow manager")
-        self._stop_actions()  # stop the old actions
+        self.__stop_actions()  # stop the old actions
         self.actions = []  # clear the action list
-        self._start_actions()  # start the configured actions
+        self.__start_actions()  # start the configured actions
         self.logger.debug("flow manager restarted")
 
-    def _start_actions(self):
+    def __start_actions(self):
         """
         Start all the actions for the recipes
         """
@@ -146,12 +146,12 @@ class FlowsManager:
 
         list(
             map(
-                lambda section: self._start_action_for_section(section),
+                lambda section: self.__start_action_for_section(section),
                 self.config_manager.sections,
             )
         )
 
-    def _start_action_for_section(self, section):
+    def __start_action_for_section(self, section):
         """
         Start all the actions for a particular section
         """
@@ -194,7 +194,7 @@ class FlowsManager:
         for my_input in my_action.monitored_input:
             self.subscriptions.setdefault(my_input, []).append(my_action)
 
-    def _stop_actions(self):
+    def __stop_actions(self):
         """
         Stop all the actions
         """
@@ -251,7 +251,7 @@ class FlowsManager:
     #             self.logger.debug(f"triggering the throttle function due to {cause}")
     #             # self._adapt_sleep_interval(sent, received, queue_length, now)
 
-    def _deliver_message(self, msg):
+    def __deliver_message(self, msg):
         """
         Deliver the message to the subscripted actions
         """
@@ -262,7 +262,7 @@ class FlowsManager:
 
             action.on_input_received(msg)
 
-    def _fetch_messages(self):
+    def __fetch_messages(self):
         """
         Get an input message from the socket
         """
@@ -274,7 +274,7 @@ class FlowsManager:
             self.fetched = self.fetched + 1
             # obj = pickle.loads(msg)
             obj = json.loads(msg)
-            self._deliver_message(obj)
+            self.__deliver_message(obj)
             return obj
         except zmq.error.Again:
             return None
@@ -289,13 +289,13 @@ class FlowsManager:
         self.logger.debug("registering callbacks for message fetcher coroutine")
         self.isrunning = True
         while self.isrunning:
-            loop.call_soon(self._fetch_messages)
+            loop.call_soon(self.__fetch_messages)
             # loop.call_soon(self._perform_system_check)
             await asyncio.sleep(self.config_manager.message_fetcher_sleep_interval)
 
         self.logger.debug("message fetcher stopped")
 
-    def _start_message_fetcher(self):
+    def __start_message_fetcher(self):
         """
         Start the message fetcher (called from coroutine)
         """
@@ -343,7 +343,7 @@ class FlowsManager:
     #     if self.CONFIG_MANAGER.show_stats:
     #         self.LOGGER.info(sleep_interval_log_string)
 
-    def _parse_input_parameters(self):
+    def __parse_input_parameters(self):
         """
         Set the configuration for the Logger
         """

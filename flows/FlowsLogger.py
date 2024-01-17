@@ -38,16 +38,16 @@ class FlowsLogger:
         """
         self.log_level = logging.WARN
         self._logger_instance = None
-        self._create_logger_instance()
+        self.__create_logger_instance()
 
     def get_logger(self):
         """
         Returns the existing logger instance or, if it doesn't exists,
         create a new instance and return it
         """
-        return self._logger_instance or self._create_logger_instance
+        return self._logger_instance or self.__create_logger_instance
 
-    def _create_logger_instance(self):
+    def __create_logger_instance(self):
         """
         Create a logger instance
         """
@@ -71,4 +71,4 @@ class FlowsLogger:
         Returns a new standard logger instance
         """
         self.log_level = log_level
-        self._create_logger_instance()
+        self.__create_logger_instance()
