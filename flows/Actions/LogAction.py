@@ -57,6 +57,9 @@ class LogAction(Action):
 
                     self.file_logger.addHandler(handler)
 
+    def on_cycle(self):
+        pass
+
     def on_input_received(self, message=None):
         super().on_input_received(message)
 

@@ -15,6 +15,7 @@ import os
 import site
 import time
 
+from abc import ABC, abstractmethod
 from threading import Thread
 
 from flows.ConfigManager import ConfigManager
@@ -22,7 +23,7 @@ from flows.FlowsLogger import FlowsLogger
 from flows.MessageDispatcher import MessageDispatcher
 
 
-class Action(Thread):
+class Action(Thread, ABC):
     """
     Generic abstract class that should be subclassed to create
     custom action classes.
@@ -60,18 +61,21 @@ class Action(Thread):
         # Start the action (as a thread, the run method will be executed)
         self.start()
 
+    @abstractmethod
     def on_init(self):
         """
         Initialization of the action, code to be executed before start
         """
         pass
 
+    @abstractmethod
     def on_cycle(self):
         """
         Main cycle of the action, code to be executed before the start of each cycle
         """
         pass
 
+    @abstractmethod
     def on_input_received(self, message=None):
         """
         Fire the current action
@@ -80,6 +84,7 @@ class Action(Thread):
             self.input_sender = message["sender"]
             self.input_message = message["message"]
 
+    @abstractmethod
     def on_stop(self):
         """
         Code to be executed before end

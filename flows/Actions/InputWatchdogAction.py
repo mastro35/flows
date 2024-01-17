@@ -129,6 +129,12 @@ class WatchdogAction(Action):
 
         self.log(f"observer started on {self.path}")
 
+    def on_cycle(self):
+        pass
+
+    def on_input_received(self):
+        pass
+
     def on_stop(self):
         super().on_stop()
         self.observer.stop()
