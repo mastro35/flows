@@ -28,6 +28,8 @@ class MessageDispatcher:
     # singleton variables
     _instance = None
     _instance_lock = threading.Lock()
+
+    # utilities
     logger = FlowsLogger.default_instance().get_logger()
     config_manager = ConfigManager.default_instance()
 

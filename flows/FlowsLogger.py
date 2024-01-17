@@ -18,8 +18,6 @@ class FlowsLogger:
 
     _instance_lock = threading.Lock()
     _instance = None
-    _logger_instance = None
-    log_level = logging.WARN
 
     @classmethod
     def default_instance(cls):
@@ -38,6 +36,8 @@ class FlowsLogger:
         """
         Default constructor: it should never be called directly!
         """
+        self.log_level = logging.WARN
+        self._logger_instance = None
         self._create_logger_instance()
 
     def get_logger(self):

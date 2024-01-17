@@ -15,7 +15,7 @@ import os
 import site
 import time
 
-from threading import Lock, Thread
+from threading import Thread
 
 from flows.ConfigManager import ConfigManager
 from flows.FlowsLogger import FlowsLogger
@@ -28,22 +28,10 @@ class Action(Thread):
     custom action classes.
     """
 
-    type = ""
-    name = ""
-    input_sender = None
-    input_message = None
-    _instance_lock = Lock()
-    configuration = None
-    context = None
-    socket = None
-    is_running = True
-    monitored_input: list
-    my_action_input = None
+    python_files = []
     logger = FlowsLogger.default_instance().get_logger()
     config_manager = ConfigManager.default_instance()
     message_dispatcher = MessageDispatcher.default_instance()
-
-    python_files = []
 
     def __init__(self, name: str, configuration, managed_input: list):
         """
@@ -53,6 +41,13 @@ class Action(Thread):
 
         # Set the action as a daemon
         self.daemon = True
+
+        # Set the initial values for the attributes
+        self.type = ""
+        self.name = ""
+        self.input_sender = None
+        self.input_message = None
+        self.is_running = True
 
         # Init the action instance variables
         self.monitored_input = managed_input
@@ -246,7 +241,7 @@ class Action(Thread):
             module_name = os.path.basename(os.path.normpath(filename))[:-3]
 
             # garbage collect all the modules you load if they are not necessary
-            context = {}
+            #            context = {}
             Action.load_module(module_name, filename)
             for subclass in Action.__subclasses__():
                 if subclass.type == action_code:

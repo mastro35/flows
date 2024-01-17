@@ -21,27 +21,25 @@ class ConfigManager:
     Handle the configuration settings
     """
 
-    config_file = ""
-
-    sections = {}
-    _instance = None
-    subscriber_socket_address = ""
-    publisher_socket_address = ""
-    sleep_interval = 0.5  # -i parameter
-    message_fetcher_sleep_interval = 0.5  # no parameter: auto throttle
-    queue_length_for_system_check = 100
-    messages_dispatched_for_system_check = 5000
-    seconds_between_queue_check = 60
-    recipes = []  # parameters from command line
-    show_stats = False  # -s <> 0 parameter
-    tracing_mode: bool = False  # -t parameter
-    stats_timeout = 60  # -s parameter
-    fixed_message_fetcher_interval = False  # -m parameter
-
     logger = FlowsLogger.default_instance().get_logger()
-
     _instance = None
     _instance_lock = threading.Lock()
+
+    def __init__(self):
+        self.config_file = ""
+        self.sections = {}
+        self.subscriber_socket_address = ""
+        self.publisher_socket_address = ""
+        self.sleep_interval = 0.5  # -i parameter
+        self.message_fetcher_sleep_interval = 0.5  # no parameter: auto throttle
+        self.queue_length_for_system_check = 100
+        self.messages_dispatched_for_system_check = 5000
+        self.seconds_between_queue_check = 60
+        self.recipes = []  # parameters from command line
+        self.show_stats = False  # -s <> 0 parameter
+        self.tracing_mode: bool = False  # -t parameter
+        self.stats_timeout = 60  # -s parameter
+        self.fixed_message_fetcher_interval = False  # -m parameter
 
     @classmethod
     def default_instance(cls):
