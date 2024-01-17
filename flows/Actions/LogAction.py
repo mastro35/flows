@@ -57,8 +57,8 @@ class LogAction(Action):
 
                     self.file_logger.addHandler(handler)
 
-    def on_input_received(self, action_input=None):
-        super().on_input_received(action_input)
+    def on_input_received(self, message=None):
+        super().on_input_received(message)
 
         # Action
         string_to_log = ""
@@ -66,36 +66,34 @@ class LogAction(Action):
         if "text" in self.configuration:
             string_to_log = self.configuration["text"]
 
-        input_message = action_input["message"]
-
         string_to_log = string_to_log.replace("\\n", "\n")
         string_to_log = string_to_log.replace("\\t", "\t")
-        string_to_log = string_to_log.replace("{input}", repr(input_message))
+        string_to_log = string_to_log.replace("{input}", repr(self.input_message))
         string_to_log = string_to_log.replace("{date}", time.strftime("%d/%m/%Y"))
         string_to_log = string_to_log.replace("{time}", time.strftime("%H:%M:%S"))
 
-        if "event_type" in input_message:
+        if "event_type" in self.input_message:
             string_to_log = string_to_log.replace(
-                "{event_type}", input_message["event_type"]
+                "{event_type}", self.input_message["event_type"]
             )
 
-        if "src_path" in input_message:
+        if "src_path" in self.input_message:
             string_to_log = string_to_log.replace(
-                "{file_source}", input_message["src_path"]
+                "{file_source}", self.input_message["src_path"]
             )
 
-        if "is_directory" in input_message:
+        if "is_directory" in self.input_message:
             string_to_log = string_to_log.replace(
-                "{is_directory}", str(input_message["is_directory"])
+                "{is_directory}", str(self.input_message["is_directory"])
             )
 
-        if "dest_path" in input_message:
+        if "dest_path" in self.input_message:
             string_to_log = string_to_log.replace(
-                "{file_destination}", input_message["src_path"]
+                "{file_destination}", self.input_message["src_path"]
             )
 
         if string_to_log == "":
-            string_to_log = input_message
+            string_to_log = self.input_message
 
         if self.print_to_stdout:
             if self.output_file == "":

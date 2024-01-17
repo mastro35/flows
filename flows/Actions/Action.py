@@ -30,6 +30,8 @@ class Action(Thread):
 
     type = ""
     name = ""
+    input_sender = None
+    input_message = None
     _instance_lock = Lock()
     configuration = None
     context = None
@@ -75,11 +77,13 @@ class Action(Thread):
         """
         pass
 
-    def on_input_received(self, action_input=None):
+    def on_input_received(self, message=None):
         """
         Fire the current action
         """
-        pass
+        if message:
+            self.input_sender = message["sender"]
+            self.input_message = message["message"]
 
     def on_stop(self):
         """
