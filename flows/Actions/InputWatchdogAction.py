@@ -7,7 +7,7 @@ WatchdogAction.py
 Copyright 2016-2021 Davide Mastromatteo
 """
 from watchdog.events import PatternMatchingEventHandler
-from watchdog.observers import Observer
+from watchdog.observers import Observer as Observer
 
 from flows.Actions.Action import Action
 
@@ -65,7 +65,6 @@ class WatchdogAction(Action):
     """
 
     type = "watchdog"
-
     observer = None
     path = ""
     trigger = ""
@@ -90,8 +89,9 @@ class WatchdogAction(Action):
         return message
 
     def on_init(self):
+        self.log(f"{self.name} on_init")
         super().on_init()
-
+        
         self.path = self.configuration["input"]
         if "option" in self.configuration:
             self.recursive_flag = str.lower(self.configuration["option"]) == "recursive"
@@ -125,8 +125,9 @@ class WatchdogAction(Action):
         self.observer.schedule(
             my_event_handler, self.path, recursive=self.recursive_flag
         )
-        self.observer.start()
+        self.log(f"{self.name} starting observer")
 
+        self.observer.start()
         self.log(f"observer started on {self.path}")
 
     def on_cycle(self):
@@ -184,3 +185,4 @@ class WatchdogAction(Action):
             return
         message = self.convert_event_to_message(event)
         self.send_message(message)
+

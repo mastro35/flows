@@ -226,7 +226,6 @@ class Action(Thread, ABC):
             cls.logger.debug(f"no actions found")
 
         Action.python_files = action_files
-
         return action_files
 
     @classmethod
@@ -238,20 +237,28 @@ class Action(Thread, ABC):
         cls.logger.debug(f"configuration length: {len(configuration)}")
         cls.logger.debug(f"input: {managed_input}")
 
+        cls.logger.debug(f"getting the actions catalog")
         # get the actions catalog
         my_actions_file = Action.search_actions()
 
+        cls.logger.debug(f"loading the actions into memory")
         # load custom actions to find the right one
         for filename in my_actions_file:
+            cls.logger.debug(f"loading {filename}")
             module_name = os.path.basename(os.path.normpath(filename))[:-3]
 
             # garbage collect all the modules you load if they are not necessary
             #            context = {}
+            
+            cls.logger.debug(f"loading module {module_name} from filename {filename}")
             Action.load_module(module_name, filename)
+            
             for subclass in Action.__subclasses__():
                 if subclass.type == action_code:
                     action_class = subclass
                     action = action_class(name, configuration, managed_input)
                     return action
+
             subclass = None
             gc.collect()
+
