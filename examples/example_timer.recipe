@@ -1,0 +1,8 @@
+[my_timer_action]
+type = timer
+delay = 5
+
+[my_log_action]
+type = log
+input = my_timer_action
+text = {date} - {time} : we received something ... {input}

@@ -1,0 +1,8 @@
+[my_alarm_action]
+type = alarm
+date = 25/01/2024 13:10
+
+[my_log_action]
+type = log
+input = my_alarm_action
+text = {date} - {time} : we received something ... {input}

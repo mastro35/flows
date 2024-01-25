@@ -91,7 +91,7 @@ class WatchdogAction(Action):
     def on_init(self):
         self.log(f"{self.name} on_init")
         super().on_init()
-        
+
         self.path = self.configuration["input"]
         if "option" in self.configuration:
             self.recursive_flag = str.lower(self.configuration["option"]) == "recursive"
@@ -185,4 +185,3 @@ class WatchdogAction(Action):
             return
         message = self.convert_event_to_message(event)
         self.send_message(message)
-

@@ -2,24 +2,12 @@
 
 
 *Flows* is a workflow engine for Python(istas). 
-With *flows* you will be able to create complex workflows based on the built-in actions and other custom actions that you will be able to create.
-
-With *flows*, creating a custom action is as easy as subclassing a standard Python class and the building of a workflow is even simpler.
+With *flows* you will be able to create complex workflows based on the built-in actions and even custom actions that you will be able to create simply by subclassing a standard Python class.
 
 
 # Installation
 
 *flows* can be build from sources or can be obtained from binary distribution.
-
-## For Windows user
-
-If you want to install flows on a Windows machine, please start installing the pypiwin32 package using:
-
-```sh
-c:\pip install pypiwin32
-```
-
-This is necessary due of a [problem on the pypiwin32 that the maintainer is not going to fix](https://sourceforge.net/p/pywin32/bugs/522/) (basically pypiwin32 doesn't support source builds on Python3 and doesn't have binary builds for Python 3.6. yet)
 
 ## Get *flows* from pypi
 
@@ -49,7 +37,7 @@ $ python setup.py install
 To start a flow simply start a terminal and type
 
 ```sh
-$ flows [-h] [-i MS] [-s SEC] [-t] [-v] [-V] FILENAME [FILENAME ...]
+$ flows [-h] [-t] [-v] [-V] FILENAME [FILENAME ...]
 ```
 
 Note that you can start more flows with a single command and every single action contained in every flow will be able to communicate with each others.
@@ -64,18 +52,11 @@ Just using flows -h gives you the help of the command line interface.
 >  
 >optional arguments:  
 >  -h, --help            show this help message and exit  
->  -i MS, --INTERVAL MS  perform a cycle each [MS] milliseconds. (default = 500)  
->  -m X, --MESSAGEINTERVAL X  dequeue a message each [X] tenth of milliseconds. (default = auto)
->  -s SEC, --STATS SEC   show stats each [SEC] seconds. (default = NO STATS)  
 >  -t, --TRACE           enable super verbose output, only useful for tracing
 >  -v, --VERBOSE         enable verbose output  
 >  -V, --VERSION         show program's version number and exit  
 
-As you can see, if you need to have some statistics on how your workflow is running you can specify the -s option, and each [SEC] seconds you will get an onscreen message with some statistics informations. 
-
-Beside, you can add verbosity to the output of the command just specifying the -v option or super extra verbosity adding the -t option.
-
-Don't be afraid from the -i option, we will discuss it later. However, the standard usage of *flows* is just by specifing the name of the recipes files to start.
+You can add verbosity to the output of the command just specifying the -v option or super extra verbosity adding the -t option.
 
 
 # "Actions": The flows' building blocks
@@ -89,7 +70,7 @@ To make it more clear to the reader, we will talk about two different kind of ac
 
 ## Input actions
 
-Input actions don't usually need to listen to other actions, they are usually at the beginning of a flow and are the starters of the whole process.
+Input actions don't usually need to listen to other actions, they are usually some sort of triggers that are used to start the whole chain of actions.
 
 
 ### Alarm

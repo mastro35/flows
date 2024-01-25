@@ -15,11 +15,10 @@ class TimerAction(Action):
     """
 
     type = "timer"
-    timeout = 0
     next_timer = None
 
     def run_operation(self):
-        self.send_message("TIMER : " + self.name)
+        self.send_message(f"TIMER -{self.name}-")
 
         if self.is_running:
             self.start_timer()
@@ -36,6 +35,34 @@ class TimerAction(Action):
 
     def on_init(self):
         super().on_init()
-        self.timeout = int(self.configuration["delay"])
+        
+        if "delay" not in self.configuration:
+            raise ValueError(
+                str.format(
+                    "The timer action {0} is not properly configured."
+                    "The `delay` parameter is missing",
+                    self.name,
+                )
+            )
 
-        self.start_timer()
+        try:
+            self.timeout = int(self.configuration["delay"])
+            self.start_timer()
+        except:
+            raise ValueError(
+                str.format(
+                    "The timer action {0} is not properly configured."
+                    "Error while reading the `delay` parameter",
+                    self.name,
+                )
+            )
+            
+
+    def on_input_received(self):
+        pass
+
+    def on_stop(self):
+        pass
+
+    def on_cycle(self):
+        pass

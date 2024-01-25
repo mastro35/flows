@@ -1,0 +1,11 @@
+[my_watchdog]
+type = watchdog
+input = /home
+monitor = any
+option = recursive
+patterns = *.*
+
+[my_log_action]
+type = log
+input = my_watchdog
+text = {date} - {time} : {event_type} {file_source}
