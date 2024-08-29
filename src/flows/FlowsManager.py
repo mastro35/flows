@@ -18,12 +18,13 @@ from flows.ConfigManager import ConfigManager
 from flows.FlowsLogger import FlowsLogger
 from flows.MessageDispatcher import MessageDispatcher
 from flows.Actions.Action import Action
+from importlib.metadata import version
 
 __author__: str = "Davide Mastromatteo"
 __copyright__: str = "Copyright 2024, Davide Mastromatteo"
 __credits__: list = [""]
 __license__: str = "GPL-2.0"
-__version__: str = "3.0"
+__version__: str = version("flows")
 __maintainer__: str = "Davide Mastromatteo"
 __email__: str = "mastro35@gmail.com"
 __status__: str = "Production/Stable"
