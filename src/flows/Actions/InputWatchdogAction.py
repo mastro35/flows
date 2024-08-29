@@ -6,6 +6,7 @@ WatchdogAction.py
 
 Copyright 2016-2021 Davide Mastromatteo
 """
+
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer as Observer
 
@@ -24,7 +25,12 @@ class DannyFileSystemEventHandler(PatternMatchingEventHandler):
         ignore_directories=False,
         case_sensitive=False,
     ):
-        super().__init__(patterns, ignore_patterns, ignore_directories, case_sensitive)
+        super().__init__(
+            patterns=patterns,
+            ignore_patterns=ignore_patterns,
+            ignore_directories=ignore_directories,
+            case_sensitive=case_sensitive,
+        )
 
         self.delegates = []
 
@@ -120,7 +126,7 @@ class WatchdogAction(Action):
         if "timeout" in self.configuration:
             self.timeout = int(self.configuration["timeout"])
 
-        self.observer = Observer(self.timeout)
+        self.observer = Observer(timeout=self.timeout)
 
         self.observer.schedule(
             my_event_handler, self.path, recursive=self.recursive_flag

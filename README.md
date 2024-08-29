@@ -17,27 +17,13 @@ $ pip install flows
 
 Yes, it's so simple.
 
-## Build *flows* from sources
-
-To build *flows* from sources, just install all the requirements listed in requirements.txt by typing
-
-```sh
-$ pip install -r requirements.txt
-```
-
-Once the requirements have been installed, you can simply install *flows* by typing
-
-```sh
-$ python setup.py install
-```
-
 
 # Usage
 
 To start a flow simply start a terminal and type
 
 ```sh
-$ flows [-h] [-t] [-v] [-V] FILENAME [FILENAME ...]
+$ python -m flows [-h] [-t] [-v] [-V] FILENAME [FILENAME ...]
 ```
 
 Note that you can start more flows with a single command and every single action contained in every flow will be able to communicate with each others.

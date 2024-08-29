@@ -1,0 +1,38 @@
+[project]
+name = "flows"
+version = "3.0.5"
+description = "A workflow engine for Pythonistas"
+authors = [
+    {name = "Davide Mastromatteo", email = "mastro35@gmail.com"},
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+dependencies = [
+    "croniter",
+    "watchdog",
+    "zmq",
+    "pytyler",
+    "wheel",
+    "twine"
+]
+
+dev-dependencies = [ 
+   "black",
+   "python-lsp-server"
+]
+
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "GPLv2"}
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.build]
+includes = ["./src/flows/Actions/"]
+
+[tool.pdm.scripts]
+flows = {call = "flows.__main__:main"}
