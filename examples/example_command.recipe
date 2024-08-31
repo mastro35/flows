@@ -1,0 +1,11 @@
+[my_watchdog]
+type = watchdog
+input = c:\
+monitor = create
+option = recursive
+patterns = *.*
+
+[my_command_action]
+type = command
+input = my_watchdog
+command = echo {input}

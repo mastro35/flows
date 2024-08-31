@@ -33,27 +33,25 @@ class CommandAction(Action):
 
         self.command = self.configuration["command"]
 
-    def on_input_received(self, action_input=None):
-        super().on_input_received(action_input)
-
-        # Action
-        input_message = action_input.message
+    def on_input_received(self, message=None):
+        super().on_input_received(message)
 
         cmd = self.command
-        cmd = cmd.replace("{input}", input_message)
+        cmd = cmd.replace("{input}", repr(self.input_message))
         cmd = cmd.replace("{date}", time.strftime("%d/%m/%Y"))
         cmd = cmd.replace("{time}", time.strftime("%H:%M:%S"))
 
-        if action_input.file_system_event is not None:
-            cmd = cmd.replace("{event_type}", action_input.file_system_event.event_type)
-            cmd = cmd.replace("{file_source}", action_input.file_system_event.src_path)
-            cmd = cmd.replace(
-                "{is_directory}", str(action_input.file_system_event.is_directory)
-            )
-            if hasattr(action_input.file_system_event, "dest_path"):
-                cmd = cmd.replace(
-                    "{file_destination}", action_input.file_system_event.src_path
-                )
+        if "event_type" in self.input_message:
+            cmd = cmd.replace("{event_type}", self.input_message["event_type"])
+
+        if "src_path" in self.input_message:
+            cmd = cmd.replace("{file_source}", self.input_message["src_path"])
+
+        if "is_directory" in self.input_message:
+            cmd = cmd.replace("{is_directory}", str(self.input_message["is_directory"]))
+
+        if "dest_path" in self.input_message:
+            cmd = cmd.replace("{file_destination}", self.input_message["dest_path"])
 
         process = subprocess.run(
             cmd,
@@ -69,3 +67,9 @@ class CommandAction(Action):
         # output_string = out.encode('utf-8')
         # returns the output
         self.send_message(output_string)
+
+    def on_cycle(self):
+        pass
+
+    def on_stop(self):
+        pass

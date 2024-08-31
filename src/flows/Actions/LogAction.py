@@ -92,7 +92,7 @@ class LogAction(Action):
 
         if "dest_path" in self.input_message:
             string_to_log = string_to_log.replace(
-                "{file_destination}", self.input_message["src_path"]
+                "{file_destination}", self.input_message["dest_path"]
             )
 
         if string_to_log == "":
