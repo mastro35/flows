@@ -5,24 +5,16 @@ description = "A workflow engine for Pythonistas"
 authors = [
     {name = "Davide Mastromatteo", email = "mastro35@gmail.com"},
 ]
+dependencies = [
+    "croniter>=3.0.3",
+    "watchdog>=5.0.0",
+    "zmq>=0.0.0",
+    "pytyler>=0.3",
+]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-dependencies = [
-    "croniter",
-    "watchdog",
-    "zmq",
-    "pytyler",
-    "wheel",
-    "twine"
-]
-
-dev-dependencies = [ 
-   "black",
-   "python-lsp-server"
-]
 
 requires-python = ">=3.12"
 readme = "README.md"
@@ -36,3 +28,9 @@ includes = ["./src/flows/Actions/"]
 
 [tool.pdm.scripts]
 flows = {call = "flows.__main__:main"}
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "ruff>=0.6.3",
+    "pyright>=1.1.378",
+]

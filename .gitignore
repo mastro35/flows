@@ -10,6 +10,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+.venv
 venv
 dist
 flows.egg-info

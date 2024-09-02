@@ -9,8 +9,8 @@ License: GPL 2.0
 import argparse
 import asyncio
 import datetime
-import logging
 import json
+import logging
 
 import zmq
 
