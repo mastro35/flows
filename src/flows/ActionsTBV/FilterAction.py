@@ -49,11 +49,17 @@ class FilterAction(Action):
         if "ignorecase" in self.configuration:
             self.ignorecase = True
 
-    def on_input_received(self, action_input=None):
-        super().on_input_received(action_input)
+    def on_cycle(self):
+        return super().on_cycle()
+
+    def on_stop(self):
+        return super().on_stop()
+
+    def on_input_received(self, message=None):
+        super().on_input_received(message)
 
         # Action
-        return_value = action_input.message
+        return_value = message
 
         flags = 0
         if self.ignorecase:
@@ -64,7 +70,7 @@ class FilterAction(Action):
             for regex in self.regexes:
                 regex = regex.strip()
                 if regex != "":
-                    match = re.search(regex, action_input.message, flags)
+                    match = re.search(regex, self.input_message, flags)
                     if match is not None:
                         self.send_message(return_value)
 
@@ -73,7 +79,7 @@ class FilterAction(Action):
         else:
             for regex in self.regexes:
                 regex = regex.strip()
-                match = re.search(regex, action_input.message, flags)
+                match = re.search(regex, self.input_message, flags)
                 if match is not None:
                     return None
 

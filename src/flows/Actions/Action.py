@@ -59,7 +59,7 @@ class Action(Thread, ABC):
         self.on_init()
 
         # Start the action (as a thread, the run method will be executed)
-        self.start()
+        # self.start()
 
     @abstractmethod
     def on_init(self):
@@ -114,8 +114,8 @@ class Action(Thread, ABC):
         """
         Stop the current action
         """
-        self.logger.debug(f"action {self.name} stopped")
         self.is_running = False
+        self.logger.debug(f"action {self.name} stopped")
         self.on_stop()
 
     def run(self):

@@ -1,0 +1,14 @@
+[my_timer_action]
+type = timer
+delay = 1
+
+[my_filter_action]
+type = filter
+input = my_timer_action
+regex = /^1
+
+[my_log_action]
+type = log
+input = my_filter_action
+text = {date} - {time} : we received something ... {input}
+

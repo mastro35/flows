@@ -1,0 +1,12 @@
+[my_timer_action]
+type = timer
+delay = 5
+
+[my_count_action]
+type = count
+input = my_timer_action
+
+[my_log_action]
+type = log
+input = my_count_action
+text = {date} - {time} : we received a count ... {input}

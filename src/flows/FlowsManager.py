@@ -11,6 +11,7 @@ import asyncio
 import datetime
 import json
 import logging
+import time
 
 import zmq
 
@@ -60,7 +61,7 @@ class FlowsManager:
         self.__set_command_line_arguments(self.__parse_input_parameters())
         self.__set_subscriber_socket()
 
-    def __set_subscriber_socket(self):
+    def __set_subscriber_socket(self) -> None:
         """
         Set up the SUB ZMQ socket
         """
@@ -71,7 +72,7 @@ class FlowsManager:
         # filter the multipart messages with a "*" in part 1
         self.socket.setsockopt(zmq.SUBSCRIBE, bytes("*", "utf-8"))
 
-    def __set_command_line_arguments(self, args):
+    def __set_command_line_arguments(self, args) -> None:
         """
         Set internal configuration variables according to
         the input parameters
@@ -108,7 +109,7 @@ class FlowsManager:
         self.logger.debug(f"recipes to be parsed: {args.FILENAME}")
         self.config_manager.recipes = args.FILENAME
 
-    def start(self):
+    def start(self) -> None:
         """
         Start all the processes
         """
@@ -117,16 +118,17 @@ class FlowsManager:
         self.__start_message_fetcher()
         self.logger.debug("flow manager started")
 
-    def stop(self):
+    def stop(self) -> None:
         """
         Stop all the processes
         """
         self.logger.info("stopping the flow manager")
         self.__stop_actions()
         self.isrunning = False  # stop the message fetcher
+        time.sleep(1)
         self.logger.debug("flow manager stopped")
 
-    def restart(self):
+    def restart(self) -> None:
         """
         Restart all the processes
         """
@@ -136,7 +138,7 @@ class FlowsManager:
         self.__start_actions()  # start the configured actions
         self.logger.debug("flow manager restarted")
 
-    def __start_actions(self):
+    def __start_actions(self) -> None:
         """
         Start all the actions for the recipes
         """
@@ -145,12 +147,9 @@ class FlowsManager:
         for recipe in self.config_manager.recipes:
             self.config_manager.read_recipe(recipe)
 
-        list(
-            map(
-                lambda section: self.__start_action_for_section(section),
-                self.config_manager.sections,
-            )
-        )
+            for section in self.config_manager.sections:
+                self.__start_action_for_section(section)
+            
 
     def __start_action_for_section(self, section):
         """
@@ -165,10 +164,11 @@ class FlowsManager:
         action_configuration = self.config_manager.sections[section]
 
         if len(action_configuration) == 0:
-            self.logger.warn(f"section {section} has no configuration, skipping")
+            self.logger.warning(f"section {section} has no configuration, skipping")
             return
 
         action_type = None
+
         # action_input = None
         new_managed_input = []
 
@@ -184,26 +184,29 @@ class FlowsManager:
         )
 
         if not my_action:
-            self.logger.warn(
+            self.logger.warning(
                 f"can't find a type for action {section}, the action will be skipped"
             )
             return
 
         self.actions.append(my_action)
+        my_action.start()
 
         self.logger.debug("updating the subscriptions table")
         for my_input in my_action.monitored_input:
             self.subscriptions.setdefault(my_input, []).append(my_action)
 
-    def __stop_actions(self):
+    def __stop_actions(self) -> None:
         """
         Stop all the actions
         """
         self.logger.info("stopping actions")
 
-        list(map(lambda x: x.stop(), self.actions))
+        for action in self.actions:
+            action.join(1)
 
         self.logger.info("actions stopped")
+
 
     # def _perform_system_check(self):
     #     """
@@ -305,7 +308,8 @@ class FlowsManager:
         try:
             self.logger.debug("entering event loop for message fetcher coroutine")
             event_loop.run_until_complete(self.message_fetcher_coroutine(event_loop))
-        finally:
+
+        except KeyboardInterrupt:
             self.logger.debug("closing the event loop")
             event_loop.close()
 

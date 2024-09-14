@@ -56,8 +56,11 @@ class CountAction(Action):
         if self.timed_counter:
             self.start_timer()
 
-    def on_input_received(self, action_input=None):
-        super().on_input_received(action_input)
+    def on_cycle(self):
+        return super().on_cycle()
+
+    def on_input_received(self, message=None):
+        super().on_input_received(message)
         self.counter = self.counter + 1
         if not self.timed_counter:
             self.send_message(str(self.counter))

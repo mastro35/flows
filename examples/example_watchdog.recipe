@@ -1,6 +1,6 @@
 [my_watchdog]
 type = watchdog
-input = /home
+input = /
 monitor = any
 option = recursive
 patterns = *.*

@@ -9,12 +9,12 @@ License: GPL 2.0
 from flows.FlowsManager import FlowsManager
 
 
-def main():
+def main() -> None:
     """
     Entry point of the flows module
     """
 
-    my_flows_manager = FlowsManager()
+    my_flows_manager: FlowsManager = FlowsManager()
 
     try:
         my_flows_manager.start()
