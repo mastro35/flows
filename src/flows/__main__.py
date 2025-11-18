@@ -19,7 +19,7 @@ def main() -> None:
     try:
         my_flows_manager.start()
     except KeyboardInterrupt:
-        my_flows_manager.stop()
+        pass
 
 
 if __name__ == "__main__":

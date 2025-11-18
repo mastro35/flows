@@ -14,6 +14,7 @@ import importlib.util
 import os
 import site
 import time
+import queue
 
 from abc import ABC, abstractmethod
 from threading import Thread
@@ -54,6 +55,9 @@ class Action(Thread, ABC):
         self.monitored_input = managed_input
         self.configuration = configuration
         self.name = name
+
+        # Init a message queue
+        self.message_queue = queue.Queue()
 
         # Launch custom configuration method
         self.on_init()
@@ -130,8 +134,16 @@ class Action(Thread, ABC):
 
         while self.is_running:
             try:
+                while not self.message_queue.empty():
+                    msg = self.message_queue.get_nowait()
+                    self.on_input_received(msg)
+                    self.message_queue.task_done()
+
                 time.sleep(self.config_manager.sleep_interval)
                 self.on_cycle()
+
+            except queue.Empty:
+                pass  # The queue is empty, that's ok
 
             except Exception as exc:
                 self.logger.error(
@@ -249,10 +261,10 @@ class Action(Thread, ABC):
 
             # garbage collect all the modules you load if they are not necessary
             #            context = {}
-            
+
             cls.logger.debug(f"loading module {module_name} from filename {filename}")
             Action.load_module(module_name, filename)
-            
+
             for subclass in Action.__subclasses__():
                 if subclass.type == action_code:
                     action_class = subclass
@@ -261,4 +273,3 @@ class Action(Thread, ABC):
 
             subclass = None
             gc.collect()
-
