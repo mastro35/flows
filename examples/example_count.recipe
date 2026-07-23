@@ -1,6 +1,6 @@
 [my_timer_action]
 type = timer
-delay = 5
+delay = 1
 
 [my_count_action]
 type = count
